@@ -53,6 +53,9 @@ const {
   buildMainHistoryCard
 } = window.BetCertezaBetCards;
 
+const { createExpenseHelpers } = window.BetCertezaExpenses;
+const { createBootstrapHelpers } = window.BetCertezaBootstrap;
+
 const { createBetFormHelpers } = window.BetCertezaBetForms;
 
 const {
@@ -158,15 +161,89 @@ const elements = {
 const {
   collectEntries,
   applySurebetBalancedDefaults,
+  rebalanceSurebetStakesFromOdds,
   applyFreebetBalancedDefaults,
+  rebalanceFreebetStakesFromOdds,
   updateFreebetResults,
-  updateSurebetResults
+  updateSurebetResults,
+  updateSurebetPreview,
+  handleFixedSideChange
 } = createBetFormHelpers({
   elements,
   defaults: {
     defaultSurebetTotal: DEFAULT_SUREBET_TOTAL,
     defaultFreebetTotal: DEFAULT_FREEBET_TOTAL
   }
+});
+
+const {
+  setupRecordFilters,
+  setupTabShortcuts,
+  setupTabs,
+  setupBankroll,
+  setupEntryButtons,
+  setupFreebetCalculator,
+  setupSurebetCalculator,
+  switchToTab
+} = createBootstrapHelpers({
+  elements,
+  getState: () => state,
+  getFilters: () => ({
+    selectedHistoryMonth,
+    selectedHistoryType,
+    selectedHistoryOutcome,
+    selectedHistoryDay,
+    selectedExpenseMonth,
+    selectedAnalysisMonth
+  }),
+  setFilters: (nextFilters) => {
+    if (Object.prototype.hasOwnProperty.call(nextFilters, 'selectedHistoryMonth')) {
+      selectedHistoryMonth = nextFilters.selectedHistoryMonth;
+    }
+    if (Object.prototype.hasOwnProperty.call(nextFilters, 'selectedHistoryType')) {
+      selectedHistoryType = nextFilters.selectedHistoryType;
+    }
+    if (Object.prototype.hasOwnProperty.call(nextFilters, 'selectedHistoryOutcome')) {
+      selectedHistoryOutcome = nextFilters.selectedHistoryOutcome;
+    }
+    if (Object.prototype.hasOwnProperty.call(nextFilters, 'selectedHistoryDay')) {
+      selectedHistoryDay = nextFilters.selectedHistoryDay;
+    }
+    if (Object.prototype.hasOwnProperty.call(nextFilters, 'selectedExpenseMonth')) {
+      selectedExpenseMonth = nextFilters.selectedExpenseMonth;
+    }
+    if (Object.prototype.hasOwnProperty.call(nextFilters, 'selectedAnalysisMonth')) {
+      selectedAnalysisMonth = nextFilters.selectedAnalysisMonth;
+    }
+  },
+  actions: {
+    addEntryRow,
+    applySurebetBalancedDefaults,
+    applyFreebetBalancedDefaults,
+    rebalanceSurebetStakesFromOdds,
+    rebalanceFreebetStakesFromOdds,
+    updateSurebetResults,
+    updateFreebetResults,
+    updateSurebetPreview,
+    handleFixedSideChange,
+    updateEntriesHistory,
+    saveState,
+    render
+  }
+});
+
+const {
+  setupExpenseForm,
+  setupExpenseEditForm,
+  bindExpenseActions
+} = createExpenseHelpers({
+  elements,
+  getState: () => state,
+  saveState,
+  render,
+  switchToTab,
+  updateEntriesHistory,
+  removeEntryHistoryById
 });
 
 bootstrap();
@@ -204,45 +281,6 @@ function bootstrap() {
   runOneTimeTodayEntriesCleanup();
 
   render();
-}
-
-function setupRecordFilters() {
-  elements.historyMonthFilter.addEventListener('change', () => {
-    selectedHistoryMonth = elements.historyMonthFilter.value;
-    selectedHistoryDay = '';
-    renderHistory();
-  });
-
-  elements.historyTypeFilter.addEventListener('change', () => {
-    selectedHistoryType = elements.historyTypeFilter.value;
-    renderHistory();
-  });
-
-  elements.historyOutcomeFilter.addEventListener('change', () => {
-    selectedHistoryOutcome = elements.historyOutcomeFilter.value;
-    renderHistory();
-  });
-
-  elements.historyDayFilter.addEventListener('change', () => {
-    selectedHistoryDay = elements.historyDayFilter.value;
-    renderHistory();
-  });
-
-  elements.expenseMonthFilter.addEventListener('change', () => {
-    selectedExpenseMonth = elements.expenseMonthFilter.value;
-    renderExpenses();
-  });
-
-  elements.analysisMonthFilter.addEventListener('change', () => {
-    selectedAnalysisMonth = elements.analysisMonthFilter.value;
-    renderMonthlyAnalysis();
-  });
-}
-
-function setupTabShortcuts() {
-  elements.openTabButtons.forEach((button) => {
-    button.addEventListener('click', () => switchToTab(button.dataset.openTab));
-  });
 }
 
 function saveState() {
@@ -309,65 +347,6 @@ function filterItemsByDay(items, dayValue, dateField) {
   return applyDayItemsFilter(items, dayValue, dateField);
 }
 
-function setupTabs() {
-  elements.tabButtons.forEach((button) => {
-    button.addEventListener('click', () => {
-      const target = button.dataset.tab;
-
-      elements.tabButtons.forEach((item) => {
-        const active = item === button;
-        item.classList.toggle('active', active);
-        item.setAttribute('aria-selected', String(active));
-      });
-
-      elements.tabPanels.forEach((panel) => {
-        const active = panel.id === target;
-        panel.classList.toggle('active', active);
-        panel.hidden = !active;
-      });
-    });
-  });
-}
-
-function setupBankroll() {
-  elements.saveBankrollButton.addEventListener('click', () => {
-    const nextValue = Number(elements.bankrollInput.value);
-
-    if (Number.isNaN(nextValue) || nextValue < 0) {
-      alert('Informe uma banca válida.');
-      return;
-    }
-
-    updateEntriesHistory(nextValue - state.bankroll, {
-      reason: 'Ajuste manual de banca',
-      description: 'Valor editado manualmente'
-    });
-    elements.bankrollInput.value = '';
-    saveState();
-    render();
-  });
-}
-
-function setupEntryButtons() {
-  elements.addEntryButtons.forEach((button) => {
-    button.addEventListener('click', () => addEntryRow(button.dataset.addEntry));
-  });
-
-  if (elements.addSurebetCounterEntryButton) {
-    elements.addSurebetCounterEntryButton.addEventListener('click', () => {
-      addEntryRow('counter');
-      updateSurebetResults();
-    });
-  }
-
-  if (elements.addFreebetHedgeEntryButton) {
-    elements.addFreebetHedgeEntryButton.addEventListener('click', () => {
-      addEntryRow('freebetHedge');
-      updateFreebetResults();
-    });
-  }
-}
-
 function addEntryRow(side) {
   const isComputedBetSide = ['main', 'counter', 'freebetMain', 'freebetHedge'].includes(side);
   const isFreebetSide = side === 'freebetMain' || side === 'freebetHedge';
@@ -415,26 +394,6 @@ function addEntryRow(side) {
     applyFreebetBalancedDefaults();
     updateFreebetResults();
   }
-}
-
-function setupFreebetCalculator() {
-  const handleFreebetInput = (event) => {
-    if (event.target?.name === 'odd') {
-      rebalanceFreebetStakesFromOdds();
-    }
-
-    updateFreebetResults();
-  };
-
-  elements.freebetMainEntries.addEventListener('input', handleFreebetInput);
-  elements.freebetHedgeEntries.addEventListener('input', handleFreebetInput);
-  elements.freebetAmountInput.addEventListener('input', () => {
-    rebalanceFreebetStakesFromOdds();
-    updateFreebetResults();
-  });
-
-  applyFreebetBalancedDefaults();
-  updateFreebetResults();
 }
 
 function setupSurebetForm() {
@@ -576,130 +535,6 @@ function setupFreebetForm() {
     updateFreebetResults();
     render();
     switchToTab('freebets');
-  });
-}
-
-function setupSurebetCalculator() {
-  const handleSurebetInput = (event) => {
-    if (event.target?.name === 'odd') {
-      rebalanceSurebetStakesFromOdds();
-    }
-
-    updateSurebetResults();
-  };
-
-  elements.mainEntries.addEventListener('input', handleSurebetInput);
-  elements.counterEntries.addEventListener('input', handleSurebetInput);
-  elements.surebetTotalInput.addEventListener('input', () => {
-    rebalanceSurebetStakesFromOdds();
-    updateSurebetResults();
-  });
-
-  applySurebetBalancedDefaults();
-  updateSurebetResults();
-}
-
-function setupExpenseForm() {
-  elements.expenseForm.addEventListener('submit', (event) => {
-    event.preventDefault();
-
-    const formData = new FormData(elements.expenseForm);
-    const expense = {
-      id: crypto.randomUUID(),
-      entryType: formData.get('entryType'),
-      amount: Number(formData.get('amount')),
-      description: formData.get('description').trim(),
-      createdAt: new Date().toISOString()
-    };
-
-    if (!expense.entryType || !expense.description) {
-      alert('Preencha o tipo e a descrição do lançamento.');
-      return;
-    }
-
-    if (Number.isNaN(expense.amount) || expense.amount <= 0) {
-      alert('Informe um valor válido.');
-      return;
-    }
-
-    state.expenses.unshift(expense);
-    const entryMovement = updateEntriesHistory(getExpenseBankrollDelta(expense), {
-      reason: expense.entryType === 'lucrinho' ? 'Lucrinho adicionado' : 'Gasto adicionado',
-      description: expense.description
-    });
-    if (entryMovement) {
-      expense.entryHistoryId = entryMovement.id;
-      expense.bankrollBefore = entryMovement.before;
-      expense.bankrollAfter = entryMovement.after;
-    }
-    saveState();
-    elements.expenseForm.reset();
-    render();
-    switchToTab('dashboard');
-  });
-}
-
-function setupExpenseEditForm() {
-  elements.closeExpenseEditDialog.addEventListener('click', () => {
-    elements.expenseEditDialog.close();
-  });
-
-  elements.expenseEditForm.addEventListener('submit', (event) => {
-    event.preventDefault();
-
-    const id = elements.editExpenseId.value;
-    const expense = state.expenses.find((item) => item.id === id);
-    if (!expense) {
-      elements.expenseEditDialog.close();
-      return;
-    }
-
-    const nextType = elements.editExpenseType.value;
-    const nextDescription = elements.editExpenseDescription.value.trim();
-    const nextAmount = Number(elements.editExpenseAmount.value);
-
-    if (!nextType || !nextDescription) {
-      alert('Preencha tipo e descrição.');
-      return;
-    }
-
-    if (!['expense', 'lucrinho'].includes(nextType)) {
-      alert('Tipo inválido.');
-      return;
-    }
-
-    if (Number.isNaN(nextAmount) || nextAmount <= 0) {
-      alert('Valor inválido.');
-      return;
-    }
-
-    const previousExpense = { ...expense };
-    const previousDelta = getExpenseBankrollDelta(previousExpense);
-    const nextExpense = {
-      ...expense,
-      entryType: nextType,
-      description: nextDescription,
-      amount: nextAmount
-    };
-    const nextDelta = getExpenseBankrollDelta(nextExpense);
-
-    expense.entryType = nextType;
-    expense.description = nextDescription;
-    expense.amount = nextAmount;
-
-    state.bankroll += nextDelta - previousDelta;
-
-    if (expense.bankrollBefore != null) {
-      expense.bankrollAfter = Number(expense.bankrollBefore) + getExpenseBankrollDelta(expense);
-    }
-
-    if (expense.entryHistoryId) {
-      updateLinkedExpenseEntryHistory(expense);
-    }
-
-    saveState();
-    render();
-    elements.expenseEditDialog.close();
   });
 }
 
@@ -1198,86 +1033,10 @@ function renderAnalysisExpenseDetails(items) {
   `).join('');
 }
 
-function bindExpenseActions() {
-  elements.expenseList.querySelectorAll('[data-action="delete-expense"]').forEach((button) => {
-    button.addEventListener('click', () => deleteExpense(button.dataset.id));
-  });
-
-  elements.expenseList.querySelectorAll('[data-action="edit-expense"]').forEach((button) => {
-    button.addEventListener('click', () => editExpense(button.dataset.id));
-  });
-}
-
-function applyExpenseEffect(expense) {
-  state.bankroll += expense.entryType === 'lucrinho' ? Number(expense.amount || 0) : -Number(expense.amount || 0);
-}
-
-function revertExpenseEffect(expense) {
-  state.bankroll -= expense.entryType === 'lucrinho' ? Number(expense.amount || 0) : -Number(expense.amount || 0);
-}
-
-function deleteExpense(id) {
-  const index = state.expenses.findIndex((item) => item.id === id);
-  if (index === -1) {
-    return;
-  }
-
-  const [expense] = state.expenses.splice(index, 1);
-  state.bankroll -= getExpenseBankrollDelta(expense);
-  removeEntryHistoryById(expense.entryHistoryId);
-  saveState();
-  render();
-}
-
-function editExpense(id) {
-  const expense = state.expenses.find((item) => item.id === id);
-  if (!expense) {
-    return;
-  }
-
-  elements.editExpenseId.value = expense.id;
-  elements.editExpenseType.value = expense.entryType;
-  elements.editExpenseAmount.value = String(expense.amount);
-  elements.editExpenseDescription.value = expense.description;
-  elements.expenseEditDialog.showModal();
-}
-
-function getExpenseBankrollDelta(expense) {
-  return expense.entryType === 'lucrinho' ? Number(expense.amount || 0) : -Number(expense.amount || 0);
-}
-
-function updateLinkedExpenseEntryHistory(expense) {
-  const linkedEntry = state.entriesHistory.find((item) => item.id === expense.entryHistoryId);
-  if (!linkedEntry) {
-    return;
-  }
-
-  if (expense.bankrollBefore == null) {
-    expense.bankrollBefore = linkedEntry.before;
-  }
-
-  if (expense.bankrollAfter == null) {
-    expense.bankrollAfter = Number(expense.bankrollBefore) + getExpenseBankrollDelta(expense);
-  }
-
-  linkedEntry.reason = expense.entryType === 'lucrinho' ? 'Lucrinho adicionado' : 'Gasto adicionado';
-  linkedEntry.description = expense.description;
-  linkedEntry.change = getExpenseBankrollDelta(expense);
-  linkedEntry.before = expense.bankrollBefore;
-  linkedEntry.after = expense.bankrollAfter;
-}
-
 function deleteEntryHistory(entryHistoryId) {
   removeEntryHistoryById(entryHistoryId);
   saveState();
   render();
-}
-
-function switchToTab(tabId) {
-  const targetButton = [...elements.tabButtons].find((button) => button.dataset.tab === tabId);
-  if (targetButton) {
-    targetButton.click();
-  }
 }
 
 function clearTodayEntriesHistory() {
