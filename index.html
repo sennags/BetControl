@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BetCerteza</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Controle de surebets e custos</p>
+        <h1>BetCerteza</h1>
+      </div>
+      <button id="save-bankroll-button" class="secondary-button">Salvar banca</button>
+    </header>
+
+    <main>
+      <section class="hero-grid">
+        <article class="card highlight-card">
+          <span class="card-label">Banca atual</span>
+          <strong id="bankroll-value" class="money">R$ 0,00</strong>
+          <label class="inline-field" for="bankroll-input">
+            <span>Editar banca</span>
+            <input id="bankroll-input" type="number" min="0" step="0.01" placeholder="0,00">
+          </label>
+        </article>
+
+        <article class="card gain-card">
+          <span class="card-label">Ganhos com bets</span>
+          <strong id="gain-value" class="money">R$ 0,00</strong>
+          <small>Soma dos ganhos positivos de bets no mês atual</small>
+        </article>
+
+        <article class="card loss-card">
+          <span class="card-label">Perdas / gastos deste mês</span>
+          <strong id="loss-value" class="money">R$ 0,00</strong>
+          <small>Gastos e resultados negativos de bets no mês atual</small>
+        </article>
+      </section>
+
+      <section class="tabs-section">
+        <div class="tabs" role="tablist" aria-label="Abas principais">
+          <button class="tab-button active" data-tab="dashboard" role="tab" aria-selected="true">Resumo</button>
+          <button class="tab-button" data-tab="monthly-analysis" role="tab" aria-selected="false">Análise mensal</button>
+          <button class="tab-button" data-tab="history" role="tab" aria-selected="false">Histórico</button>
+          <button class="tab-button" data-tab="freebets" role="tab" aria-selected="false">Freebets</button>
+          <button class="tab-button" data-tab="expenses" role="tab" aria-selected="false">Gastos/Lucrinho</button>
+          <button class="tab-button" data-tab="surebet" role="tab" aria-selected="false">Adicionar surebet</button>
+          <button class="tab-button" data-tab="freebet" role="tab" aria-selected="false">Adicionar freebet</button>
+          <button class="tab-button" data-tab="expense" role="tab" aria-selected="false">Adicionar gasto/lucrinho</button>
+        </div>
+
+        <div id="dashboard" class="tab-panel active" role="tabpanel">
+          <div class="panel-grid">
+            <section class="card">
+              <div class="section-header">
+                <h2>Surebets ativas</h2>
+                <span id="surebet-count" class="badge">0</span>
+              </div>
+              <div id="surebet-list" class="stack-list empty-state">
+                Nenhuma surebet cadastrada ainda.
+              </div>
+            </section>
+
+            <section class="card">
+              <div class="section-header">
+                <h2>Entradas hoje</h2>
+                <span id="entries-history-count" class="badge">0</span>
+              </div>
+              <div id="entries-history-list" class="stack-list empty-state">
+                Nenhuma entrada registrada hoje.
+              </div>
+            </section>
+
+            <section id="freebet-overview-card" class="card clickable-card" data-open-tab="freebets">
+              <div class="section-header">
+                <h2>Freebets</h2>
+                <span id="freebet-overview-count" class="badge">0</span>
+              </div>
+              <strong id="freebet-overview-total" class="money small-money">R$ 0,00</strong>
+              <div id="freebet-overview-locations" class="stack-list empty-state compact-stack">
+                Nenhuma freebet cadastrada ainda.
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <div id="history" class="tab-panel" role="tabpanel" hidden>
+          <div class="panel-grid single-column">
+            <section class="card history-card">
+              <div class="section-header">
+                <h2>Histórico de apostas</h2>
+                <span id="history-count" class="badge">0</span>
+              </div>
+              <div class="filter-bar">
+                <label class="filter-field">
+                  <span>Mês</span>
+                  <select id="history-month-filter"></select>
+                </label>
+                <label id="history-day-filter-field" class="filter-field" hidden>
+                  <span>Dia</span>
+                  <input id="history-day-filter" type="date" disabled>
+                </label>
+                <div id="history-month-summary" class="filter-summary">Nenhuma aposta batida ainda.</div>
+              </div>
+              <div id="history-list" class="stack-list empty-state">
+                Nenhuma aposta batida ainda.
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <div id="monthly-analysis" class="tab-panel" role="tabpanel" hidden>
+          <div class="panel-grid single-column">
+            <section class="card">
+              <div class="section-header">
+                <h2>Análise mensal</h2>
+                <span id="analysis-month-badge" class="badge">Todos os meses</span>
+              </div>
+              <div class="filter-bar">
+                <label class="filter-field">
+                  <span>Mês</span>
+                  <select id="analysis-month-filter"></select>
+                </label>
+                <div id="analysis-month-summary" class="filter-summary">Sem dados no período.</div>
+              </div>
+
+              <section class="hero-grid compact-hero-grid analysis-grid">
+                <article class="card gain-card metric-card">
+                  <span class="card-label">Profit do mês</span>
+                  <strong id="analysis-profit-value" class="money small-money">R$ 0,00</strong>
+                </article>
+
+                <article class="card loss-card metric-card">
+                  <span class="card-label">Gastos do mês</span>
+                  <strong id="analysis-expense-value" class="money small-money">R$ 0,00</strong>
+                </article>
+
+                <article class="card gain-card metric-card">
+                  <span class="card-label">Lucrinho do mês</span>
+                  <strong id="analysis-sidegain-value" class="money small-money">R$ 0,00</strong>
+                </article>
+
+                <article class="card highlight-card metric-card">
+                  <span class="card-label">Saldo líquido</span>
+                  <strong id="analysis-net-value" class="money small-money">R$ 0,00</strong>
+                </article>
+
+                <article class="card metric-card">
+                  <span class="card-label">Apostas batidas</span>
+                  <strong id="analysis-settled-count" class="money small-money">0</strong>
+                </article>
+              </section>
+
+              <div class="analysis-details-grid">
+                <article class="card subcard">
+                  <div class="section-header compact">
+                    <h3>Resumo das apostas</h3>
+                  </div>
+                  <div id="analysis-history-details" class="stack-list empty-state">Nenhuma aposta batida no período.</div>
+                </article>
+
+                <article class="card subcard">
+                  <div class="section-header compact">
+                    <h3>Resumo de gastos/lucrinho</h3>
+                  </div>
+                  <div id="analysis-expense-details" class="stack-list empty-state">Nenhum lançamento no período.</div>
+                </article>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <div id="expenses" class="tab-panel" role="tabpanel" hidden>
+          <div class="panel-grid single-column">
+            <section class="card">
+              <div class="section-header">
+                <h2>Gastos/Lucrinho</h2>
+                <span id="expense-count" class="badge">0</span>
+              </div>
+              <div class="filter-bar">
+                <label class="filter-field">
+                  <span>Mês</span>
+                  <select id="expense-month-filter"></select>
+                </label>
+                <div id="expense-month-summary" class="filter-summary">Nenhum lançamento registrado ainda.</div>
+              </div>
+              <div id="expense-list" class="stack-list empty-state">
+                Nenhum lançamento registrado ainda.
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <div id="freebets" class="tab-panel" role="tabpanel" hidden>
+          <div class="panel-grid single-column">
+            <section class="card">
+              <div class="section-header">
+                <h2>Freebets ativas</h2>
+                <span id="freebet-count" class="badge">0</span>
+              </div>
+              <div id="freebet-list" class="stack-list empty-state">
+                Nenhuma freebet ativa ainda.
+              </div>
+            </section>
+
+            <section class="card">
+              <div class="section-header">
+                <h2>Histórico de freebets</h2>
+                <span id="freebet-history-count" class="badge">0</span>
+              </div>
+              <div id="freebet-history-list" class="stack-list empty-state">
+                Nenhuma freebet registrada ainda.
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <div id="surebet" class="tab-panel" role="tabpanel" hidden>
+          <section class="card form-card">
+            <div class="section-header">
+              <h2>Nova surebet</h2>
+            </div>
+
+            <form id="surebet-form" class="stack-form">
+              <section class="bet-side-card freebet-side-card">
+                <div class="section-header compact freebet-side-header">
+                  <h3>Casas da surebet</h3>
+                </div>
+
+                <div class="freebet-side-layout">
+                  <div id="main-entries" class="entries-list"></div>
+                </div>
+              </section>
+
+              <section class="bet-side-card freebet-side-card">
+                <div class="section-header compact freebet-side-header">
+                  <h3>Casas contrárias</h3>
+                  <button type="button" id="add-surebet-counter-entry-button" class="mini-button">Adicionar casa</button>
+                </div>
+
+                <div class="freebet-side-layout">
+                  <div id="counter-entries" class="entries-list"></div>
+                </div>
+              </section>
+
+              <input id="surebet-total-input" name="surebetTotal" type="hidden" value="100">
+
+              <button type="submit" class="primary-button">Salvar surebet</button>
+            </form>
+          </section>
+        </div>
+
+        <div id="freebet" class="tab-panel" role="tabpanel" hidden>
+          <section class="card form-card">
+            <div class="section-header">
+              <h2>Nova freebet</h2>
+            </div>
+
+            <form id="freebet-form" class="stack-form">
+              <section class="bet-side-card freebet-side-card">
+                <div class="section-header compact freebet-side-header">
+                  <h3>Casas da freebet</h3>
+                </div>
+
+                <div class="freebet-side-layout">
+                  <div id="freebet-main-entries" class="entries-list"></div>
+                </div>
+              </section>
+
+              <section class="bet-side-card freebet-side-card">
+                <div class="section-header compact freebet-side-header">
+                  <h3>Casas contrárias</h3>
+                  <button type="button" id="add-freebet-hedge-entry-button" class="mini-button">Adicionar casa</button>
+                </div>
+
+                <div class="freebet-side-layout">
+                  <div id="freebet-hedge-entries" class="entries-list"></div>
+                </div>
+              </section>
+
+              <label>
+                <span>Freebet que vai ganhar</span>
+                <input id="freebet-amount-input" name="freebetAmount" type="number" min="0.01" step="0.01" required value="100" placeholder="100,00">
+              </label>
+
+              <button type="submit" class="primary-button">Salvar freebet</button>
+            </form>
+          </section>
+        </div>
+
+        <div id="expense" class="tab-panel" role="tabpanel" hidden>
+          <section class="card form-card">
+            <div class="section-header">
+                <h2>Novo gasto/lucrinho</h2>
+              </div>
+
+            <form id="expense-form" class="stack-form">
+              <div class="two-columns">
+                <label>
+                  <span>Tipo</span>
+                  <select name="entryType" required>
+                    <option value="expense">Gasto</option>
+                    <option value="lucrinho">Lucrinho</option>
+                  </select>
+                </label>
+
+                <label>
+                  <span>Valor</span>
+                  <input name="amount" type="number" min="0.01" step="0.01" required placeholder="0,00">
+                </label>
+              </div>
+
+              <label>
+                <span>Descrição</span>
+                <input name="description" type="text" required placeholder="Ex.: Corrida até a lotérica / Pix inesperado">
+              </label>
+
+              <button type="submit" class="primary-button">Salvar lançamento</button>
+            </form>
+          </section>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <template id="entry-template">
+    <div class="entry-row">
+      <label>
+        <span>Casa</span>
+        <input type="text" name="house" required placeholder="Ex.: Betano">
+      </label>
+      <label>
+        <span>Valor</span>
+        <input type="number" name="amount" min="0.01" step="0.01" required placeholder="0,00">
+      </label>
+      <button type="button" class="remove-entry-button">Remover</button>
+    </div>
+  </template>
+
+  <template id="freebet-entry-template">
+    <div class="entry-row freebet-entry-row">
+      <label>
+        <span>Casa</span>
+        <input type="text" name="house" required placeholder="Ex.: Betano">
+      </label>
+      <label>
+        <span>Odd</span>
+        <input type="number" name="odd" min="1.01" step="0.01" required value="2" placeholder="2,00">
+      </label>
+      <label>
+        <span>Stake</span>
+        <input type="number" name="amount" min="0" step="0.01" required placeholder="0,00">
+      </label>
+      <label class="freebet-entry-result-field">
+        <span>Profit</span>
+        <input type="text" name="result" readonly value="" placeholder="—">
+      </label>
+      <button type="button" class="remove-entry-button">Remover</button>
+    </div>
+  </template>
+
+  <dialog id="expense-edit-dialog" class="modal-dialog">
+    <form id="expense-edit-form" class="stack-form modal-form" method="dialog">
+      <div class="section-header">
+        <h2>Editar lançamento</h2>
+        <button type="button" id="close-expense-edit-dialog" class="secondary-button">Fechar</button>
+      </div>
+
+      <input type="hidden" id="edit-expense-id" name="id">
+
+      <div class="two-columns">
+        <label>
+          <span>Tipo</span>
+          <select id="edit-expense-type" name="entryType" required>
+            <option value="expense">Gasto</option>
+            <option value="lucrinho">Lucrinho</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Valor</span>
+          <input id="edit-expense-amount" name="amount" type="number" min="0.01" step="0.01" required>
+        </label>
+      </div>
+
+      <label>
+        <span>Descrição</span>
+        <input id="edit-expense-description" name="description" type="text" required>
+      </label>
+
+      <button type="submit" class="primary-button">Salvar alterações</button>
+    </form>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
