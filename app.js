@@ -95,6 +95,12 @@ const elements = {
   entriesHistoryCount: document.getElementById('entries-history-count'),
   gainValue: document.getElementById('gain-value'),
   lossValue: document.getElementById('loss-value'),
+  dashboardNetValue: document.getElementById('dashboard-net-value'),
+  dashboardNetBadge: document.getElementById('dashboard-net-badge'),
+  dashboardOpenExposure: document.getElementById('dashboard-open-exposure'),
+  dashboardActiveSurebets: document.getElementById('dashboard-active-surebets'),
+  dashboardActiveFreebets: document.getElementById('dashboard-active-freebets'),
+  dashboardInsightText: document.getElementById('dashboard-insight-text'),
   saveBankrollButton: document.getElementById('save-bankroll-button'),
   surebetForm: document.getElementById('surebet-form'),
   freebetForm: document.getElementById('freebet-form'),
@@ -381,6 +387,7 @@ function addEntryRow(side) {
     if (isSurebetSide) {
       applySurebetBalancedDefaults();
       updateSurebetResults();
+      updateSurebetPreview?.({ source: 'entries', changedSide: side });
     } else if (isFreebetSide) {
       applyFreebetBalancedDefaults();
       updateFreebetResults();
@@ -392,6 +399,7 @@ function addEntryRow(side) {
   if (isSurebetSide) {
     applySurebetBalancedDefaults();
     updateSurebetResults();
+    updateSurebetPreview?.({ source: 'entries', changedSide: side });
   } else if (isFreebetSide) {
     applyFreebetBalancedDefaults();
     updateFreebetResults();
@@ -771,10 +779,33 @@ function clearEntryPrintDraft(row) {
 
 function renderSummary() {
   const summary = buildDashboardSummary(state, new Date(), getBetOutcomeAmount, isSameMonth);
+  const openExposure = state.surebets.reduce((sum, item) => sum + getSurebetTotalStake(item), 0)
+    + state.freebets.reduce((sum, item) => sum + getFreebetTotalStake(item), 0);
+  const net = summary.gains - summary.losses;
+  const activeSurebets = state.surebets.length;
+  const activeFreebets = state.freebets.length;
+
+  let insight = 'Sem movimentação suficiente para analisar o período.';
+  if (net > 0 && openExposure === 0) {
+    insight = 'O mês está positivo e sem capital travado em operações abertas.';
+  } else if (net > 0) {
+    insight = 'O mês está positivo, mas ainda existe exposição aberta em operações pendentes.';
+  } else if (net < 0 && openExposure > 0) {
+    insight = 'O mês está pressionado e parte da banca segue comprometida em operações abertas.';
+  } else if (net < 0) {
+    insight = 'O mês está negativo. Vale revisar gastos e eficiência das entradas concluídas.';
+  }
 
   elements.bankrollValue.textContent = formatCurrency(summary.bankroll);
   elements.gainValue.textContent = formatCurrency(summary.gains);
   elements.lossValue.textContent = formatCurrency(summary.losses);
+  elements.dashboardNetValue.textContent = formatSignedCurrency(net);
+  elements.dashboardOpenExposure.textContent = formatCurrency(openExposure);
+  elements.dashboardActiveSurebets.textContent = String(activeSurebets);
+  elements.dashboardActiveFreebets.textContent = String(activeFreebets);
+  elements.dashboardInsightText.textContent = insight;
+  elements.dashboardNetBadge.textContent = net > 0 ? 'Mês positivo' : net < 0 ? 'Mês pressionado' : 'Mês neutro';
+  elements.dashboardNetBadge.className = `dashboard-trend-badge ${net > 0 ? 'positive' : net < 0 ? 'negative' : 'neutral'}`;
 }
 
 function renderFreebetOverview() {

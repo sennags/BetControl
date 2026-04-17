@@ -2,10 +2,7 @@ window.BetControlBetForms = ((calculations, utils) => {
   const {
     splitAmount,
     splitAmountByWeights,
-    calculateFreebetResultsFromEntries,
-    calculateSurebetFromTotal,
-    calculateSurebetFromFixedStake,
-    calculateSurebetFromActualStakes
+    calculateFreebetResultsFromEntries
   } = calculations;
   const {
     formatCurrency,
@@ -18,7 +15,8 @@ window.BetControlBetForms = ((calculations, utils) => {
 
     function hasSurebetPreviewElements() {
       return Boolean(
-        elements.profitInput
+        elements.surebetTotalInput
+        && elements.profitInput
         && elements.mainResultValue
         && elements.counterResultValue
         && elements.calculatedProfitPercent
@@ -245,42 +243,13 @@ window.BetControlBetForms = ((calculations, utils) => {
       }
     }
 
-    function getFixedSide() {
-      if (elements.mainFixedCheck.checked) {
-        return 'main';
-      }
-
-      if (elements.counterFixedCheck.checked) {
-        return 'counter';
-      }
-
-      return null;
-    }
-
-    function setDistributedAmounts(container, amount) {
-      const rows = [...container.querySelectorAll('.entry-row')];
-      if (rows.length === 0) {
+    function updateSurebetStatus(value, tone = 'neutral') {
+      if (!elements.surebetStatus) {
         return;
       }
 
-      const splitValues = splitAmount(amount, rows.length);
-      rows.forEach((row, index) => {
-        row.querySelector('[name="amount"]').value = splitValues[index].toFixed(2);
-      });
-    }
-
-    function setAutoAmount(container, amount) {
-      setDistributedAmounts(container, amount);
-    }
-
-    function autoFillSurebetAmounts(plan) {
-      setAutoAmount(elements.mainEntries, plan.idealMainStake);
-      setAutoAmount(elements.counterEntries, plan.idealCounterStake);
-    }
-
-    function fillAdaptiveSide(side, amount) {
-      const container = side === 'main' ? elements.mainEntries : elements.counterEntries;
-      setDistributedAmounts(container, amount);
+      elements.surebetStatus.textContent = value;
+      elements.surebetStatus.className = `form-status-badge ${tone}`;
     }
 
     function sumEntryAmounts(container) {
@@ -306,54 +275,33 @@ window.BetControlBetForms = ((calculations, utils) => {
         return;
       }
 
-      const { source = 'controls', changedSide = null } = options;
-      const fixedTotal = Number(elements.fixedTotalInput.value);
-      const mainOdd = Number(elements.mainOddInput.value);
-      const counterOdd = Number(elements.counterOddInput.value);
+      const { source = 'controls' } = options;
+
+      if (source === 'controls') {
+        rebalanceSurebetStakesFromOdds();
+        updateSurebetResults();
+      }
 
       try {
-        const fixedSide = getFixedSide();
-        let plan;
-
-        if (fixedSide === 'main') {
-          plan = calculateSurebetFromFixedStake(mainOdd, counterOdd, sumEntryAmounts(elements.mainEntries), 'main');
-          fillAdaptiveSide('counter', plan.adaptedCounterStake);
-        } else if (fixedSide === 'counter') {
-          plan = calculateSurebetFromFixedStake(mainOdd, counterOdd, sumEntryAmounts(elements.counterEntries), 'counter');
-          fillAdaptiveSide('main', plan.adaptedMainStake);
-        } else {
-          plan = calculateSurebetFromTotal(mainOdd, counterOdd, fixedTotal);
-          if (source === 'controls') {
-            autoFillSurebetAmounts(plan);
-          }
-        }
-
-        if (fixedSide && source === 'entries' && changedSide && changedSide !== fixedSide) {
-          if (fixedSide === 'main') {
-            fillAdaptiveSide('counter', plan.adaptedCounterStake);
-          } else {
-            fillAdaptiveSide('main', plan.adaptedMainStake);
-          }
-        }
-
-        const totals = getSideTotals();
-        const actualCalculation = calculateSurebetFromActualStakes(mainOdd, counterOdd, totals.mainTotal, totals.counterTotal);
-        const displayedProfit = Math.min(actualCalculation.mainResult, actualCalculation.counterResult);
+        const mainEntries = collectPreviewEntries(elements.mainEntries);
+        const counterEntries = collectPreviewEntries(elements.counterEntries);
+        const calculation = calculateFreebetResultsFromEntries(mainEntries, counterEntries);
+        const displayedProfit = calculation.guaranteedProfit;
 
         elements.profitInput.value = formatSignedCurrency(displayedProfit);
         updateProfitInputState(displayedProfit);
-        elements.mainResultValue.textContent = formatSignedCurrency(actualCalculation.mainResult);
-        elements.counterResultValue.textContent = formatSignedCurrency(actualCalculation.counterResult);
-        elements.calculatedProfitPercent.textContent = formatPercent(totals.totalStake > 0 ? displayedProfit / totals.totalStake : 0);
+        elements.mainResultValue.textContent = formatSignedCurrency(calculation.resultIfFreebetWins);
+        elements.counterResultValue.textContent = formatSignedCurrency(calculation.resultIfHedgeWins);
+        elements.calculatedProfitPercent.textContent = formatPercent(calculation.totalStake > 0 ? displayedProfit / calculation.totalStake : 0);
 
         if (displayedProfit > 0) {
-          elements.surebetStatus.textContent = 'Surebet válida';
+          updateSurebetStatus('Surebet válida', 'positive');
+        } else if (calculation.resultIfFreebetWins < 0 || calculation.resultIfHedgeWins < 0) {
+          updateSurebetStatus('Há cenário negativo', 'negative');
         } else if (displayedProfit < 0) {
-          elements.surebetStatus.textContent = 'Não é surebet';
-        } else if (actualCalculation.mainResult < 0 || actualCalculation.counterResult < 0) {
-          elements.surebetStatus.textContent = 'Há cenário negativo';
+          updateSurebetStatus('Não é surebet', 'negative');
         } else {
-          elements.surebetStatus.textContent = 'Empate técnico';
+          updateSurebetStatus('Empate técnico', 'neutral');
         }
       } catch {
         elements.profitInput.value = formatCurrency(0);
@@ -361,19 +309,11 @@ window.BetControlBetForms = ((calculations, utils) => {
         elements.mainResultValue.textContent = formatSignedCurrency(0);
         elements.counterResultValue.textContent = formatSignedCurrency(0);
         elements.calculatedProfitPercent.textContent = formatPercent(0);
-        elements.surebetStatus.textContent = 'Preencha odds válidas';
+        updateSurebetStatus('Preencha odds válidas', 'neutral');
       }
     }
 
-    function handleFixedSideChange(side) {
-      if (side === 'main' && elements.mainFixedCheck.checked) {
-        elements.counterFixedCheck.checked = false;
-      }
-
-      if (side === 'counter' && elements.counterFixedCheck.checked) {
-        elements.mainFixedCheck.checked = false;
-      }
-
+    function handleFixedSideChange() {
       updateSurebetPreview({ source: 'controls' });
     }
 
