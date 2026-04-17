@@ -309,6 +309,59 @@ select {
   gap: 16px;
 }
 
+.print-preview-list,
+.bet-print-groups,
+.bet-print-group,
+.bet-print-list,
+.print-preview-meta {
+  display: flex;
+  gap: 10px;
+}
+
+.print-preview-list,
+.bet-print-groups,
+.bet-print-group,
+.print-preview-meta {
+  flex-direction: column;
+}
+
+.bet-print-list {
+  flex-wrap: wrap;
+}
+
+.print-preview-item {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.print-preview-thumb,
+.bet-print-thumb {
+  width: 84px;
+  height: 84px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: #0d152a;
+}
+
+.print-preview-meta strong,
+.bet-print-group-title {
+  color: var(--text);
+}
+
+.print-preview-meta button {
+  align-self: flex-start;
+}
+
+.bet-print-link {
+  display: inline-flex;
+}
+
 .freebet-side-layout {
   display: block;
 }
@@ -360,6 +413,10 @@ select {
   border-radius: 14px;
   border: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.03);
+}
+
+.bet-print-groups {
+  margin-top: 12px;
 }
 
 .expense-card {

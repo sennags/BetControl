@@ -255,7 +255,10 @@
               <section class="bet-side-card freebet-side-card">
                 <div class="section-header compact freebet-side-header">
                   <h3>Casas da surebet</h3>
+                  <button type="button" id="add-surebet-main-print-button" class="mini-button">Inserir print</button>
                 </div>
+                <input id="surebet-main-print-input" type="file" accept="image/*" multiple hidden>
+                <div id="surebet-main-print-preview" class="print-preview-list empty-state compact-stack">Nenhum print anexado.</div>
 
                 <div class="freebet-side-layout">
                   <div id="main-entries" class="entries-list"></div>
@@ -265,8 +268,13 @@
               <section class="bet-side-card freebet-side-card">
                 <div class="section-header compact freebet-side-header">
                   <h3>Casas contrárias</h3>
-                  <button type="button" id="add-surebet-counter-entry-button" class="mini-button">Adicionar casa</button>
+                  <div class="side-actions">
+                    <button type="button" id="add-surebet-counter-print-button" class="mini-button">Inserir print</button>
+                    <button type="button" id="add-surebet-counter-entry-button" class="mini-button">Adicionar casa</button>
+                  </div>
                 </div>
+                <input id="surebet-counter-print-input" type="file" accept="image/*" multiple hidden>
+                <div id="surebet-counter-print-preview" class="print-preview-list empty-state compact-stack">Nenhum print anexado.</div>
 
                 <div class="freebet-side-layout">
                   <div id="counter-entries" class="entries-list"></div>
@@ -290,7 +298,10 @@
               <section class="bet-side-card freebet-side-card">
                 <div class="section-header compact freebet-side-header">
                   <h3>Casas da freebet</h3>
+                  <button type="button" id="add-freebet-main-print-button" class="mini-button">Inserir print</button>
                 </div>
+                <input id="freebet-main-print-input" type="file" accept="image/*" multiple hidden>
+                <div id="freebet-main-print-preview" class="print-preview-list empty-state compact-stack">Nenhum print anexado.</div>
 
                 <div class="freebet-side-layout">
                   <div id="freebet-main-entries" class="entries-list"></div>
@@ -300,8 +311,13 @@
               <section class="bet-side-card freebet-side-card">
                 <div class="section-header compact freebet-side-header">
                   <h3>Casas contrárias</h3>
-                  <button type="button" id="add-freebet-hedge-entry-button" class="mini-button">Adicionar casa</button>
+                  <div class="side-actions">
+                    <button type="button" id="add-freebet-hedge-print-button" class="mini-button">Inserir print</button>
+                    <button type="button" id="add-freebet-hedge-entry-button" class="mini-button">Adicionar casa</button>
+                  </div>
                 </div>
+                <input id="freebet-hedge-print-input" type="file" accept="image/*" multiple hidden>
+                <div id="freebet-hedge-print-preview" class="print-preview-list empty-state compact-stack">Nenhum print anexado.</div>
 
                 <div class="freebet-side-layout">
                   <div id="freebet-hedge-entries" class="entries-list"></div>

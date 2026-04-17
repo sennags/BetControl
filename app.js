@@ -83,6 +83,14 @@ let selectedHistoryOutcome = 'all';
 let selectedHistoryDay = currentDayValue;
 let selectedExpenseMonth = currentMonthKey;
 let selectedAnalysisMonth = currentMonthKey;
+const MAX_PRINTS_PER_SECTION = 5;
+const MAX_PRINT_SIZE_BYTES = 750 * 1024;
+let betPrintDrafts = {
+  surebetMain: [],
+  surebetCounter: [],
+  freebetMain: [],
+  freebetHedge: []
+};
 
 const elements = {
   bankrollInput: document.getElementById('bankroll-input'),
@@ -150,7 +158,19 @@ const elements = {
   calculatedProfitPercent: document.getElementById('calculated-profit-percent'),
   surebetStatus: document.getElementById('surebet-status'),
   addSurebetCounterEntryButton: document.getElementById('add-surebet-counter-entry-button'),
+  addSurebetMainPrintButton: document.getElementById('add-surebet-main-print-button'),
+  addSurebetCounterPrintButton: document.getElementById('add-surebet-counter-print-button'),
+  surebetMainPrintInput: document.getElementById('surebet-main-print-input'),
+  surebetCounterPrintInput: document.getElementById('surebet-counter-print-input'),
+  surebetMainPrintPreview: document.getElementById('surebet-main-print-preview'),
+  surebetCounterPrintPreview: document.getElementById('surebet-counter-print-preview'),
   addFreebetHedgeEntryButton: document.getElementById('add-freebet-hedge-entry-button'),
+  addFreebetMainPrintButton: document.getElementById('add-freebet-main-print-button'),
+  addFreebetHedgePrintButton: document.getElementById('add-freebet-hedge-print-button'),
+  freebetMainPrintInput: document.getElementById('freebet-main-print-input'),
+  freebetHedgePrintInput: document.getElementById('freebet-hedge-print-input'),
+  freebetMainPrintPreview: document.getElementById('freebet-main-print-preview'),
+  freebetHedgePrintPreview: document.getElementById('freebet-hedge-print-preview'),
   freebetAmountInput: document.getElementById('freebet-amount-input'),
   entryTemplate: document.getElementById('entry-template'),
   freebetEntryTemplate: document.getElementById('freebet-entry-template'),
@@ -253,6 +273,7 @@ bootstrap();
 function bootstrap() {
   setupTabs();
   setupBankroll();
+  setupBetPrintInputs();
   setupSurebetForm();
   setupFreebetForm();
   setupExpenseForm();
@@ -428,10 +449,12 @@ function setupSurebetForm() {
         createdAt: new Date().toISOString(),
         status: 'active',
         main: {
-          entries: savedMainEntries
+          entries: savedMainEntries,
+          prints: clonePrintDrafts('surebetMain')
         },
         counter: {
-          entries: savedCounterEntries
+          entries: savedCounterEntries,
+          prints: clonePrintDrafts('surebetCounter')
         }
       };
     } catch (error) {
@@ -457,6 +480,7 @@ function setupSurebetForm() {
     saveState();
     elements.surebetForm.reset();
     resetEntries();
+    resetPrintDrafts(['surebetMain', 'surebetCounter']);
     updateSurebetResults();
     render();
     switchToTab('dashboard');
@@ -500,6 +524,10 @@ function setupFreebetForm() {
       freebetStake,
       hedgeStake,
       freebetAmount,
+      prints: {
+        main: clonePrintDrafts('freebetMain'),
+        hedge: clonePrintDrafts('freebetHedge')
+      },
       resultIfFreebetWins,
       resultIfHedgeWins,
       guaranteedProfit: calculation.guaranteedProfit,
@@ -534,6 +562,7 @@ function setupFreebetForm() {
     saveState();
     elements.freebetForm.reset();
     resetFreebetEntries();
+    resetPrintDrafts(['freebetMain', 'freebetHedge']);
     updateFreebetResults();
     render();
     switchToTab('freebets');
@@ -563,6 +592,139 @@ function render() {
   renderMonthlyAnalysis();
   renderHistory();
   renderExpenses();
+}
+
+function setupBetPrintInputs() {
+  bindPrintInput({
+    key: 'surebetMain',
+    button: elements.addSurebetMainPrintButton,
+    input: elements.surebetMainPrintInput,
+    preview: elements.surebetMainPrintPreview,
+    emptyMessage: 'Nenhum print anexado.'
+  });
+  bindPrintInput({
+    key: 'surebetCounter',
+    button: elements.addSurebetCounterPrintButton,
+    input: elements.surebetCounterPrintInput,
+    preview: elements.surebetCounterPrintPreview,
+    emptyMessage: 'Nenhum print anexado.'
+  });
+  bindPrintInput({
+    key: 'freebetMain',
+    button: elements.addFreebetMainPrintButton,
+    input: elements.freebetMainPrintInput,
+    preview: elements.freebetMainPrintPreview,
+    emptyMessage: 'Nenhum print anexado.'
+  });
+  bindPrintInput({
+    key: 'freebetHedge',
+    button: elements.addFreebetHedgePrintButton,
+    input: elements.freebetHedgePrintInput,
+    preview: elements.freebetHedgePrintPreview,
+    emptyMessage: 'Nenhum print anexado.'
+  });
+}
+
+function bindPrintInput({ key, button, input, preview, emptyMessage }) {
+  if (!button || !input || !preview) {
+    return;
+  }
+
+  button.addEventListener('click', () => input.click());
+  input.addEventListener('change', async () => {
+    const files = [...(input.files || [])];
+    if (files.length === 0) {
+      return;
+    }
+
+    try {
+      const nextPrints = await readPrintFiles(files);
+      const availableSlots = MAX_PRINTS_PER_SECTION - betPrintDrafts[key].length;
+      if (availableSlots <= 0) {
+        alert(`Máximo de ${MAX_PRINTS_PER_SECTION} prints por seção.`);
+      } else {
+        betPrintDrafts[key] = [...betPrintDrafts[key], ...nextPrints.slice(0, availableSlots)];
+        if (nextPrints.length > availableSlots) {
+          alert(`Só os primeiros ${availableSlots} print(s) foram adicionados.`);
+        }
+      }
+      renderPrintDraftPreview(key, preview, emptyMessage);
+    } catch (error) {
+      alert(error.message || 'Não foi possível carregar os prints.');
+    } finally {
+      input.value = '';
+    }
+  });
+
+  preview.addEventListener('click', (event) => {
+    const removeButton = event.target.closest('[data-action="remove-print-draft"]');
+    if (!removeButton) {
+      return;
+    }
+
+    betPrintDrafts[key] = betPrintDrafts[key].filter((item) => item.id !== removeButton.dataset.id);
+    renderPrintDraftPreview(key, preview, emptyMessage);
+  });
+
+  renderPrintDraftPreview(key, preview, emptyMessage);
+}
+
+function readPrintFiles(files) {
+  return Promise.all(files.map((file) => new Promise((resolve, reject) => {
+    if (!file.type.startsWith('image/')) {
+      reject(new Error('Envie apenas imagens.'));
+      return;
+    }
+
+    if (file.size > MAX_PRINT_SIZE_BYTES) {
+      reject(new Error('Cada print pode ter no máximo 750 KB.'));
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => resolve({
+      id: crypto.randomUUID(),
+      name: file.name,
+      dataUrl: String(reader.result || '')
+    });
+    reader.onerror = () => reject(new Error(`Falha ao carregar o print ${file.name}.`));
+    reader.readAsDataURL(file);
+  })));
+}
+
+function renderPrintDraftPreview(key, preview, emptyMessage) {
+  const prints = betPrintDrafts[key];
+  if (!prints || prints.length === 0) {
+    preview.className = 'print-preview-list empty-state compact-stack';
+    preview.textContent = emptyMessage;
+    return;
+  }
+
+  preview.className = 'print-preview-list';
+  preview.innerHTML = prints.map((item) => `
+    <div class="print-preview-item">
+      <img src="${item.dataUrl}" alt="${escapeHtml(item.name)}" class="print-preview-thumb">
+      <div class="print-preview-meta">
+        <strong>${escapeHtml(item.name)}</strong>
+        <button type="button" class="danger-button" data-action="remove-print-draft" data-id="${item.id}">Remover</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function clonePrintDrafts(key) {
+  return betPrintDrafts[key].map((item) => ({ ...item }));
+}
+
+function resetPrintDrafts(keys) {
+  keys.forEach((key) => {
+    betPrintDrafts[key] = [];
+  });
+
+  renderPrintDraftPreview('surebetMain', elements.surebetMainPrintPreview, 'Nenhum print anexado.');
+  renderPrintDraftPreview('surebetCounter', elements.surebetCounterPrintPreview, 'Nenhum print anexado.');
+  renderPrintDraftPreview('freebetMain', elements.freebetMainPrintPreview, 'Nenhum print anexado.');
+  renderPrintDraftPreview('freebetHedge', elements.freebetHedgePrintPreview, 'Nenhum print anexado.');
 }
 
 function renderSummary() {

@@ -14,6 +14,30 @@ window.BetCertezaBetCards = ((utils, calculations) => {
     getSurebetTotalStake
   } = calculations;
 
+  function buildPrintGroups(groups) {
+    const visibleGroups = groups.filter((group) => Array.isArray(group.prints) && group.prints.length > 0);
+    if (visibleGroups.length === 0) {
+      return '';
+    }
+
+    return `
+      <div class="bet-print-groups">
+        ${visibleGroups.map((group) => `
+          <section class="bet-print-group">
+            <strong class="bet-print-group-title">${escapeHtml(group.label)}</strong>
+            <div class="bet-print-list">
+              ${group.prints.map((item) => `
+                <a class="bet-print-link" href="${item.dataUrl}" target="_blank" rel="noreferrer noopener" title="${escapeHtml(item.name || 'Print da aposta')}">
+                  <img src="${item.dataUrl}" alt="${escapeHtml(item.name || 'Print da aposta')}" class="bet-print-thumb">
+                </a>
+              `).join('')}
+            </div>
+          </section>
+        `).join('')}
+      </div>
+    `;
+  }
+
   function buildFreebetWinnerRows(item) {
     const totalStake = getFreebetTotalStake(item);
 
@@ -65,6 +89,10 @@ window.BetCertezaBetCards = ((utils, calculations) => {
           </div>
         </div>
         ${fromHistory ? buildFreebetHistoryRows(item) : buildFreebetWinnerRows(item)}
+        ${buildPrintGroups([
+          { label: 'Prints da freebet', prints: item.prints?.main },
+          { label: 'Prints do hedge', prints: item.prints?.hedge }
+        ])}
         <div class="item-meta">
           ${fromHistory ? '' : `<span class="chip">Freebet a ganhar: ${formatCurrency(item.freebetAmount || 0)}</span>`}
           ${outcomeChip}
@@ -115,6 +143,10 @@ window.BetCertezaBetCards = ((utils, calculations) => {
 
     return `
       ${fromHistory ? buildSurebetHistoryRows(item) : buildSurebetWinnerRows(item)}
+      ${buildPrintGroups([
+        { label: 'Prints da surebet', prints: item.main?.prints },
+        { label: 'Prints das contrárias', prints: item.counter?.prints }
+      ])}
       <div class="item-meta">
         ${fromHistory ? '' : `<span class="chip">Profit: ${formatSignedCurrency(item.profit || 0)}</span>`}
         ${outcomeChip}
