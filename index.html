@@ -318,7 +318,10 @@
                 </div>
               </section>
 
-              <input id="surebet-total-input" name="surebetTotal" type="hidden" value="100">
+              <label>
+                <span>Stake total da surebet</span>
+                <input id="surebet-total-input" name="surebetTotal" type="number" min="0.01" step="0.01" required value="100" placeholder="100,00">
+              </label>
 
               <button type="submit" class="primary-button">Salvar surebet</button>
             </form>
