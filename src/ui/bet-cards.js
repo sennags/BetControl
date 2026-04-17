@@ -133,6 +133,7 @@ window.BetControlBetCards = ((utils, calculations) => {
             ${actionButton}
           </div>
         </div>
+        ${item.description ? `<p>${escapeHtml(item.description)}</p>` : ''}
         ${fromHistory ? buildFreebetHistoryRows(item) : buildFreebetWinnerRows(item)}
         ${buildEntryPrintGroups([
           { label: 'Prints da freebet', entries: item.freebetEntries, fallbackLabel: 'Casa da freebet', downloadPrefix: 'freebet' },
@@ -216,6 +217,7 @@ window.BetControlBetCards = ((utils, calculations) => {
             <button type="button" class="danger-button" data-action="delete-surebet" data-id="${item.id}">Excluir</button>
           </div>
         </div>
+        ${item.description ? `<p>${escapeHtml(item.description)}</p>` : ''}
         ${buildSurebetDetails(item, false)}
       </article>
     `;
@@ -234,6 +236,7 @@ window.BetControlBetCards = ((utils, calculations) => {
             <button type="button" class="danger-button" data-action="delete-history-surebet" data-id="${item.id}">Excluir</button>
           </div>
         </div>
+        ${item.description ? `<p>${escapeHtml(item.description)}</p>` : ''}
         <p><strong>Batida em:</strong> ${formatDate(item.settledAt || item.createdAt)}</p>
         ${buildSurebetDetails(item, true)}
       </article>

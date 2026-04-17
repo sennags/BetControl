@@ -410,6 +410,7 @@ function setupSurebetForm() {
       const calculation = calculateFreebetResultsFromEntries(mainEntries, counterEntries);
       const formData = new FormData(elements.surebetForm);
       const totalStakeInput = Number(formData.get('surebetTotal'));
+      const description = String(formData.get('description') || '').trim();
       const savedMainEntries = calculation.freebetEntries;
       const savedCounterEntries = calculation.hedgeEntries;
       const mainHouse = savedMainEntries.map((entry) => entry.house).join(' + ');
@@ -417,6 +418,7 @@ function setupSurebetForm() {
       surebet = {
         id: crypto.randomUUID(),
         title: mainHouse,
+        description,
         profit: calculation.guaranteedProfit,
         mainResult: calculation.resultIfFreebetWins,
         counterResult: calculation.resultIfHedgeWins,
@@ -447,7 +449,7 @@ function setupSurebetForm() {
     state.surebets.unshift(surebet);
     const stakeMovement = updateEntriesHistory(-getSurebetTotalStake(surebet), {
       reason: 'Surebet registrada',
-      description: surebet.title
+      description: surebet.description || surebet.title
     });
     if (stakeMovement) {
       surebet.stakeEntryHistoryId = stakeMovement.id;
@@ -487,12 +489,14 @@ function setupFreebetForm() {
     const freebetStake = freebetEntries.reduce((sum, entry) => sum + Number(entry.amount || 0), 0);
     const hedgeStake = hedgeEntries.reduce((sum, entry) => sum + Number(entry.amount || 0), 0);
     const freebetAmount = Number(formData.get('freebetAmount'));
+    const description = String(formData.get('description') || '').trim();
     const resultIfFreebetWins = calculation.resultIfFreebetWins;
     const resultIfHedgeWins = calculation.resultIfHedgeWins;
     const freebetHouse = freebetEntries.map((entry) => entry.house).join(' + ');
     const freebet = {
       id: crypto.randomUUID(),
       title: freebetHouse,
+      description,
       freebetHouse,
       hedgeHouse: hedgeEntries.map((entry) => entry.house).join(' + '),
       freebetEntries,
@@ -524,7 +528,7 @@ function setupFreebetForm() {
     state.freebets.unshift(freebet);
     const stakeMovement = updateEntriesHistory(-getFreebetTotalStake(freebet), {
       reason: 'Freebet registrada',
-      description: freebet.title
+      description: freebet.description || freebet.title
     });
     if (stakeMovement) {
       freebet.stakeEntryHistoryId = stakeMovement.id;
