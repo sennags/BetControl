@@ -75,12 +75,14 @@ const {
 } = window.BetCertezaHistory;
 
 let state = loadState();
-let selectedHistoryMonth = 'all';
+const currentMonthKey = getMonthKey(new Date());
+const currentDayValue = formatDateInputValue(new Date());
+let selectedHistoryMonth = currentMonthKey;
 let selectedHistoryType = 'all';
 let selectedHistoryOutcome = 'all';
-let selectedHistoryDay = '';
-let selectedExpenseMonth = 'all';
-let selectedAnalysisMonth = 'all';
+let selectedHistoryDay = currentDayValue;
+let selectedExpenseMonth = currentMonthKey;
+let selectedAnalysisMonth = currentMonthKey;
 
 const elements = {
   bankrollInput: document.getElementById('bankroll-input'),
