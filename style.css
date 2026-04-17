@@ -614,10 +614,6 @@ select {
   max-width: 860px;
 }
 
-.surebet-total-section {
-  max-width: 360px;
-}
-
 .form-two-columns > * {
   flex: 1 1 260px;
 }
@@ -1148,10 +1144,6 @@ select {
 
   .money {
     font-size: 1.7rem;
-  }
-
-  .surebet-total-section {
-    max-width: 100%;
   }
 
   .entry-row,
