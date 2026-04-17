@@ -176,6 +176,60 @@ window.BetCertezaHistory = ((utils) => {
     });
   }
 
+  function getDashboardSummary(state, currentDate, getBetOutcomeAmount, isSameMonth) {
+    const settledBets = getSettledBetHistoryItems(state)
+      .filter((item) => isSameMonth(item.settledAt || item.createdAt, currentDate));
+    const betResults = settledBets.map((item) => getBetOutcomeAmount(item));
+    const gains = betResults
+      .filter((amount) => amount > 0)
+      .reduce((sum, amount) => sum + amount, 0);
+    const betLosses = betResults
+      .filter((amount) => amount < 0)
+      .reduce((sum, amount) => sum + Math.abs(amount), 0);
+    const expenseLosses = state.expenses
+      .filter((item) => item.entryType !== 'lucrinho' && isSameMonth(item.createdAt, currentDate))
+      .reduce((sum, item) => sum + Number(item.amount || 0), 0);
+
+    return {
+      bankroll: Number(state.bankroll) || 0,
+      gains,
+      losses: expenseLosses + betLosses
+    };
+  }
+
+  function getMonthlyAnalysisData(state, selectedMonth, getBetOutcomeAmount) {
+    const settledHistory = getSettledBetHistoryItems(state);
+    const mergedItems = [
+      ...settledHistory.map((item) => ({ ...item, __kind: 'history', __date: item.settledAt || item.createdAt })),
+      ...state.expenses.map((item) => ({ ...item, __kind: 'expense', __date: item.createdAt }))
+    ];
+    const monthOptions = getMonthOptions(mergedItems, '__date');
+    const nextSelectedMonth = monthOptions.some((option) => option.value === selectedMonth) ? selectedMonth : 'all';
+    const filteredHistory = filterItemsByMonth(settledHistory, nextSelectedMonth, 'settledAt');
+    const filteredExpenses = filterItemsByMonth(state.expenses, nextSelectedMonth, 'createdAt');
+    const betResults = filteredHistory.map((item) => getBetOutcomeAmount(item));
+    const profit = betResults.filter((amount) => amount > 0).reduce((sum, amount) => sum + amount, 0);
+    const betLosses = betResults.filter((amount) => amount < 0).reduce((sum, amount) => sum + Math.abs(amount), 0);
+    const expenses = filteredExpenses
+      .filter((item) => item.entryType !== 'lucrinho')
+      .reduce((sum, item) => sum + Number(item.amount || 0), 0) + betLosses;
+    const sideGains = filteredExpenses
+      .filter((item) => item.entryType === 'lucrinho')
+      .reduce((sum, item) => sum + Number(item.amount || 0), 0);
+    const net = profit + sideGains - expenses;
+
+    return {
+      monthOptions,
+      selectedMonth: nextSelectedMonth,
+      filteredHistory,
+      filteredExpenses,
+      profit,
+      expenses,
+      sideGains,
+      net
+    };
+  }
+
   return {
     getSettledBetHistoryItems,
     getEntriesHistoryDisplayAmount,
@@ -187,6 +241,8 @@ window.BetCertezaHistory = ((utils) => {
     syncMonthFilter,
     syncHistoryDayFilter,
     filterItemsByMonth,
-    filterItemsByDay
+    filterItemsByDay,
+    getDashboardSummary,
+    getMonthlyAnalysisData
   };
 })(window.BetCertezaUtils);

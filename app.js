@@ -65,7 +65,9 @@ const {
   syncMonthFilter: applyMonthFilterSync,
   syncHistoryDayFilter: applyHistoryDayFilterSync,
   filterItemsByMonth: applyMonthItemsFilter,
-  filterItemsByDay: applyDayItemsFilter
+  filterItemsByDay: applyDayItemsFilter,
+  getDashboardSummary: buildDashboardSummary,
+  getMonthlyAnalysisData: buildMonthlyAnalysisData
 } = window.BetCertezaHistory;
 
 let state = loadState();
@@ -1048,23 +1050,11 @@ function render() {
 }
 
 function renderSummary() {
-  const currentDate = new Date();
-  const settledBets = getSettledBetHistoryItems().filter((item) => isSameMonth(item.settledAt || item.createdAt, currentDate));
-  const betGains = settledBets
-    .map((item) => getBetOutcomeAmount(item))
-    .filter((amount) => amount > 0)
-    .reduce((sum, amount) => sum + amount, 0);
-  const betLosses = settledBets
-    .map((item) => getBetOutcomeAmount(item))
-    .filter((amount) => amount < 0)
-    .reduce((sum, amount) => sum + Math.abs(amount), 0);
-  const expenseLosses = state.expenses
-    .filter((item) => item.entryType !== 'lucrinho' && isSameMonth(item.createdAt, currentDate))
-    .reduce((sum, item) => sum + Number(item.amount || 0), 0);
+  const summary = buildDashboardSummary(state, new Date(), getBetOutcomeAmount, isSameMonth);
 
-  elements.bankrollValue.textContent = formatCurrency(state.bankroll);
-  elements.gainValue.textContent = formatCurrency(betGains);
-  elements.lossValue.textContent = formatCurrency(expenseLosses + betLosses);
+  elements.bankrollValue.textContent = formatCurrency(summary.bankroll);
+  elements.gainValue.textContent = formatCurrency(summary.gains);
+  elements.lossValue.textContent = formatCurrency(summary.losses);
 }
 
 function renderFreebetOverview() {
@@ -1615,37 +1605,24 @@ function renderExpenses() {
 }
 
 function renderMonthlyAnalysis() {
-  const mergedItems = [
-    ...getSettledBetHistoryItems().map((item) => ({ ...item, __kind: 'history', __date: item.settledAt || item.createdAt })),
-    ...state.expenses.map((item) => ({ ...item, __kind: 'expense', __date: item.createdAt }))
-  ];
-  const monthOptions = getMonthOptions(mergedItems, '__date');
-  selectedAnalysisMonth = syncMonthFilter(elements.analysisMonthFilter, monthOptions, selectedAnalysisMonth);
+  const analysis = buildMonthlyAnalysisData(state, selectedAnalysisMonth, getBetOutcomeAmount);
+  selectedAnalysisMonth = syncMonthFilter(elements.analysisMonthFilter, analysis.monthOptions, analysis.selectedMonth);
 
-  const filteredHistory = filterItemsByMonth(getSettledBetHistoryItems(), selectedAnalysisMonth, 'settledAt');
-  const filteredExpenses = filterItemsByMonth(state.expenses, selectedAnalysisMonth, 'createdAt');
-  const betResults = filteredHistory.map((item) => getBetOutcomeAmount(item));
-  const profit = betResults.filter((amount) => amount > 0).reduce((sum, amount) => sum + amount, 0);
-  const betLosses = betResults.filter((amount) => amount < 0).reduce((sum, amount) => sum + Math.abs(amount), 0);
-  const expenses = filteredExpenses.filter((item) => item.entryType !== 'lucrinho').reduce((sum, item) => sum + Number(item.amount || 0), 0) + betLosses;
-  const sideGains = filteredExpenses.filter((item) => item.entryType === 'lucrinho').reduce((sum, item) => sum + Number(item.amount || 0), 0);
-  const net = profit + sideGains - expenses;
-
-  elements.analysisProfitValue.textContent = formatCurrency(profit);
-  elements.analysisExpenseValue.textContent = formatCurrency(expenses);
-  elements.analysisSidegainValue.textContent = formatCurrency(sideGains);
-  elements.analysisNetValue.textContent = formatSignedCurrency(net);
-  elements.analysisSettledCount.textContent = String(filteredHistory.length);
+  elements.analysisProfitValue.textContent = formatCurrency(analysis.profit);
+  elements.analysisExpenseValue.textContent = formatCurrency(analysis.expenses);
+  elements.analysisSidegainValue.textContent = formatCurrency(analysis.sideGains);
+  elements.analysisNetValue.textContent = formatSignedCurrency(analysis.net);
+  elements.analysisSettledCount.textContent = String(analysis.filteredHistory.length);
   elements.analysisMonthBadge.textContent = getSelectedMonthLabel(elements.analysisMonthFilter);
 
-  if (filteredHistory.length === 0 && filteredExpenses.length === 0) {
+  if (analysis.filteredHistory.length === 0 && analysis.filteredExpenses.length === 0) {
     elements.analysisMonthSummary.textContent = 'Sem dados no período selecionado.';
   } else {
-    elements.analysisMonthSummary.textContent = `${filteredHistory.length} aposta(s) batida(s) • ${filteredExpenses.length} lançamento(s) • Saldo: ${formatSignedCurrency(net)}`;
+    elements.analysisMonthSummary.textContent = `${analysis.filteredHistory.length} aposta(s) batida(s) • ${analysis.filteredExpenses.length} lançamento(s) • Saldo: ${formatSignedCurrency(analysis.net)}`;
   }
 
-  renderAnalysisHistoryDetails(filteredHistory);
-  renderAnalysisExpenseDetails(filteredExpenses);
+  renderAnalysisHistoryDetails(analysis.filteredHistory);
+  renderAnalysisExpenseDetails(analysis.filteredExpenses);
 }
 
 function renderAnalysisHistoryDetails(items) {
