@@ -388,6 +388,178 @@ select {
   gap: 20px;
 }
 
+.form-heading-block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.form-intro-copy,
+.section-helper {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.operation-form {
+  gap: 22px;
+}
+
+.compact-operation-form {
+  max-width: 860px;
+}
+
+.form-overview-panel {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.form-overview-panel strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 1.05rem;
+}
+
+.form-overview-panel p {
+  max-width: 56ch;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.highlight-panel {
+  border-color: rgba(90, 161, 255, 0.28);
+  background: rgba(90, 161, 255, 0.08);
+}
+
+.accent-panel {
+  border-color: rgba(255, 200, 87, 0.28);
+  background: rgba(255, 200, 87, 0.08);
+}
+
+.neutral-panel {
+  border-color: rgba(159, 176, 208, 0.18);
+}
+
+.operation-form-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(300px, 0.95fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.operation-form-main,
+.operation-form-sidebar,
+.summary-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.operation-form-main {
+  min-width: 0;
+}
+
+.surebet-form-layout {
+  max-width: 100%;
+}
+
+.form-section {
+  gap: 16px;
+}
+
+.form-section-emphasis {
+  border-color: rgba(255, 200, 87, 0.22);
+  background: rgba(255, 200, 87, 0.04);
+}
+
+.summary-card {
+  position: sticky;
+  top: 18px;
+}
+
+.form-status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(159, 176, 208, 0.2);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.form-status-badge.positive {
+  border-color: rgba(20, 184, 106, 0.35);
+  background: rgba(20, 184, 106, 0.12);
+}
+
+.form-status-badge.negative {
+  border-color: rgba(239, 93, 103, 0.35);
+  background: rgba(239, 93, 103, 0.12);
+}
+
+.form-status-badge.neutral {
+  border-color: rgba(90, 161, 255, 0.3);
+  background: rgba(90, 161, 255, 0.12);
+}
+
+.form-featured-field input,
+.form-featured-field select,
+.readonly-metric-field input {
+  min-height: 54px;
+  border-radius: 14px;
+  font-size: 1.05rem;
+}
+
+.form-featured-field input,
+.form-featured-field select {
+  border-color: rgba(90, 161, 255, 0.28);
+  background: rgba(7, 17, 33, 0.88);
+}
+
+.readonly-metric-field input {
+  font-weight: 700;
+}
+
+.expense-entry-panel {
+  max-width: 860px;
+}
+
+.surebet-total-section {
+  max-width: 360px;
+}
+
+.form-two-columns > * {
+  flex: 1 1 260px;
+}
+
+.form-submit-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+  padding: 18px 20px;
+  border: 1px solid rgba(90, 161, 255, 0.16);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.02) 100%);
+}
+
+.form-submit-bar strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.form-submit-bar p {
+  color: var(--muted);
+}
+
 .calc-summary-card {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -504,6 +676,7 @@ select {
 
 .freebet-side-layout {
   display: block;
+  min-width: 0;
 }
 
 .entry-row {
@@ -517,7 +690,24 @@ select {
 }
 
 .freebet-entry-row {
-  grid-template-columns: minmax(0, 2fr) minmax(110px, 0.8fr) minmax(130px, 0.9fr) minmax(140px, 1fr) minmax(220px, 1.1fr) auto;
+  grid-template-columns: minmax(0, 1.7fr) repeat(3, minmax(110px, 1fr)) auto;
+}
+
+.freebet-entry-row > label,
+.entry-row > label,
+.freebet-entry-row > .entry-row-actions,
+.entry-row > .entry-row-actions {
+  min-width: 0;
+}
+
+.freebet-entry-row .entry-row-actions {
+  grid-column: 1 / span 4;
+  min-width: 0;
+}
+
+.freebet-entry-row .remove-entry-button {
+  min-width: 110px;
+  align-self: stretch;
 }
 
 .freebet-entry-result-field input[readonly] {
@@ -833,6 +1023,17 @@ select {
     grid-template-columns: 1fr;
   }
 
+  .form-overview-panel,
+  .form-submit-bar,
+  .operation-form-grid {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .summary-card {
+    position: static;
+  }
+
   .topbar,
   .entry-row,
     .freebet-side-layout,
@@ -846,7 +1047,35 @@ select {
     font-size: 1.7rem;
   }
 
+  .surebet-total-section {
+    max-width: 100%;
+  }
+
+  .entry-row,
+  .freebet-entry-row {
+    grid-template-columns: 1fr;
+  }
+
+  .entry-row-actions,
+  .freebet-entry-row .entry-row-actions,
+  .freebet-entry-row .remove-entry-button {
+    grid-column: auto;
+    min-width: 0;
+    width: 100%;
+  }
+
   .winner-metric {
     grid-column: 1;
+  }
+}
+
+@media (max-width: 960px) {
+  .freebet-entry-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .freebet-entry-row .entry-row-actions,
+  .freebet-entry-row .remove-entry-button {
+    grid-column: 1 / -1;
   }
 }

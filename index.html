@@ -290,112 +290,214 @@
 
         <div id="surebet" class="tab-panel" role="tabpanel" hidden>
           <section class="card form-card">
-            <div class="section-header">
-              <h2>Nova surebet</h2>
+            <div class="form-heading-block">
+              <p class="eyebrow">Nova operação</p>
+              <div class="section-header">
+                <h2>Nova surebet</h2>
+              </div>
+              <p class="form-intro-copy">Monte os dois lados da operação, revise o resultado projetado e salve apenas quando o cenário estiver financeiramente coerente.</p>
             </div>
 
-            <form id="surebet-form" class="stack-form">
-              <section class="bet-side-card freebet-side-card">
-                <div class="section-header compact freebet-side-header">
-                  <h3>Casas da surebet</h3>
+            <form id="surebet-form" class="stack-form operation-form">
+              <section class="form-overview-panel highlight-panel">
+                <div>
+                  <span class="card-label">Estratégia da operação</span>
+                  <strong>Distribuição automática por stake total</strong>
                 </div>
-
-                <div class="freebet-side-layout">
-                  <div id="main-entries" class="entries-list"></div>
-                </div>
+                <p>As stakes são rebalanceadas conforme as odds preenchidas. O painel ao lado resume profit, retorno por cenário e status da surebet.</p>
               </section>
 
-              <section class="bet-side-card freebet-side-card">
-                <div class="section-header compact freebet-side-header">
-                  <h3>Casas contrárias</h3>
-                  <div class="side-actions">
-                    <button type="button" id="add-surebet-counter-entry-button" class="mini-button">Adicionar casa</button>
+              <div class="operation-form-main surebet-form-layout">
+                <section class="bet-side-card form-section form-featured-field surebet-total-section">
+                  <label class="form-featured-field" for="surebet-total-input">
+                    <span>Stake total da surebet</span>
+                    <input id="surebet-total-input" name="surebetTotal" type="number" min="0.01" step="0.01" required value="100" placeholder="100,00">
+                  </label>
+                </section>
+
+                <section class="bet-side-card freebet-side-card form-section">
+                  <div class="section-header compact freebet-side-header">
+                    <div>
+                      <h3>Casas da surebet</h3>
+                      <p class="section-helper">Lado principal da operação. Informe as casas e odds que sustentam o cenário base.</p>
+                    </div>
                   </div>
+
+                  <div class="freebet-side-layout">
+                    <div id="main-entries" class="entries-list"></div>
+                  </div>
+                </section>
+
+                <section class="bet-side-card freebet-side-card form-section form-section-emphasis">
+                  <div class="section-header compact freebet-side-header">
+                    <div>
+                      <h3>Casas contrárias</h3>
+                      <p class="section-helper">Cobertura da operação para travar o resultado entre os cenários possíveis.</p>
+                    </div>
+                    <div class="side-actions">
+                      <button type="button" id="add-surebet-counter-entry-button" class="mini-button">Adicionar casa</button>
+                    </div>
+                  </div>
+
+                  <div class="freebet-side-layout">
+                    <div id="counter-entries" class="entries-list"></div>
+                  </div>
+                </section>
+              </div>
+            
+              <div class="form-submit-bar">
+                <div>
+                  <strong>Salvar surebet</strong>
+                  <p>Registre a operação e envie a stake total para a banca.</p>
                 </div>
-
-                <div class="freebet-side-layout">
-                  <div id="counter-entries" class="entries-list"></div>
-                </div>
-              </section>
-
-              <label>
-                <span>Stake total da surebet</span>
-                <input id="surebet-total-input" name="surebetTotal" type="number" min="0.01" step="0.01" required value="100" placeholder="100,00">
-              </label>
-
-              <button type="submit" class="primary-button">Salvar surebet</button>
+                <button type="submit" class="primary-button">Salvar surebet</button>
+              </div>
             </form>
           </section>
         </div>
 
         <div id="freebet" class="tab-panel" role="tabpanel" hidden>
           <section class="card form-card">
-            <div class="section-header">
-              <h2>Nova freebet</h2>
+            <div class="form-heading-block">
+              <p class="eyebrow">Nova operação</p>
+              <div class="section-header">
+                <h2>Nova freebet</h2>
+              </div>
+              <p class="form-intro-copy">Organize o lado que recebe a freebet, defina o hedge e acompanhe o profit estimado por linha para fechar a operação com clareza.</p>
             </div>
 
-            <form id="freebet-form" class="stack-form">
-              <section class="bet-side-card freebet-side-card">
-                <div class="section-header compact freebet-side-header">
-                  <h3>Casas da freebet</h3>
+            <form id="freebet-form" class="stack-form operation-form">
+              <section class="form-overview-panel accent-panel">
+                <div>
+                  <span class="card-label">Leitura operacional</span>
+                  <strong>Valor da freebet e hedge em foco</strong>
                 </div>
-
-                <div class="freebet-side-layout">
-                  <div id="freebet-main-entries" class="entries-list"></div>
-                </div>
+                <p>O valor da freebet define a distribuição automática. Use os profits por linha para validar rapidamente se o hedge está equilibrado.</p>
               </section>
 
-              <section class="bet-side-card freebet-side-card">
-                <div class="section-header compact freebet-side-header">
-                  <h3>Casas contrárias</h3>
-                  <div class="side-actions">
-                    <button type="button" id="add-freebet-hedge-entry-button" class="mini-button">Adicionar casa</button>
-                  </div>
+              <div class="operation-form-grid">
+                <div class="operation-form-main">
+                  <section class="bet-side-card freebet-side-card form-section">
+                    <div class="section-header compact freebet-side-header">
+                      <div>
+                        <h3>Casas da freebet</h3>
+                        <p class="section-helper">Onde a freebet será convertida em retorno. O profit por linha aparece automaticamente.</p>
+                      </div>
+                    </div>
+
+                    <div class="freebet-side-layout">
+                      <div id="freebet-main-entries" class="entries-list"></div>
+                    </div>
+                  </section>
+
+                  <section class="bet-side-card freebet-side-card form-section form-section-emphasis">
+                    <div class="section-header compact freebet-side-header">
+                      <div>
+                        <h3>Casas contrárias</h3>
+                        <p class="section-helper">Hedge da operação para estabilizar o resultado entre os cenários.</p>
+                      </div>
+                      <div class="side-actions">
+                        <button type="button" id="add-freebet-hedge-entry-button" class="mini-button">Adicionar casa</button>
+                      </div>
+                    </div>
+
+                    <div class="freebet-side-layout">
+                      <div id="freebet-hedge-entries" class="entries-list"></div>
+                    </div>
+                  </section>
                 </div>
 
-                <div class="freebet-side-layout">
-                  <div id="freebet-hedge-entries" class="entries-list"></div>
+                <aside class="operation-form-sidebar">
+                  <section class="bet-side-card form-section summary-card">
+                    <div class="section-header compact">
+                      <div>
+                        <h3>Parâmetros-chave</h3>
+                        <p class="section-helper">Campo estratégico que orienta a distribuição da operação.</p>
+                      </div>
+                    </div>
+
+                    <label class="form-featured-field" for="freebet-amount-input">
+                      <span>Freebet que vai ganhar</span>
+                      <input id="freebet-amount-input" name="freebetAmount" type="number" min="0.01" step="0.01" required value="100" placeholder="100,00">
+                    </label>
+
+                    <div class="summary-notes">
+                      <div class="detail-line">
+                        <span>Leitura dos inputs</span>
+                        <strong>Odds + stake por casa</strong>
+                      </div>
+                      <div class="detail-line">
+                        <span>Leitura dos outputs</span>
+                        <strong>Profit por linha</strong>
+                      </div>
+                      <div class="detail-line">
+                        <span>Objetivo</span>
+                        <strong>Fechar hedge com clareza</strong>
+                      </div>
+                    </div>
+                  </section>
+                </aside>
+              </div>
+
+              <div class="form-submit-bar">
+                <div>
+                  <strong>Salvar freebet</strong>
+                  <p>Registre a operação e mantenha o controle das freebets ativas.</p>
                 </div>
-              </section>
-
-              <label>
-                <span>Freebet que vai ganhar</span>
-                <input id="freebet-amount-input" name="freebetAmount" type="number" min="0.01" step="0.01" required value="100" placeholder="100,00">
-              </label>
-
-              <button type="submit" class="primary-button">Salvar freebet</button>
+                <button type="submit" class="primary-button">Salvar freebet</button>
+              </div>
             </form>
           </section>
         </div>
 
         <div id="expense" class="tab-panel" role="tabpanel" hidden>
           <section class="card form-card">
-            <div class="section-header">
+            <div class="form-heading-block">
+              <p class="eyebrow">Lançamento financeiro</p>
+              <div class="section-header">
                 <h2>Novo gasto/lucrinho</h2>
               </div>
+              <p class="form-intro-copy">Registre rapidamente uma saída ou entrada complementar da operação sem perder o contexto financeiro da banca.</p>
+            </div>
 
-            <form id="expense-form" class="stack-form">
-              <div class="two-columns">
-                <label>
-                  <span>Tipo</span>
-                  <select name="entryType" required>
-                    <option value="expense">Gasto</option>
-                    <option value="lucrinho">Lucrinho</option>
-                  </select>
-                </label>
+            <form id="expense-form" class="stack-form operation-form compact-operation-form">
+              <section class="form-overview-panel neutral-panel">
+                <div>
+                  <span class="card-label">Fluxo rápido</span>
+                  <strong>Lançamento curto e objetivo</strong>
+                </div>
+                <p>Escolha o tipo, informe o valor e registre uma descrição breve para manter o histórico financeiro legível.</p>
+              </section>
+
+              <section class="bet-side-card form-section summary-card expense-entry-panel">
+                <div class="two-columns form-two-columns">
+                  <label class="form-featured-field">
+                    <span>Tipo</span>
+                    <select name="entryType" required>
+                      <option value="expense">Gasto</option>
+                      <option value="lucrinho">Lucrinho</option>
+                    </select>
+                  </label>
+
+                  <label class="form-featured-field">
+                    <span>Valor</span>
+                    <input name="amount" type="number" min="0.01" step="0.01" required placeholder="0,00">
+                  </label>
+                </div>
 
                 <label>
-                  <span>Valor</span>
-                  <input name="amount" type="number" min="0.01" step="0.01" required placeholder="0,00">
+                  <span>Descrição</span>
+                  <input name="description" type="text" required placeholder="Ex.: Corrida até a lotérica / Pix inesperado">
                 </label>
+              </section>
+
+              <div class="form-submit-bar">
+                <div>
+                  <strong>Salvar lançamento</strong>
+                  <p>Atualize a leitura financeira sem sair do fluxo operacional.</p>
+                </div>
+                <button type="submit" class="primary-button">Salvar lançamento</button>
               </div>
-
-              <label>
-                <span>Descrição</span>
-                <input name="description" type="text" required placeholder="Ex.: Corrida até a lotérica / Pix inesperado">
-              </label>
-
-              <button type="submit" class="primary-button">Salvar lançamento</button>
             </form>
           </section>
         </div>

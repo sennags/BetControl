@@ -387,6 +387,7 @@ function addEntryRow(side) {
     if (isSurebetSide) {
       applySurebetBalancedDefaults();
       updateSurebetResults();
+      updateSurebetPreview?.({ source: 'entries', changedSide: side });
     } else if (isFreebetSide) {
       applyFreebetBalancedDefaults();
       updateFreebetResults();
@@ -398,6 +399,7 @@ function addEntryRow(side) {
   if (isSurebetSide) {
     applySurebetBalancedDefaults();
     updateSurebetResults();
+    updateSurebetPreview?.({ source: 'entries', changedSide: side });
   } else if (isFreebetSide) {
     applyFreebetBalancedDefaults();
     updateFreebetResults();
