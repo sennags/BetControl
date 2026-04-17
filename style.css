@@ -313,7 +313,9 @@ select {
 .bet-print-groups,
 .bet-print-group,
 .bet-print-list,
-.print-preview-meta {
+.print-preview-meta,
+.entry-print-preview,
+.entry-row-actions {
   display: flex;
   gap: 10px;
 }
@@ -321,7 +323,9 @@ select {
 .print-preview-list,
 .bet-print-groups,
 .bet-print-group,
-.print-preview-meta {
+.print-preview-meta,
+.entry-print-preview,
+.entry-row-actions {
   flex-direction: column;
 }
 
@@ -329,7 +333,9 @@ select {
   flex-wrap: wrap;
 }
 
-.print-preview-item {
+.print-preview-item,
+.entry-print-item,
+.bet-print-item {
   display: flex;
   gap: 12px;
   align-items: center;
@@ -337,16 +343,6 @@ select {
   border: 1px solid var(--line);
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.03);
-}
-
-.print-preview-thumb,
-.bet-print-thumb {
-  width: 84px;
-  height: 84px;
-  object-fit: cover;
-  border-radius: 10px;
-  border: 1px solid var(--line);
-  background: #0d152a;
 }
 
 .print-preview-meta strong,
@@ -358,8 +354,34 @@ select {
   align-self: flex-start;
 }
 
-.bet-print-link {
-  display: inline-flex;
+.entry-print-item,
+.bet-print-item {
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.entry-print-file-name {
+  color: var(--muted);
+  font-size: 0.85rem;
+  word-break: break-all;
+}
+
+.entry-print-open-button,
+.bet-print-open-button,
+.bet-print-download-button {
+  text-decoration: none;
+}
+
+.bet-print-open-button,
+.entry-print-open-button {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  text-align: left;
+}
+
+.entry-row-actions {
+  min-width: 220px;
 }
 
 .freebet-side-layout {
@@ -368,7 +390,7 @@ select {
 
 .entry-row {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr)) auto;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(220px, 1fr) auto;
   align-items: end;
   padding: 14px;
   border: 1px solid var(--line);
@@ -377,7 +399,7 @@ select {
 }
 
 .freebet-entry-row {
-  grid-template-columns: minmax(0, 2fr) minmax(110px, 0.8fr) minmax(130px, 0.9fr) minmax(140px, 1fr) auto;
+  grid-template-columns: minmax(0, 2fr) minmax(110px, 0.8fr) minmax(130px, 0.9fr) minmax(140px, 1fr) minmax(220px, 1.1fr) auto;
 }
 
 .freebet-entry-result-field input[readonly] {
@@ -419,6 +441,11 @@ select {
   margin-top: 12px;
 }
 
+.bet-print-list,
+.entry-print-preview {
+  width: 100%;
+}
+
 .expense-card {
   border-width: 1px;
 }
@@ -440,7 +467,7 @@ select {
 
 .freebet-winner-row {
   display: grid;
-  grid-template-columns: 20px minmax(120px, 1fr) repeat(3, minmax(90px, max-content));
+  grid-template-columns: 20px minmax(260px, 3fr) repeat(3, minmax(72px, 0.75fr));
   gap: 12px;
   align-items: center;
   padding: 10px 12px;
@@ -466,8 +493,12 @@ select {
   font-weight: 700;
   color: var(--text);
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow: visible;
+  text-overflow: clip;
+}
+
+.history-row {
+  grid-template-columns: minmax(260px, 3fr) repeat(3, minmax(72px, 0.75fr));
 }
 
 .winner-metric {

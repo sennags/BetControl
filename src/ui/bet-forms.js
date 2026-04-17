@@ -35,8 +35,17 @@ window.BetCertezaBetForms = ((calculations, utils) => {
         const amount = Number(row.querySelector('[name="amount"]').value);
         const oddInput = row.querySelector('[name="odd"]');
         const odd = oddInput ? Number(oddInput.value) : null;
+        const printsPayload = row.querySelector('[name="printsPayload"]')?.value || '[]';
+        let prints = [];
 
-        return oddInput ? { house, odd, amount } : { house, amount };
+        try {
+          const parsedPrints = JSON.parse(printsPayload);
+          prints = Array.isArray(parsedPrints) ? parsedPrints : [];
+        } catch {
+          prints = [];
+        }
+
+        return oddInput ? { house, odd, amount, prints } : { house, amount, prints };
       });
 
       const invalidEntry = entries.some((entry) => {
