@@ -97,9 +97,10 @@ window.BetControlBetForms = ((calculations, utils) => {
       return Number.isNaN(value) || value <= 0 ? defaultSurebetTotal : value;
     }
 
-    function getFreebetTargetTotal() {
-      const value = Number(elements.freebetAmountInput.value);
-      return Number.isNaN(value) || value <= 0 ? defaultFreebetTotal : value;
+    function getFreebetStakeTotal() {
+      const rows = getFreebetRows();
+      const total = rows.reduce((sum, row) => sum + (Number(row.querySelector('[name="amount"]').value) || 0), 0);
+      return total > 0 ? total : defaultFreebetTotal;
     }
 
     function rebalanceSurebetStakesFromOdds() {
@@ -146,7 +147,7 @@ window.BetControlBetForms = ((calculations, utils) => {
       }
 
       const weights = entries.map((entry) => 1 / entry.odd);
-      const distributedStakes = splitAmountByWeights(weights, getFreebetTargetTotal());
+      const distributedStakes = splitAmountByWeights(weights, getFreebetStakeTotal());
 
       entries.forEach((entry, index) => {
         const amountInput = entry.row.querySelector('[name="amount"]');

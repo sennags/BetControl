@@ -151,11 +151,6 @@ window.BetControlBootstrap = (() => {
 
       elements.freebetMainEntries.addEventListener('input', handleFreebetInput);
       elements.freebetHedgeEntries.addEventListener('input', handleFreebetInput);
-      elements.freebetAmountInput.addEventListener('input', () => {
-        rebalanceFreebetStakesFromOdds();
-        updateFreebetResults();
-      });
-
       applyFreebetBalancedDefaults();
       updateFreebetResults();
     }
