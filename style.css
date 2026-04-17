@@ -383,7 +383,7 @@ select {
 
 .freebet-winner-row {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) repeat(3, minmax(88px, max-content));
+  grid-template-columns: auto minmax(120px, 1fr) repeat(3, minmax(90px, max-content));
   gap: 12px;
   align-items: center;
   padding: 10px 12px;
@@ -406,7 +406,9 @@ select {
   align-items: center;
   font-weight: 700;
   color: var(--text);
-  overflow-wrap: anywhere;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .winner-metric {
