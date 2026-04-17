@@ -41,15 +41,26 @@
       </section>
 
       <section class="tabs-section">
-        <div class="tabs" role="tablist" aria-label="Abas principais">
-          <button class="tab-button active" data-tab="dashboard" role="tab" aria-selected="true">Resumo</button>
-          <button class="tab-button" data-tab="monthly-analysis" role="tab" aria-selected="false">Análise mensal</button>
-          <button class="tab-button" data-tab="history" role="tab" aria-selected="false">Histórico</button>
-          <button class="tab-button" data-tab="freebets" role="tab" aria-selected="false">Freebets</button>
-          <button class="tab-button" data-tab="expenses" role="tab" aria-selected="false">Gastos/Lucrinho</button>
-          <button class="tab-button" data-tab="surebet" role="tab" aria-selected="false">Adicionar surebet</button>
-          <button class="tab-button" data-tab="freebet" role="tab" aria-selected="false">Adicionar freebet</button>
-          <button class="tab-button" data-tab="expense" role="tab" aria-selected="false">Adicionar gasto/lucrinho</button>
+        <div class="tabs-layout">
+          <div class="tabs-group">
+            <span class="tabs-group-label">Visão geral</span>
+            <div class="tabs" role="tablist" aria-label="Abas principais">
+              <button class="tab-button active" data-tab="dashboard" role="tab" aria-selected="true">Resumo</button>
+              <button class="tab-button" data-tab="history" role="tab" aria-selected="false">Histórico</button>
+              <button class="tab-button" data-tab="monthly-analysis" role="tab" aria-selected="false">Análise mensal</button>
+              <button class="tab-button" data-tab="freebets" role="tab" aria-selected="false">Freebets</button>
+              <button class="tab-button" data-tab="expenses" role="tab" aria-selected="false">Gastos/Lucrinho</button>
+            </div>
+          </div>
+
+          <div class="tabs-group">
+            <span class="tabs-group-label">Adicionar</span>
+            <div class="tabs" role="tablist" aria-label="Abas de cadastro">
+              <button class="tab-button tab-button-accent" data-tab="surebet" role="tab" aria-selected="false">Nova surebet</button>
+              <button class="tab-button tab-button-accent" data-tab="freebet" role="tab" aria-selected="false">Nova freebet</button>
+              <button class="tab-button tab-button-accent" data-tab="expense" role="tab" aria-selected="false">Novo gasto/lucrinho</button>
+            </div>
+          </div>
         </div>
 
         <div id="dashboard" class="tab-panel active" role="tabpanel">
