@@ -1094,22 +1094,53 @@ function bindBetPrintActions(container) {
     return;
   }
 
+  container.querySelectorAll('.bet-print-open-button').forEach((link) => {
+    link.addEventListener('click', async (event) => {
+      event.preventDefault();
+      const dataUrl = link.dataset.url;
+      if (!dataUrl) {
+        return;
+      }
+
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        alert('Não foi possível abrir o print. Verifique se o navegador bloqueou a nova aba.');
+        return;
+      }
+
+      try {
+        const objectUrl = await createObjectUrlFromDataUrl(dataUrl);
+        printWindow.location.href = objectUrl;
+        setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
+      } catch {
+        printWindow.close();
+        alert('Não foi possível abrir o print.');
+      }
+    });
+  });
+
   container.querySelectorAll('.bet-print-download-button').forEach((link) => {
     link.addEventListener('click', (event) => {
       event.preventDefault();
-      const url = link.getAttribute('href');
-      if (!url) {
+      const dataUrl = link.dataset.url;
+      if (!dataUrl) {
         return;
       }
 
       const tempLink = document.createElement('a');
-      tempLink.href = url;
+      tempLink.href = dataUrl;
       tempLink.download = link.dataset.fileName || 'print.png';
       document.body.appendChild(tempLink);
       tempLink.click();
       tempLink.remove();
     });
   });
+}
+
+async function createObjectUrlFromDataUrl(dataUrl) {
+  const response = await fetch(dataUrl);
+  const blob = await response.blob();
+  return URL.createObjectURL(blob);
 }
 
 function settleSurebet(id) {

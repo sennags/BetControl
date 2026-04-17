@@ -27,8 +27,8 @@ window.BetCertezaBetCards = ((utils, calculations) => {
 
       return `
         <div class="bet-print-item">
-          <a class="mini-button bet-print-open-button" href="${item.dataUrl}" data-file-name="${escapeHtml(fileName)}" target="_blank" rel="noreferrer noopener" title="Abrir ${escapeHtml(fileName)}">${escapeHtml(buttonLabel)}</a>
-          <a class="secondary-button bet-print-download-button" href="${item.dataUrl}" data-file-name="${escapeHtml(fileName)}" download="${escapeHtml(fileName)}">Baixar</a>
+          <a class="mini-button bet-print-open-button" href="#" data-url="${item.dataUrl}" data-file-name="${escapeHtml(fileName)}" title="Abrir ${escapeHtml(fileName)}">${escapeHtml(buttonLabel)}</a>
+          <a class="secondary-button bet-print-download-button" href="#" data-url="${item.dataUrl}" data-file-name="${escapeHtml(fileName)}" download="${escapeHtml(fileName)}">Baixar</a>
         </div>
       `;
     }).join('');
