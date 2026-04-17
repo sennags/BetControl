@@ -16,6 +16,16 @@ window.BetCertezaBetForms = ((calculations, utils) => {
   function createBetFormHelpers({ elements, defaults }) {
     const { defaultSurebetTotal, defaultFreebetTotal } = defaults;
 
+    function hasSurebetPreviewElements() {
+      return Boolean(
+        elements.profitInput
+        && elements.mainResultValue
+        && elements.counterResultValue
+        && elements.calculatedProfitPercent
+        && elements.surebetStatus
+      );
+    }
+
     function collectEntries(container, options = {}) {
       const { requireOdd = false } = options;
       const rows = [...container.querySelectorAll('.entry-row')];
@@ -213,6 +223,10 @@ window.BetCertezaBetForms = ((calculations, utils) => {
     }
 
     function updateProfitInputState(value) {
+      if (!elements.profitInput) {
+        return;
+      }
+
       elements.profitInput.classList.remove('profit-positive', 'profit-negative');
 
       if (value > 0) {
@@ -279,6 +293,10 @@ window.BetCertezaBetForms = ((calculations, utils) => {
     }
 
     function updateSurebetPreview(options = {}) {
+      if (!hasSurebetPreviewElements()) {
+        return;
+      }
+
       const { source = 'controls', changedSide = null } = options;
       const fixedTotal = Number(elements.fixedTotalInput.value);
       const mainOdd = Number(elements.mainOddInput.value);
