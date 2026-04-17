@@ -1,4 +1,4 @@
-window.BetCertezaBetForms = ((calculations, utils) => {
+window.BetControlBetForms = ((calculations, utils) => {
   const {
     splitAmount,
     splitAmountByWeights,
@@ -396,4 +396,4 @@ window.BetCertezaBetForms = ((calculations, utils) => {
   return {
     createBetFormHelpers
   };
-})(window.BetCertezaCalculations, window.BetCertezaUtils);
+})(window.BetControlCalculations, window.BetControlUtils);

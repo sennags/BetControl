@@ -1,11 +1,12 @@
 const {
   ONE_TIME_TODAY_ENTRIES_CLEAR_KEY,
+  LEGACY_ONE_TIME_TODAY_ENTRIES_CLEAR_KEY,
   ONE_TIME_TODAY_ENTRIES_CLEAR_TARGET,
   DEFAULT_FREEBET_TOTAL,
   DEFAULT_SUREBET_TOTAL,
   loadState,
   saveState: persistState
-} = window.BetCertezaStorage;
+} = window.BetControlStorage;
 
 const {
   formatCurrency,
@@ -22,19 +23,19 @@ const {
   getMonthKey,
   getMonthBounds,
   getSelectedMonthLabel
-} = window.BetCertezaUtils;
+} = window.BetControlUtils;
 
 const {
   updateEntriesHistory: applyEntriesHistoryUpdate,
   removeEntryHistoryById: removeEntryHistoryRecord,
   removeLinkedEntryHistory: removeSurebetLinkedEntryHistory,
   removeLinkedFreebetEntryHistory: removeFreebetLinkedEntryHistory
-} = window.BetCertezaBankroll;
+} = window.BetControlBankroll;
 
 const {
   settleBet: settleActiveBetRecord,
   deleteBet: deleteBetRecord
-} = window.BetCertezaBets;
+} = window.BetControlBets;
 
 const {
   calculateFreebetResultsFromEntries,
@@ -45,18 +46,18 @@ const {
   getSurebetTotalStake,
   getFreebetSettlementDelta,
   getSurebetSettlementDelta
-} = window.BetCertezaCalculations;
+} = window.BetControlCalculations;
 
 const {
   buildFreebetCard,
   buildSurebetCard,
   buildMainHistoryCard
-} = window.BetCertezaBetCards;
+} = window.BetControlBetCards;
 
-const { createExpenseHelpers } = window.BetCertezaExpenses;
-const { createBootstrapHelpers } = window.BetCertezaBootstrap;
+const { createExpenseHelpers } = window.BetControlExpenses;
+const { createBootstrapHelpers } = window.BetControlBootstrap;
 
-const { createBetFormHelpers } = window.BetCertezaBetForms;
+const { createBetFormHelpers } = window.BetControlBetForms;
 
 const {
   getSettledBetHistoryItems: selectSettledBetHistoryItems,
@@ -72,7 +73,7 @@ const {
   filterItemsByDay: applyDayItemsFilter,
   getDashboardSummary: buildDashboardSummary,
   getMonthlyAnalysisData: buildMonthlyAnalysisData
-} = window.BetCertezaHistory;
+} = window.BetControlHistory;
 
 let state = loadState();
 const currentMonthKey = getMonthKey(new Date());
@@ -1340,11 +1341,15 @@ function clearTodayEntriesHistory() {
 }
 
 function runOneTimeTodayEntriesCleanup() {
-  if (localStorage.getItem(ONE_TIME_TODAY_ENTRIES_CLEAR_KEY) === ONE_TIME_TODAY_ENTRIES_CLEAR_TARGET) {
+  const currentMarker = localStorage.getItem(ONE_TIME_TODAY_ENTRIES_CLEAR_KEY)
+    || localStorage.getItem(LEGACY_ONE_TIME_TODAY_ENTRIES_CLEAR_KEY);
+
+  if (currentMarker === ONE_TIME_TODAY_ENTRIES_CLEAR_TARGET) {
     return;
   }
 
   clearTodayEntriesHistory();
   saveState();
   localStorage.setItem(ONE_TIME_TODAY_ENTRIES_CLEAR_KEY, ONE_TIME_TODAY_ENTRIES_CLEAR_TARGET);
+  localStorage.removeItem(LEGACY_ONE_TIME_TODAY_ENTRIES_CLEAR_KEY);
 }

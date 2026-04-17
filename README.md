@@ -1,6 +1,6 @@
-# BetCerteza
+# BetControl
 
-BetCerteza é um app web simples para acompanhar banca, surebets, freebets e gastos ligados às apostas.
+BetControl é um app web simples para acompanhar banca, surebets, freebets e gastos ligados às apostas.
 
 ## Conceito
 

@@ -1,6 +1,8 @@
-window.BetCertezaStorage = (() => {
-  const STORAGE_KEY = 'betcerteza:data';
-  const ONE_TIME_TODAY_ENTRIES_CLEAR_KEY = 'betcerteza:entries-history-cleared-once';
+window.BetControlStorage = (() => {
+  const STORAGE_KEY = 'betcontrol:data';
+  const LEGACY_STORAGE_KEY = 'betcerteza:data';
+  const ONE_TIME_TODAY_ENTRIES_CLEAR_KEY = 'betcontrol:entries-history-cleared-once';
+  const LEGACY_ONE_TIME_TODAY_ENTRIES_CLEAR_KEY = 'betcerteza:entries-history-cleared-once';
   const ONE_TIME_TODAY_ENTRIES_CLEAR_TARGET = '2026-04-16';
   const DEFAULT_FREEBET_TOTAL = 100;
   const DEFAULT_SUREBET_TOTAL = 100;
@@ -116,7 +118,7 @@ window.BetCertezaStorage = (() => {
 
   function loadState() {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
+      const saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY);
       if (!saved) {
         return structuredClone(defaultState);
       }
@@ -137,7 +139,7 @@ window.BetCertezaStorage = (() => {
       };
 
       const { state, changed } = purgeExpiredState(normalizedState);
-      if (changed) {
+      if (changed || !localStorage.getItem(STORAGE_KEY)) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
       }
 
@@ -153,7 +155,9 @@ window.BetCertezaStorage = (() => {
 
   return {
     STORAGE_KEY,
+    LEGACY_STORAGE_KEY,
     ONE_TIME_TODAY_ENTRIES_CLEAR_KEY,
+    LEGACY_ONE_TIME_TODAY_ENTRIES_CLEAR_KEY,
     ONE_TIME_TODAY_ENTRIES_CLEAR_TARGET,
     DEFAULT_FREEBET_TOTAL,
     DEFAULT_SUREBET_TOTAL,

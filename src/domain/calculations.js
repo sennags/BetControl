@@ -1,4 +1,4 @@
-window.BetCertezaCalculations = ((utils) => {
+window.BetControlCalculations = ((utils) => {
   const { normalizeCurrencyValue } = utils;
 
   function splitAmount(total, parts) {
@@ -252,4 +252,4 @@ window.BetCertezaCalculations = ((utils) => {
     getFreebetSettlementDelta,
     getSurebetSettlementDelta
   };
-})(window.BetCertezaUtils);
+})(window.BetControlUtils);

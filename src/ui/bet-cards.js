@@ -1,4 +1,4 @@
-window.BetCertezaBetCards = ((utils, calculations) => {
+window.BetControlBetCards = ((utils, calculations) => {
   const {
     formatCurrency,
     formatDate,
@@ -245,4 +245,4 @@ window.BetCertezaBetCards = ((utils, calculations) => {
     buildSurebetCard,
     buildMainHistoryCard
   };
-})(window.BetCertezaUtils, window.BetCertezaCalculations);
+})(window.BetControlUtils, window.BetControlCalculations);

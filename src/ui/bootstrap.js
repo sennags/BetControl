@@ -1,4 +1,4 @@
-window.BetCertezaBootstrap = (() => {
+window.BetControlBootstrap = (() => {
   function createBootstrapHelpers({
     elements,
     getState,

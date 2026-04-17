@@ -1,4 +1,4 @@
-window.BetCertezaBets = ((utils) => {
+window.BetControlBets = ((utils) => {
   const { normalizeCurrencyValue } = utils;
 
   function getCheckedWinnerKeys(card, selector) {
@@ -82,4 +82,4 @@ window.BetCertezaBets = ((utils) => {
     settleBet,
     deleteBet
   };
-})(window.BetCertezaUtils);
+})(window.BetControlUtils);

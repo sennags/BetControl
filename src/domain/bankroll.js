@@ -1,4 +1,4 @@
-window.BetCertezaBankroll = (() => {
+window.BetControlBankroll = (() => {
 
   function updateEntriesHistory(state, delta, details = {}) {
     const amount = Number(delta) || 0;

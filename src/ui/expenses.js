@@ -1,4 +1,4 @@
-window.BetCertezaExpenses = (() => {
+window.BetControlExpenses = (() => {
   function createExpenseHelpers({
     elements,
     getState,

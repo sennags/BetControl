@@ -1,4 +1,4 @@
-window.BetCertezaHistory = ((utils) => {
+window.BetControlHistory = ((utils) => {
   const {
     capitalize,
     formatDateInputValue,
@@ -249,4 +249,4 @@ window.BetCertezaHistory = ((utils) => {
     getDashboardSummary,
     getMonthlyAnalysisData
   };
-})(window.BetCertezaUtils);
+})(window.BetControlUtils);
