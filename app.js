@@ -25,6 +25,29 @@ const {
   getSelectedMonthLabel
 } = window.BetCertezaUtils;
 
+const {
+  updateEntriesHistory: applyEntriesHistoryUpdate,
+  removeEntryHistoryById: removeEntryHistoryRecord,
+  moveBetToTrash: moveBetRecordToTrash,
+  restoreTrashBet: restoreTrashBetRecord,
+  removeLinkedEntryHistory: removeSurebetLinkedEntryHistory,
+  removeLinkedFreebetEntryHistory: removeFreebetLinkedEntryHistory
+} = window.BetCertezaBankroll;
+
+const {
+  getSettledBetHistoryItems: selectSettledBetHistoryItems,
+  getEntriesHistoryDisplayAmount: selectEntriesHistoryDisplayAmount,
+  filterHistoryByType: applyHistoryTypeFilter,
+  filterHistoryByOutcome: applyHistoryOutcomeFilter,
+  getMainHistoryItems: selectMainHistoryItems,
+  groupHistoryByMonthAndDay: groupHistoryItemsByMonthAndDay,
+  getMonthOptions: buildMonthOptions,
+  syncMonthFilter: applyMonthFilterSync,
+  syncHistoryDayFilter: applyHistoryDayFilterSync,
+  filterItemsByMonth: applyMonthItemsFilter,
+  filterItemsByDay: applyDayItemsFilter
+} = window.BetCertezaHistory;
+
 let state = loadState();
 let selectedHistoryMonth = 'all';
 let selectedHistoryType = 'all';
@@ -190,6 +213,83 @@ function setupTabShortcuts() {
 
 function saveState() {
   persistState(state);
+}
+
+function updateEntriesHistory(delta, details = {}) {
+  return applyEntriesHistoryUpdate(state, delta, details);
+}
+
+function removeEntryHistoryById(entryHistoryId) {
+  return removeEntryHistoryRecord(state, entryHistoryId);
+}
+
+function moveBetToTrash(payload, options) {
+  return moveBetRecordToTrash(state, payload, options);
+}
+
+function restoreTrashBet(trashId) {
+  const result = restoreTrashBetRecord(state, trashId);
+  if (!result.ok) {
+    if (result.error) {
+      alert(result.error);
+    }
+    return;
+  }
+
+  saveState();
+  render();
+}
+
+function removeLinkedEntryHistory(surebet) {
+  return removeSurebetLinkedEntryHistory(state, surebet);
+}
+
+function removeLinkedFreebetEntryHistory(freebet) {
+  return removeFreebetLinkedEntryHistory(state, freebet);
+}
+
+function getSettledBetHistoryItems() {
+  return selectSettledBetHistoryItems(state);
+}
+
+function getEntriesHistoryDisplayAmount(entry) {
+  return selectEntriesHistoryDisplayAmount(state, entry, getBetOutcomeAmount);
+}
+
+function filterHistoryByType(items, type) {
+  return applyHistoryTypeFilter(items, type);
+}
+
+function filterHistoryByOutcome(items, outcome) {
+  return applyHistoryOutcomeFilter(items, outcome, getBetOutcomeAmount);
+}
+
+function getMainHistoryItems() {
+  return selectMainHistoryItems(state);
+}
+
+function groupHistoryByMonthAndDay(items, dateField = 'settledAt') {
+  return groupHistoryItemsByMonthAndDay(items, dateField);
+}
+
+function getMonthOptions(items, dateField) {
+  return buildMonthOptions(items, dateField);
+}
+
+function syncMonthFilter(selectElement, options, selectedValue) {
+  return applyMonthFilterSync(selectElement, options, selectedValue);
+}
+
+function syncHistoryDayFilter(inputElement, monthKey, selectedValue) {
+  return applyHistoryDayFilterSync(elements.historyDayFilterField, inputElement, monthKey, selectedValue);
+}
+
+function filterItemsByMonth(items, monthKey, dateField) {
+  return applyMonthItemsFilter(items, monthKey, dateField);
+}
+
+function filterItemsByDay(items, dayValue, dateField) {
+  return applyDayItemsFilter(items, dayValue, dateField);
 }
 
 function setupTabs() {
@@ -1143,10 +1243,6 @@ function renderSummary() {
   elements.lossValue.textContent = formatCurrency(expenseLosses + betLosses);
 }
 
-function getSettledBetHistoryItems() {
-  return [...state.surebetHistory, ...state.freebetHistory];
-}
-
 function getBetOutcomeAmount(item) {
   if (item.settledResult != null) {
     return Number(item.settledResult || 0);
@@ -1227,20 +1323,6 @@ function renderEntriesHistory() {
   }).join('');
 
   bindEntriesHistoryActions();
-}
-
-function getEntriesHistoryDisplayAmount(entry) {
-  const relatedSurebet = state.surebetHistory.find((item) => item.entryHistoryId === entry.id);
-  if (relatedSurebet) {
-    return getBetOutcomeAmount(relatedSurebet);
-  }
-
-  const relatedFreebet = state.freebetHistory.find((item) => item.entryHistoryId === entry.id);
-  if (relatedFreebet) {
-    return getBetOutcomeAmount(relatedFreebet);
-  }
-
-  return Number(entry.change || 0);
 }
 
 function bindEntriesHistoryActions() {
@@ -1565,37 +1647,6 @@ function renderHistory() {
   bindHistoryActions();
 }
 
-function filterHistoryByType(items, type) {
-  if (type === 'all') {
-    return items;
-  }
-
-  return items.filter((item) => item.__betType === type);
-}
-
-function filterHistoryByOutcome(items, outcome) {
-  if (outcome === 'all') {
-    return items;
-  }
-
-  if (outcome === 'gain') {
-    return items.filter((item) => getBetOutcomeAmount(item) > 0);
-  }
-
-  if (outcome === 'loss') {
-    return items.filter((item) => getBetOutcomeAmount(item) < 0);
-  }
-
-  return items;
-}
-
-function getMainHistoryItems() {
-  return [
-    ...state.surebetHistory.map((item) => ({ ...item, __betType: 'surebet' })),
-    ...state.freebetHistory.map((item) => ({ ...item, __betType: 'freebet' }))
-  ];
-}
-
 function buildMainHistoryCard(item) {
   if (item.__betType === 'freebet') {
     return buildFreebetCard(item, true);
@@ -1775,50 +1826,6 @@ function deleteSurebet(id, fromHistory) {
 
   saveState();
   render();
-}
-
-function groupHistoryByMonthAndDay(items, dateField = 'settledAt') {
-  const monthFormatter = new Intl.DateTimeFormat('pt-BR', {
-    month: 'long',
-    year: 'numeric'
-  });
-  const dayFormatter = new Intl.DateTimeFormat('pt-BR', {
-    dateStyle: 'full'
-  });
-  const sorted = [...items].sort((a, b) => new Date((b[dateField] || b.createdAt)) - new Date((a[dateField] || a.createdAt)));
-  const monthMap = new Map();
-
-  sorted.forEach((item) => {
-    const date = new Date(item[dateField] || item.createdAt);
-    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-    const dayKey = date.toISOString().slice(0, 10);
-
-    if (!monthMap.has(monthKey)) {
-      monthMap.set(monthKey, {
-        label: capitalize(monthFormatter.format(date)),
-        total: 0,
-        days: new Map()
-      });
-    }
-
-    const monthGroup = monthMap.get(monthKey);
-    monthGroup.total += 1;
-
-    if (!monthGroup.days.has(dayKey)) {
-      monthGroup.days.set(dayKey, {
-        label: capitalize(dayFormatter.format(date)),
-        items: []
-      });
-    }
-
-    monthGroup.days.get(dayKey).items.push(item);
-  });
-
-  return [...monthMap.values()].map((monthGroup) => ({
-    label: monthGroup.label,
-    total: monthGroup.total,
-    days: [...monthGroup.days.values()]
-  }));
 }
 
 function renderExpenses() {
@@ -2097,28 +2104,6 @@ function getFreebetNetBankrollImpact(freebet) {
   return Number(freebet.freebetAmount || 0) + result;
 }
 
-function updateEntriesHistory(delta, details = {}) {
-  const amount = Number(delta) || 0;
-  if (amount === 0) {
-    return null;
-  }
-
-  const before = Number(state.bankroll) || 0;
-  const after = before + amount;
-  state.bankroll = after;
-  const historyEntry = {
-    id: crypto.randomUUID(),
-    reason: details.reason || 'Movimentação de banca',
-    description: details.description || '',
-    before,
-    after,
-    change: amount,
-    createdAt: new Date().toISOString()
-  };
-  state.entriesHistory.unshift(historyEntry);
-  return historyEntry;
-}
-
 function updateLinkedExpenseEntryHistory(expense) {
   const linkedEntry = state.entriesHistory.find((item) => item.id === expense.entryHistoryId);
   if (!linkedEntry) {
@@ -2140,186 +2125,10 @@ function updateLinkedExpenseEntryHistory(expense) {
   linkedEntry.after = expense.bankrollAfter;
 }
 
-function removeEntryHistoryById(entryHistoryId) {
-  if (!entryHistoryId) {
-    return;
-  }
-
-  state.entriesHistory = state.entriesHistory.filter((item) => item.id !== entryHistoryId);
-}
-
-function captureEntryHistorySnapshots(entryHistoryIds = []) {
-  return entryHistoryIds
-    .filter(Boolean)
-    .map((entryHistoryId) => state.entriesHistory.find((item) => item.id === entryHistoryId))
-    .filter(Boolean)
-    .map((item) => ({ ...item }));
-}
-
-function insertEntryHistorySnapshots(entries = []) {
-  entries.forEach((entry) => {
-    if (!entry?.id || state.entriesHistory.some((item) => item.id === entry.id)) {
-      return;
-    }
-
-    state.entriesHistory.push({ ...entry });
-  });
-
-  state.entriesHistory.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-}
-
-function moveBetToTrash(payload, options) {
-  const trashItem = {
-    id: crypto.randomUUID(),
-    betType: options.betType,
-    source: options.source,
-    removedAt: new Date().toISOString(),
-    bankrollDelta: Number(options.bankrollDelta || 0),
-    historyEntries: captureEntryHistorySnapshots(options.historyEntryIds),
-    payload: structuredClone(payload)
-  };
-
-  state.trash.unshift(trashItem);
-}
-
-function restoreTrashBet(trashId) {
-  const trashIndex = state.trash.findIndex((item) => item.id === trashId);
-  if (trashIndex === -1) {
-    return;
-  }
-
-  const [trashItem] = state.trash.splice(trashIndex, 1);
-  const payload = structuredClone(trashItem.payload || {});
-  const existsInTarget = trashItem.betType === 'freebet'
-    ? (trashItem.source === 'history' ? state.freebetHistory : state.freebets).some((item) => item.id === payload.id)
-    : (trashItem.source === 'history' ? state.surebetHistory : state.surebets).some((item) => item.id === payload.id);
-
-  if (existsInTarget) {
-    state.trash.splice(trashIndex, 0, trashItem);
-    alert('Essa aposta já foi restaurada e ainda existe no destino.');
-    return;
-  }
-
-  if (trashItem.betType === 'freebet') {
-    if (trashItem.source === 'history') {
-      state.freebetHistory.unshift(payload);
-    } else {
-      state.freebets.unshift(payload);
-    }
-  } else if (trashItem.source === 'history') {
-    state.surebetHistory.unshift(payload);
-  } else {
-    state.surebets.unshift(payload);
-  }
-
-  state.bankroll = normalizeCurrencyValue(state.bankroll - Number(trashItem.bankrollDelta || 0));
-  insertEntryHistorySnapshots(trashItem.historyEntries);
-  saveState();
-  render();
-}
-
 function deleteEntryHistory(entryHistoryId) {
   removeEntryHistoryById(entryHistoryId);
   saveState();
   render();
-}
-
-function removeLinkedEntryHistory(surebet) {
-  if (surebet.entryHistoryId) {
-    removeEntryHistoryById(surebet.entryHistoryId);
-    return;
-  }
-
-  state.entriesHistory = state.entriesHistory.filter((item) => {
-    const isSameSurebetEntry = item.reason === 'Surebet batida'
-      && item.description === surebet.title
-      && Number(item.before) === Number(surebet.bankrollBefore)
-      && Number(item.after) === Number(surebet.bankrollAfter);
-
-    return !isSameSurebetEntry;
-  });
-}
-
-function removeLinkedFreebetEntryHistory(freebet) {
-  removeEntryHistoryById(freebet.stakeEntryHistoryId);
-  removeEntryHistoryById(freebet.entryHistoryId);
-}
-
-function getMonthOptions(items, dateField) {
-  const formatter = new Intl.DateTimeFormat('pt-BR', {
-    month: 'long',
-    year: 'numeric'
-  });
-  const options = new Map();
-
-  items.forEach((item) => {
-    const value = item[dateField] || item.createdAt;
-    if (!value) {
-      return;
-    }
-
-    const date = new Date(value);
-    const key = getMonthKey(date);
-    if (!options.has(key)) {
-      options.set(key, capitalize(formatter.format(date)));
-    }
-  });
-
-  return [...options.entries()]
-    .sort((a, b) => b[0].localeCompare(a[0]))
-    .map(([value, label]) => ({ value, label }));
-}
-
-function syncMonthFilter(selectElement, options, selectedValue) {
-  const nextValue = options.some((option) => option.value === selectedValue) ? selectedValue : 'all';
-  selectElement.innerHTML = [`<option value="all">Todos os meses</option>`, ...options.map((option) => `<option value="${option.value}">${option.label}</option>`)].join('');
-  selectElement.value = nextValue;
-  return nextValue;
-}
-
-function syncHistoryDayFilter(inputElement, monthKey, selectedValue) {
-  if (monthKey === 'all') {
-    elements.historyDayFilterField.hidden = true;
-    inputElement.value = '';
-    inputElement.min = '';
-    inputElement.max = '';
-    inputElement.disabled = true;
-    return '';
-  }
-
-  const { start, end } = getMonthBounds(monthKey);
-  const todayValue = formatDateInputValue(new Date());
-  const defaultValue = todayValue >= start && todayValue <= end ? todayValue : '';
-  const nextValue = selectedValue && selectedValue >= start && selectedValue <= end ? selectedValue : defaultValue;
-
-  elements.historyDayFilterField.hidden = false;
-  inputElement.disabled = false;
-  inputElement.min = start;
-  inputElement.max = end;
-  inputElement.value = nextValue;
-  return nextValue;
-}
-
-function filterItemsByMonth(items, monthKey, dateField) {
-  if (monthKey === 'all') {
-    return [...items];
-  }
-
-  return items.filter((item) => {
-    const value = item[dateField] || item.createdAt;
-    return value && getMonthKey(new Date(value)) === monthKey;
-  });
-}
-
-function filterItemsByDay(items, dayValue, dateField) {
-  if (!dayValue) {
-    return [...items];
-  }
-
-  return items.filter((item) => {
-    const value = item[dateField] || item.createdAt;
-    return value && formatDateInputValue(value) === dayValue;
-  });
 }
 
 function switchToTab(tabId) {
