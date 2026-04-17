@@ -28,11 +28,14 @@ const {
 const {
   updateEntriesHistory: applyEntriesHistoryUpdate,
   removeEntryHistoryById: removeEntryHistoryRecord,
-  moveBetToTrash: moveBetRecordToTrash,
-  restoreTrashBet: restoreTrashBetRecord,
   removeLinkedEntryHistory: removeSurebetLinkedEntryHistory,
   removeLinkedFreebetEntryHistory: removeFreebetLinkedEntryHistory
 } = window.BetCertezaBankroll;
+
+const {
+  settleBet: settleActiveBetRecord,
+  deleteBet: deleteBetRecord
+} = window.BetCertezaBets;
 
 const {
   getSettledBetHistoryItems: selectSettledBetHistoryItems,
@@ -78,7 +81,6 @@ const elements = {
   freebetList: document.getElementById('freebet-list'),
   freebetHistoryList: document.getElementById('freebet-history-list'),
   historyList: document.getElementById('history-list'),
-  trashList: document.getElementById('trash-list'),
   expenseList: document.getElementById('expense-list'),
   historyMonthFilter: document.getElementById('history-month-filter'),
   historyTypeFilter: document.getElementById('history-type-filter'),
@@ -102,13 +104,11 @@ const elements = {
   freebetCount: document.getElementById('freebet-count'),
   freebetHistoryCount: document.getElementById('freebet-history-count'),
   historyCount: document.getElementById('history-count'),
-  trashCount: document.getElementById('trash-count'),
   expenseCount: document.getElementById('expense-count'),
   freebetOverviewCard: document.getElementById('freebet-overview-card'),
   freebetOverviewCount: document.getElementById('freebet-overview-count'),
   freebetOverviewTotal: document.getElementById('freebet-overview-total'),
   freebetOverviewLocations: document.getElementById('freebet-overview-locations'),
-  trashSummary: document.getElementById('trash-summary'),
   mainEntries: document.getElementById('main-entries'),
   counterEntries: document.getElementById('counter-entries'),
   freebetMainEntries: document.getElementById('freebet-main-entries'),
@@ -221,23 +221,6 @@ function updateEntriesHistory(delta, details = {}) {
 
 function removeEntryHistoryById(entryHistoryId) {
   return removeEntryHistoryRecord(state, entryHistoryId);
-}
-
-function moveBetToTrash(payload, options) {
-  return moveBetRecordToTrash(state, payload, options);
-}
-
-function restoreTrashBet(trashId) {
-  const result = restoreTrashBetRecord(state, trashId);
-  if (!result.ok) {
-    if (result.error) {
-      alert(result.error);
-    }
-    return;
-  }
-
-  saveState();
-  render();
 }
 
 function removeLinkedEntryHistory(surebet) {
@@ -1220,7 +1203,6 @@ function render() {
   renderMonthlyAnalysis();
   renderHistory();
   renderExpenses();
-  renderTrash();
 }
 
 function renderSummary() {
@@ -1493,96 +1475,74 @@ function bindFreebetActions() {
 }
 
 function finishFreebet(id) {
-  const freebet = state.freebets.find((item) => item.id === id);
-  if (!freebet) {
-    return;
-  }
-
   const card = elements.freebetList.querySelector(`[data-freebet-id="${id}"]`);
-  const selectedWinnerKeys = card
-    ? [...card.querySelectorAll('[data-freebet-winner]:checked')].map((input) => input.dataset.entryKey)
-    : [];
+  const result = settleActiveBetRecord(state, {
+    id,
+    activeKey: 'freebets',
+    historyKey: 'freebetHistory',
+    card,
+    winnerSelector: '[data-freebet-winner]:checked',
+    emptySelectionMessage: 'Marque ao menos uma casa ganhadora.',
+    getSelectableEntries: getFreebetSelectableEntries,
+    applySettlement: (freebet, outcome) => {
+      const settledResult = normalizeCurrencyValue(outcome.settledPayout - getFreebetTotalStake(freebet));
+      freebet.selectedWinnerKeys = outcome.selectedWinnerKeys;
+      freebet.qualificationOutcome = 'selected';
+      freebet.qualificationOutcomeLabel = outcome.settledLabel;
+      freebet.qualificationResult = settledResult;
+      freebet.qualificationRecordedAt = new Date().toISOString();
+      const settlementMovement = updateEntriesHistory(getFreebetSettlementDelta(freebet), {
+        reason: 'Freebet concluída',
+        description: freebet.title
+      });
+      if (settlementMovement) {
+        freebet.qualificationEntryHistoryId = settlementMovement.id;
+        freebet.qualificationBankrollBefore = settlementMovement.before;
+        freebet.qualificationBankrollAfter = settlementMovement.after;
+      }
+    },
+    buildHistoryEntry: (freebet, selectedWinnerKeys) => ({
+      ...freebet,
+      id: crypto.randomUUID(),
+      sourceFreebetId: freebet.id,
+      selectedWinnerKeys,
+      settledAt: freebet.qualificationRecordedAt,
+      settledOutcome: freebet.qualificationOutcome,
+      settledOutcomeLabel: freebet.qualificationOutcomeLabel,
+      settledResult: freebet.qualificationResult,
+      entryHistoryId: freebet.qualificationEntryHistoryId,
+      bankrollBefore: freebet.qualificationBankrollBefore,
+      bankrollAfter: freebet.qualificationBankrollAfter
+    })
+  });
 
-  if (selectedWinnerKeys.length === 0) {
-    alert('Marque ao menos uma casa ganhadora.');
+  if (!result.ok) {
+    if (result.error) {
+      alert(result.error);
+    }
     return;
   }
 
-  const selectedEntries = getFreebetSelectableEntries(freebet).filter((entry) => selectedWinnerKeys.includes(entry.key));
-  const settledPayout = selectedEntries.reduce((sum, entry) => sum + (Number(entry.amount || 0) * Number(entry.odd || 0)), 0);
-  const settledResult = normalizeCurrencyValue(settledPayout - getFreebetTotalStake(freebet));
-  const settledLabel = selectedEntries.map((entry) => entry.house || 'Sem casa').join(', ');
-
-  freebet.selectedWinnerKeys = selectedWinnerKeys;
-  freebet.qualificationOutcome = 'selected';
-  freebet.qualificationOutcomeLabel = settledLabel;
-  freebet.qualificationResult = settledResult;
-  freebet.qualificationRecordedAt = new Date().toISOString();
-  const settlementMovement = updateEntriesHistory(getFreebetSettlementDelta(freebet), {
-    reason: 'Freebet concluída',
-    description: freebet.title
-  });
-  if (settlementMovement) {
-    freebet.qualificationEntryHistoryId = settlementMovement.id;
-    freebet.qualificationBankrollBefore = settlementMovement.before;
-    freebet.qualificationBankrollAfter = settlementMovement.after;
-  }
-
-  const historyEntry = {
-    ...freebet,
-    id: crypto.randomUUID(),
-    sourceFreebetId: freebet.id,
-    selectedWinnerKeys,
-    settledAt: freebet.qualificationRecordedAt,
-    settledOutcome: freebet.qualificationOutcome,
-    settledOutcomeLabel: freebet.qualificationOutcomeLabel,
-    settledResult: freebet.qualificationResult,
-    entryHistoryId: freebet.qualificationEntryHistoryId,
-    bankrollBefore: freebet.qualificationBankrollBefore,
-    bankrollAfter: freebet.qualificationBankrollAfter
-  };
-
-  freebet.qualificationHistoryId = historyEntry.id;
-  state.freebets = state.freebets.filter((item) => item.id !== id);
-  state.freebetHistory.unshift(historyEntry);
+  result.bet.qualificationHistoryId = state.freebetHistory[0]?.id;
   saveState();
   render();
 }
 
 function deleteFreebet(id, fromHistory = false) {
-  if (fromHistory) {
-    const freebet = state.freebetHistory.find((item) => item.id === id);
-    if (!freebet) {
-      return;
+  deleteBetRecord(state, {
+    id,
+    fromHistory,
+    activeKey: 'freebets',
+    historyKey: 'freebetHistory',
+    historyBankrollChange: (freebet) => -getBetOutcomeAmount(freebet),
+    activeBankrollChange: (freebet) => (!freebet.qualificationOutcomeLabel ? getFreebetTotalStake(freebet) : 0),
+    onDeleteHistory: removeLinkedFreebetEntryHistory,
+    onDeleteActive: (freebet) => {
+      if (!freebet.qualificationOutcomeLabel) {
+        removeEntryHistoryById(freebet.stakeEntryHistoryId);
+      }
     }
-
-    moveBetToTrash(freebet, {
-      betType: 'freebet',
-      source: 'history',
-      historyEntryIds: [freebet.stakeEntryHistoryId, freebet.entryHistoryId],
-      bankrollDelta: -getBetOutcomeAmount(freebet)
-    });
-    state.freebetHistory = state.freebetHistory.filter((item) => item.id !== id);
-    removeLinkedFreebetEntryHistory(freebet);
-    state.bankroll = normalizeCurrencyValue(state.bankroll - getBetOutcomeAmount(freebet));
-  } else {
-    const freebet = state.freebets.find((item) => item.id === id);
-    if (!freebet) {
-      return;
-    }
-
-    moveBetToTrash(freebet, {
-      betType: 'freebet',
-      source: 'active',
-      historyEntryIds: [freebet.stakeEntryHistoryId],
-      bankrollDelta: getFreebetTotalStake(freebet)
-    });
-    state.freebets = state.freebets.filter((item) => item.id !== id);
-    if (!freebet.qualificationOutcomeLabel) {
-      state.bankroll = normalizeCurrencyValue(state.bankroll + getFreebetTotalStake(freebet));
-      removeEntryHistoryById(freebet.stakeEntryHistoryId);
-    }
-  }
+  });
 
   saveState();
   render();
@@ -1751,78 +1711,57 @@ function bindHistoryActions() {
 }
 
 function settleSurebet(id) {
-  const index = state.surebets.findIndex((item) => item.id === id);
-  if (index === -1) {
-    return;
-  }
-
-  const [surebet] = state.surebets.splice(index, 1);
   const card = elements.surebetList.querySelector(`[data-surebet-id="${id}"]`);
-  const selectedWinnerKeys = card
-    ? [...card.querySelectorAll('[data-surebet-winner]:checked')].map((input) => input.dataset.entryKey)
-    : [];
+  const result = settleActiveBetRecord(state, {
+    id,
+    activeKey: 'surebets',
+    historyKey: 'surebetHistory',
+    card,
+    winnerSelector: '[data-surebet-winner]:checked',
+    emptySelectionMessage: 'Marque ao menos uma casa ganhadora.',
+    getSelectableEntries: getSurebetSelectableEntries,
+    applySettlement: (surebet, outcome) => {
+      const settledResult = normalizeCurrencyValue(outcome.settledPayout - getSurebetTotalStake(surebet));
+      surebet.selectedWinnerKeys = outcome.selectedWinnerKeys;
+      surebet.settledOutcomeLabel = outcome.settledLabel;
+      surebet.settledResult = settledResult;
+      surebet.status = 'settled';
+      surebet.settledAt = new Date().toISOString();
+      const entryMovement = updateEntriesHistory(getSurebetSettlementDelta(surebet), {
+        reason: 'Surebet concluída',
+        description: surebet.title
+      });
+      if (entryMovement) {
+        surebet.entryHistoryId = entryMovement.id;
+        surebet.bankrollBefore = entryMovement.before;
+        surebet.bankrollAfter = entryMovement.after;
+      }
+    },
+    buildHistoryEntry: (surebet) => surebet
+  });
 
-  if (selectedWinnerKeys.length === 0) {
-    state.surebets.splice(index, 0, surebet);
-    alert('Marque ao menos uma casa ganhadora.');
+  if (!result.ok) {
+    if (result.error) {
+      alert(result.error);
+    }
     return;
   }
 
-  const selectedEntries = getSurebetSelectableEntries(surebet).filter((entry) => selectedWinnerKeys.includes(entry.key));
-  const settledPayout = selectedEntries.reduce((sum, entry) => sum + (Number(entry.amount || 0) * Number(entry.odd || 0)), 0);
-  const settledResult = normalizeCurrencyValue(settledPayout - getSurebetTotalStake(surebet));
-  surebet.selectedWinnerKeys = selectedWinnerKeys;
-  surebet.settledOutcomeLabel = selectedEntries.map((entry) => entry.house || 'Sem casa').join(', ');
-  surebet.settledResult = settledResult;
-  surebet.status = 'settled';
-  surebet.settledAt = new Date().toISOString();
-  state.surebetHistory.unshift(surebet);
-  const entryMovement = updateEntriesHistory(getSurebetSettlementDelta(surebet), {
-    reason: 'Surebet concluída',
-    description: surebet.title
-  });
-  if (entryMovement) {
-    surebet.entryHistoryId = entryMovement.id;
-    surebet.bankrollBefore = entryMovement.before;
-    surebet.bankrollAfter = entryMovement.after;
-  }
   saveState();
   render();
 }
 
 function deleteSurebet(id, fromHistory) {
-  if (fromHistory) {
-    const surebet = state.surebetHistory.find((item) => item.id === id);
-    if (!surebet) {
-      return;
-    }
-
-    moveBetToTrash(surebet, {
-      betType: 'surebet',
-      source: 'history',
-      historyEntryIds: [surebet.stakeEntryHistoryId, surebet.entryHistoryId],
-      bankrollDelta: -getBetOutcomeAmount(surebet)
-    });
-    state.surebetHistory = state.surebetHistory.filter((item) => item.id !== id);
-    removeEntryHistoryById(surebet.stakeEntryHistoryId);
-    removeEntryHistoryById(surebet.entryHistoryId);
-    state.bankroll = normalizeCurrencyValue(state.bankroll - getBetOutcomeAmount(surebet));
-  } else {
-    const surebet = state.surebets.find((item) => item.id === id);
-    if (!surebet) {
-      return;
-    }
-
-    moveBetToTrash(surebet, {
-      betType: 'surebet',
-      source: 'active',
-      historyEntryIds: [surebet.stakeEntryHistoryId],
-      bankrollDelta: getSurebetTotalStake(surebet)
-    });
-    state.surebets = state.surebets.filter((item) => item.id !== id);
-    state.bankroll = normalizeCurrencyValue(state.bankroll + getSurebetTotalStake(surebet));
-    removeEntryHistoryById(surebet.stakeEntryHistoryId);
-  }
+  deleteBetRecord(state, {
+    id,
+    fromHistory,
+    activeKey: 'surebets',
+    historyKey: 'surebetHistory',
+    historyBankrollChange: (surebet) => -getBetOutcomeAmount(surebet),
+    activeBankrollChange: (surebet) => getSurebetTotalStake(surebet),
+    onDeleteHistory: removeLinkedEntryHistory,
+    onDeleteActive: (surebet) => removeEntryHistoryById(surebet.stakeEntryHistoryId)
+  });
 
   saveState();
   render();
@@ -1879,96 +1818,6 @@ function renderExpenses() {
   }).join('');
 
   bindExpenseActions();
-}
-
-function renderTrash() {
-  const trashItems = [...state.trash].sort((a, b) => new Date(b.removedAt || b.createdAt || 0) - new Date(a.removedAt || a.createdAt || 0));
-  elements.trashCount.textContent = String(trashItems.length);
-
-  if (trashItems.length === 0) {
-    elements.trashList.className = 'stack-list empty-state';
-    elements.trashList.textContent = 'Nenhuma aposta excluída.';
-    elements.trashSummary.textContent = 'Nenhuma aposta excluída.';
-    return;
-  }
-
-  const restoredProfit = trashItems
-    .filter((item) => item.source === 'history')
-    .reduce((sum, item) => sum + getBetOutcomeAmount(item.payload || {}), 0);
-
-  elements.trashSummary.textContent = `${trashItems.length} aposta(s) no lixo • Profit fora dos ganhos: ${formatSignedCurrency(-restoredProfit)}`;
-  elements.trashList.className = 'stack-list';
-  elements.trashList.innerHTML = trashItems.map((item) => buildTrashCard(item)).join('');
-
-  bindTrashActions();
-}
-
-function buildTrashCard(item) {
-  const payload = item.payload || {};
-  const betTypeLabel = item.betType === 'freebet' ? 'Freebet' : 'Surebet';
-  const sourceLabel = item.source === 'history' ? 'Histórico' : 'Ativa';
-  const amountLabel = item.source === 'history'
-    ? `Profit removido: ${formatSignedCurrency(-getBetOutcomeAmount(payload))}`
-    : `Stake devolvida: ${formatSignedCurrency(item.bankrollDelta || 0)}`;
-  const preview = buildTrashBetPreview(item);
-
-  return `
-    <article class="trash-card">
-      <div class="item-header">
-        <div>
-          <h3>${escapeHtml(payload.title || betTypeLabel)}</h3>
-          <p>${betTypeLabel} enviada para o lixo</p>
-        </div>
-        <div class="item-actions">
-          <button type="button" class="success-button" data-action="restore-trash-bet" data-id="${item.id}">Restaurar</button>
-        </div>
-      </div>
-      <div class="item-meta">
-        <span class="chip">Tipo: ${betTypeLabel}</span>
-        <span class="chip">Origem: ${sourceLabel}</span>
-        <span class="chip">${amountLabel}</span>
-        <span class="chip">Excluída em: ${formatDate(item.removedAt || payload.createdAt)}</span>
-      </div>
-      <div class="trash-preview">${preview}</div>
-    </article>
-  `;
-}
-
-function buildTrashBetPreview(item) {
-  const payload = item.payload || {};
-  const isHistory = item.source === 'history';
-
-  if (item.betType === 'freebet') {
-    const totalStake = getFreebetTotalStake(payload);
-    return `
-      <article class="item-card freebet-card">
-        ${buildFreebetHistoryRows(isHistory ? payload : { ...payload, selectedWinnerKeys: [] }, totalStake)}
-        <div class="item-meta">
-          ${isHistory
-            ? `<span class="chip">Profit: ${formatSignedCurrency(getBetOutcomeAmount(payload))}</span><span class="chip">Finalizada em: ${formatDate(payload.settledAt || payload.createdAt)}</span>`
-            : `<span class="chip">Profit esperado: ${formatSignedCurrency(payload.guaranteedProfit || 0)}</span><span class="chip">Criada em: ${formatDate(payload.createdAt)}</span><span class="chip">Freebet a ganhar: ${formatCurrency(payload.freebetAmount || 0)}</span>`}
-        </div>
-      </article>
-    `;
-  }
-
-  const totalStake = getSurebetTotalStake(payload);
-  return `
-    <article class="item-card freebet-card">
-      ${buildSurebetHistoryRows(isHistory ? payload : { ...payload, selectedWinnerKeys: [] }, totalStake)}
-      <div class="item-meta">
-        ${isHistory
-          ? `<span class="chip">Profit: ${formatSignedCurrency(getBetOutcomeAmount(payload))}</span><span class="chip">Finalizada em: ${formatDate(payload.settledAt || payload.createdAt)}</span>`
-          : `<span class="chip">Profit esperado: ${formatSignedCurrency(payload.profit || 0)}</span><span class="chip">Criada em: ${formatDate(payload.createdAt)}</span>`}
-      </div>
-    </article>
-  `;
-}
-
-function bindTrashActions() {
-  elements.trashList.querySelectorAll('[data-action="restore-trash-bet"]').forEach((button) => {
-    button.addEventListener('click', () => restoreTrashBet(button.dataset.id));
-  });
 }
 
 function renderMonthlyAnalysis() {

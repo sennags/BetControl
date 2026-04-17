@@ -12,8 +12,7 @@ window.BetCertezaStorage = (() => {
     freebets: [],
     freebetHistory: [],
     surebetHistory: [],
-    expenses: [],
-    trash: []
+    expenses: []
   };
 
   function loadState() {
@@ -35,8 +34,7 @@ window.BetCertezaStorage = (() => {
         freebets: Array.isArray(parsed.freebets) ? parsed.freebets : [],
         freebetHistory: Array.isArray(parsed.freebetHistory) ? parsed.freebetHistory : [],
         surebetHistory: Array.isArray(parsed.surebetHistory) ? parsed.surebetHistory : [],
-        expenses: Array.isArray(parsed.expenses) ? parsed.expenses : [],
-        trash: Array.isArray(parsed.trash) ? parsed.trash : []
+        expenses: Array.isArray(parsed.expenses) ? parsed.expenses : []
       };
     } catch {
       return structuredClone(defaultState);
