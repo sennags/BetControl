@@ -17,27 +17,70 @@
     </header>
 
     <main>
-      <section class="hero-grid">
-        <article class="card highlight-card">
-          <span class="card-label">Banca atual</span>
-          <strong id="bankroll-value" class="money">R$ 0,00</strong>
-          <label class="inline-field" for="bankroll-input">
+      <section class="dashboard-hero-grid">
+        <article class="card highlight-card dashboard-balance-card">
+          <div class="dashboard-balance-topline">
+            <div>
+              <span class="card-label">Patrimônio operacional</span>
+              <strong id="bankroll-value" class="money dashboard-balance-value">R$ 0,00</strong>
+            </div>
+            <div id="dashboard-net-badge" class="dashboard-trend-badge neutral">Mês neutro</div>
+          </div>
+
+          <p class="dashboard-balance-copy">Visão central da banca com foco em saldo disponível, exposição aberta e resultado líquido do mês.</p>
+
+          <div class="dashboard-kpi-grid">
+            <article class="dashboard-kpi-card">
+              <span class="card-label">Saldo líquido do mês</span>
+              <strong id="dashboard-net-value" class="money small-money">R$ 0,00</strong>
+            </article>
+
+            <article class="dashboard-kpi-card">
+              <span class="card-label">Exposição aberta</span>
+              <strong id="dashboard-open-exposure" class="money small-money">R$ 0,00</strong>
+            </article>
+
+            <article class="dashboard-kpi-card">
+              <span class="card-label">Surebets ativas</span>
+              <strong id="dashboard-active-surebets" class="money small-money">0</strong>
+            </article>
+
+            <article class="dashboard-kpi-card">
+              <span class="card-label">Freebets ativas</span>
+              <strong id="dashboard-active-freebets" class="money small-money">0</strong>
+            </article>
+          </div>
+
+          <label class="inline-field dashboard-bankroll-editor" for="bankroll-input">
             <span>Editar banca</span>
             <input id="bankroll-input" type="number" min="0" step="0.01" placeholder="0,00">
           </label>
         </article>
 
-        <article class="card gain-card">
-          <span class="card-label">Ganhos com bets</span>
-          <strong id="gain-value" class="money">R$ 0,00</strong>
-          <small>Soma dos ganhos positivos de bets no mês atual</small>
-        </article>
+        <div class="dashboard-side-column">
+          <article class="card gain-card dashboard-side-card">
+            <div class="dashboard-side-header">
+              <span class="card-label">Ganhos no mês</span>
+              <span class="status-dot positive"></span>
+            </div>
+            <strong id="gain-value" class="money">R$ 0,00</strong>
+            <small>Resultados positivos de surebets e freebets já encerradas no período.</small>
+          </article>
 
-        <article class="card loss-card">
-          <span class="card-label">Perdas / gastos deste mês</span>
-          <strong id="loss-value" class="money">R$ 0,00</strong>
-          <small>Gastos e resultados negativos de bets no mês atual</small>
-        </article>
+          <article class="card loss-card dashboard-side-card">
+            <div class="dashboard-side-header">
+              <span class="card-label">Saídas no mês</span>
+              <span class="status-dot negative"></span>
+            </div>
+            <strong id="loss-value" class="money">R$ 0,00</strong>
+            <small>Gastos e perdas operacionais somados ao que saiu da banca neste mês.</small>
+          </article>
+
+          <article class="card dashboard-side-card dashboard-insight-card">
+            <span class="card-label">Ritmo operacional</span>
+            <p id="dashboard-insight-text" class="dashboard-insight-text">Sem movimentação suficiente para analisar o período.</p>
+          </article>
+        </div>
       </section>
 
       <section class="tabs-section">

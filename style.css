@@ -43,7 +43,9 @@ select {
 .hero-grid,
 .panel-grid,
 .two-columns,
-.bet-side-grid {
+.bet-side-grid,
+.dashboard-balance-topline,
+.dashboard-side-header {
   display: flex;
   gap: 16px;
 }
@@ -65,6 +67,12 @@ select {
 .two-columns,
 .bet-side-grid {
   flex-wrap: wrap;
+}
+
+.dashboard-hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(280px, 0.95fr);
+  gap: 18px;
 }
 
 .single-column > * {
@@ -138,6 +146,7 @@ label span {
   display: block;
   margin: 10px 0;
   font-size: 2rem;
+  letter-spacing: -0.03em;
 }
 
 .small-money {
@@ -157,6 +166,115 @@ label {
 
 .tabs-section {
   margin-top: 24px;
+}
+
+.dashboard-balance-card {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at top right, rgba(90, 161, 255, 0.18), transparent 36%),
+    linear-gradient(180deg, rgba(17, 28, 52, 0.98) 0%, rgba(13, 22, 40, 0.98) 100%);
+}
+
+.dashboard-balance-value {
+  font-size: clamp(2.5rem, 4vw, 4rem);
+  margin-bottom: 8px;
+}
+
+.dashboard-balance-topline,
+.dashboard-side-header {
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.dashboard-balance-copy {
+  max-width: 62ch;
+  color: var(--muted);
+  line-height: 1.6;
+  margin-bottom: 22px;
+}
+
+.dashboard-trend-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(159, 176, 208, 0.18);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  font-weight: 700;
+}
+
+.dashboard-trend-badge.positive {
+  border-color: rgba(20, 184, 106, 0.35);
+  background: rgba(20, 184, 106, 0.14);
+}
+
+.dashboard-trend-badge.negative {
+  border-color: rgba(239, 93, 103, 0.35);
+  background: rgba(239, 93, 103, 0.14);
+}
+
+.dashboard-trend-badge.neutral {
+  border-color: rgba(90, 161, 255, 0.3);
+  background: rgba(90, 161, 255, 0.12);
+}
+
+.dashboard-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.dashboard-kpi-card {
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.dashboard-bankroll-editor {
+  max-width: 320px;
+}
+
+.dashboard-side-column {
+  display: grid;
+  gap: 18px;
+}
+
+.dashboard-side-card {
+  min-height: 0;
+}
+
+.dashboard-insight-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.035) 0%, rgba(255, 255, 255, 0.02) 100%);
+}
+
+.dashboard-insight-text {
+  color: var(--text);
+  line-height: 1.6;
+  font-size: 0.98rem;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  margin-top: 5px;
+  flex: 0 0 auto;
+}
+
+.status-dot.positive {
+  background: var(--green);
+  box-shadow: 0 0 0 6px rgba(20, 184, 106, 0.12);
+}
+
+.status-dot.negative {
+  background: var(--red);
+  box-shadow: 0 0 0 6px rgba(239, 93, 103, 0.12);
 }
 
 .tabs-layout {
@@ -707,10 +825,18 @@ select {
     padding: 16px;
   }
 
+  .dashboard-hero-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+
   .topbar,
   .entry-row,
-   .freebet-side-layout,
-   .freebet-winner-row {
+    .freebet-side-layout,
+    .freebet-winner-row {
     align-items: stretch;
     flex-direction: column;
     grid-template-columns: 1fr;
