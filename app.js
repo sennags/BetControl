@@ -1,19 +1,29 @@
-const STORAGE_KEY = 'betcerteza:data';
-const ONE_TIME_TODAY_ENTRIES_CLEAR_KEY = 'betcerteza:entries-history-cleared-once';
-const ONE_TIME_TODAY_ENTRIES_CLEAR_TARGET = '2026-04-16';
-const DEFAULT_FREEBET_TOTAL = 100;
-const DEFAULT_SUREBET_TOTAL = 100;
+const {
+  ONE_TIME_TODAY_ENTRIES_CLEAR_KEY,
+  ONE_TIME_TODAY_ENTRIES_CLEAR_TARGET,
+  DEFAULT_FREEBET_TOTAL,
+  DEFAULT_SUREBET_TOTAL,
+  loadState,
+  saveState: persistState
+} = window.BetCertezaStorage;
 
-const defaultState = {
-  bankroll: 0,
-  entriesHistory: [],
-  surebets: [],
-  freebets: [],
-  freebetHistory: [],
-  surebetHistory: [],
-  expenses: [],
-  trash: []
-};
+const {
+  formatCurrency,
+  normalizeCurrencyValue,
+  formatPercent,
+  formatSignedCurrency,
+  formatDate,
+  capitalize,
+  buildBankrollTransitionLabel,
+  buildBankrollTransitionInline,
+  formatDateInputValue,
+  isSameMonth,
+  isSameDay,
+  escapeHtml,
+  getMonthKey,
+  getMonthBounds,
+  getSelectedMonthLabel
+} = window.BetCertezaUtils;
 
 let state = loadState();
 let selectedHistoryMonth = 'all';
@@ -178,35 +188,8 @@ function setupTabShortcuts() {
   });
 }
 
-function loadState() {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (!saved) {
-      return structuredClone(defaultState);
-    }
-
-    const parsed = JSON.parse(saved);
-    return {
-      bankroll: Number(parsed.bankroll) || 0,
-      entriesHistory: Array.isArray(parsed.entriesHistory)
-        ? parsed.entriesHistory
-        : Array.isArray(parsed.bankrollHistory)
-          ? parsed.bankrollHistory
-          : [],
-      surebets: Array.isArray(parsed.surebets) ? parsed.surebets : [],
-      freebets: Array.isArray(parsed.freebets) ? parsed.freebets : [],
-      freebetHistory: Array.isArray(parsed.freebetHistory) ? parsed.freebetHistory : [],
-      surebetHistory: Array.isArray(parsed.surebetHistory) ? parsed.surebetHistory : [],
-      expenses: Array.isArray(parsed.expenses) ? parsed.expenses : [],
-      trash: Array.isArray(parsed.trash) ? parsed.trash : []
-    };
-  } catch {
-    return structuredClone(defaultState);
-  }
-}
-
 function saveState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  persistState(state);
 }
 
 function setupTabs() {
@@ -2339,89 +2322,11 @@ function filterItemsByDay(items, dayValue, dateField) {
   });
 }
 
-function getMonthKey(date) {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-}
-
-function getMonthBounds(monthKey) {
-  const [yearText, monthText] = monthKey.split('-');
-  const year = Number(yearText);
-  const month = Number(monthText);
-  const start = `${yearText}-${monthText}-01`;
-  const endDate = new Date(year, month, 0);
-  const end = formatDateInputValue(endDate);
-
-  return { start, end };
-}
-
-function getSelectedMonthLabel(selectElement) {
-  const option = selectElement.options[selectElement.selectedIndex];
-  return option ? option.text : 'Todos os meses';
-}
-
 function switchToTab(tabId) {
   const targetButton = [...elements.tabButtons].find((button) => button.dataset.tab === tabId);
   if (targetButton) {
     targetButton.click();
   }
-}
-
-function formatCurrency(value) {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL'
-  }).format(Number(value) || 0);
-}
-
-function normalizeCurrencyValue(value) {
-  const rounded = Math.round((Number(value) || 0) * 100) / 100;
-  return Math.abs(rounded) <= 0.02 ? 0 : rounded;
-}
-
-function formatPercent(value) {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'percent',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  }).format(Number(value) || 0);
-}
-
-function formatSignedCurrency(value) {
-  const amount = Number(value) || 0;
-  const signal = amount > 0 ? '+' : amount < 0 ? '-' : '';
-  return `${signal}${formatCurrency(Math.abs(amount))}`;
-}
-
-function formatDate(value) {
-  return new Intl.DateTimeFormat('pt-BR', {
-    dateStyle: 'short',
-    timeStyle: 'short'
-  }).format(new Date(value));
-}
-
-function capitalize(value) {
-  return value ? value.charAt(0).toUpperCase() + value.slice(1) : value;
-}
-
-function buildBankrollTransitionLabel(item) {
-  if (item.bankrollBefore == null || item.bankrollAfter == null) {
-    return '';
-  }
-
-  return `<p><strong>Antes</strong> ${formatCurrency(item.bankrollBefore)} | <strong>Depois</strong> ${formatCurrency(item.bankrollAfter)}</p>`;
-}
-
-function buildBankrollTransitionInline(item) {
-  if (item.bankrollBefore == null || item.bankrollAfter == null) {
-    return '';
-  }
-
-  return ` • Antes ${formatCurrency(item.bankrollBefore)} | Depois ${formatCurrency(item.bankrollAfter)}`;
-}
-
-function formatDateInputValue(value) {
-  const date = new Date(value);
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 }
 
 function clearTodayEntriesHistory() {
@@ -2459,33 +2364,4 @@ function runOneTimeTodayEntriesCleanup() {
   clearTodayEntriesHistory();
   saveState();
   localStorage.setItem(ONE_TIME_TODAY_ENTRIES_CLEAR_KEY, ONE_TIME_TODAY_ENTRIES_CLEAR_TARGET);
-}
-
-function isSameMonth(value, referenceDate = new Date()) {
-  if (!value) {
-    return false;
-  }
-
-  const date = new Date(value);
-  return date.getFullYear() === referenceDate.getFullYear() && date.getMonth() === referenceDate.getMonth();
-}
-
-function isSameDay(value, referenceDate = new Date()) {
-  if (!value) {
-    return false;
-  }
-
-  const date = new Date(value);
-  return date.getFullYear() === referenceDate.getFullYear()
-    && date.getMonth() === referenceDate.getMonth()
-    && date.getDate() === referenceDate.getDate();
-}
-
-function escapeHtml(value) {
-  return String(value)
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;');
 }
