@@ -743,7 +743,7 @@ function finishFreebet(id) {
       freebet.qualificationRecordedAt = new Date().toISOString();
       const settlementMovement = updateEntriesHistory(getFreebetSettlementDelta(freebet), {
         reason: 'Freebet concluída',
-        description: freebet.title
+        description: outcome.settledLabel || freebet.title
       });
       if (settlementMovement) {
         freebet.qualificationEntryHistoryId = settlementMovement.id;
@@ -896,7 +896,7 @@ function settleSurebet(id) {
       surebet.settledAt = new Date().toISOString();
       const entryMovement = updateEntriesHistory(getSurebetSettlementDelta(surebet), {
         reason: 'Surebet concluída',
-        description: surebet.title
+        description: outcome.settledLabel || surebet.title
       });
       if (entryMovement) {
         surebet.entryHistoryId = entryMovement.id;
