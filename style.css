@@ -383,13 +383,17 @@ select {
 
 .freebet-winner-row {
   display: grid;
-  grid-template-columns: auto minmax(0, 1.5fr) repeat(3, minmax(96px, 1fr));
+  grid-template-columns: auto minmax(0, 1fr) repeat(3, minmax(88px, max-content));
   gap: 12px;
-  align-items: stretch;
+  align-items: center;
   padding: 10px 12px;
   border: 1px solid var(--line);
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.03);
+}
+
+.freebet-winner-row > * {
+  min-width: 0;
 }
 
 .freebet-winner-row input {
@@ -402,12 +406,14 @@ select {
   align-items: center;
   font-weight: 700;
   color: var(--text);
+  overflow-wrap: anywhere;
 }
 
 .winner-metric {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  min-width: 88px;
 }
 
 .winner-metric-label {
