@@ -394,7 +394,6 @@ select {
   gap: 10px;
 }
 
-.form-intro-copy,
 .section-helper {
   color: var(--muted);
   line-height: 1.6;
@@ -416,18 +415,6 @@ select {
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.03);
-}
-
-.form-overview-panel strong {
-  display: block;
-  margin-top: 6px;
-  font-size: 1.05rem;
-}
-
-.form-overview-panel p {
-  max-width: 56ch;
-  color: var(--muted);
-  line-height: 1.6;
 }
 
 .highlight-panel {
@@ -553,11 +540,6 @@ select {
 
 .form-submit-bar strong {
   display: block;
-  margin-bottom: 6px;
-}
-
-.form-submit-bar p {
-  color: var(--muted);
 }
 
 .calc-summary-card {

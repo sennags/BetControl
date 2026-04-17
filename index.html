@@ -27,8 +27,6 @@
             <div id="dashboard-net-badge" class="dashboard-trend-badge neutral">Mês neutro</div>
           </div>
 
-          <p class="dashboard-balance-copy">Visão central da banca com foco em saldo disponível, exposição aberta e resultado líquido do mês.</p>
-
           <div class="dashboard-kpi-grid">
             <article class="dashboard-kpi-card">
               <span class="card-label">Saldo líquido do mês</span>
@@ -64,7 +62,6 @@
               <span class="status-dot positive"></span>
             </div>
             <strong id="gain-value" class="money">R$ 0,00</strong>
-            <small>Resultados positivos de surebets e freebets já encerradas no período.</small>
           </article>
 
           <article class="card loss-card dashboard-side-card">
@@ -73,7 +70,6 @@
               <span class="status-dot negative"></span>
             </div>
             <strong id="loss-value" class="money">R$ 0,00</strong>
-            <small>Gastos e perdas operacionais somados ao que saiu da banca neste mês.</small>
           </article>
 
           <article class="card dashboard-side-card dashboard-insight-card">
@@ -295,16 +291,11 @@
               <div class="section-header">
                 <h2>Nova surebet</h2>
               </div>
-              <p class="form-intro-copy">Monte os dois lados da operação, revise o resultado projetado e salve apenas quando o cenário estiver financeiramente coerente.</p>
             </div>
 
             <form id="surebet-form" class="stack-form operation-form">
               <section class="form-overview-panel highlight-panel">
-                <div>
-                  <span class="card-label">Estratégia da operação</span>
-                  <strong>Distribuição automática por stake total</strong>
-                </div>
-                <p>As stakes são rebalanceadas conforme as odds preenchidas. O painel ao lado resume profit, retorno por cenário e status da surebet.</p>
+                <span class="card-label">Distribuição automática por stake total</span>
               </section>
 
               <div class="operation-form-main surebet-form-layout">
@@ -317,10 +308,7 @@
 
                 <section class="bet-side-card freebet-side-card form-section">
                   <div class="section-header compact freebet-side-header">
-                    <div>
-                      <h3>Casas da surebet</h3>
-                      <p class="section-helper">Lado principal da operação. Informe as casas e odds que sustentam o cenário base.</p>
-                    </div>
+                    <h3>Casas da surebet</h3>
                   </div>
 
                   <div class="freebet-side-layout">
@@ -330,10 +318,7 @@
 
                 <section class="bet-side-card freebet-side-card form-section form-section-emphasis">
                   <div class="section-header compact freebet-side-header">
-                    <div>
-                      <h3>Casas contrárias</h3>
-                      <p class="section-helper">Cobertura da operação para travar o resultado entre os cenários possíveis.</p>
-                    </div>
+                    <h3>Casas contrárias</h3>
                     <div class="side-actions">
                       <button type="button" id="add-surebet-counter-entry-button" class="mini-button">Adicionar casa</button>
                     </div>
@@ -346,10 +331,7 @@
               </div>
             
               <div class="form-submit-bar">
-                <div>
-                  <strong>Salvar surebet</strong>
-                  <p>Registre a operação e envie a stake total para a banca.</p>
-                </div>
+                <strong>Salvar surebet</strong>
                 <button type="submit" class="primary-button">Salvar surebet</button>
               </div>
             </form>
@@ -363,26 +345,18 @@
               <div class="section-header">
                 <h2>Nova freebet</h2>
               </div>
-              <p class="form-intro-copy">Organize o lado que recebe a freebet, defina o hedge e acompanhe o profit estimado por linha para fechar a operação com clareza.</p>
             </div>
 
             <form id="freebet-form" class="stack-form operation-form">
               <section class="form-overview-panel accent-panel">
-                <div>
-                  <span class="card-label">Leitura operacional</span>
-                  <strong>Valor da freebet e hedge em foco</strong>
-                </div>
-                <p>O valor da freebet define a distribuição automática. Use os profits por linha para validar rapidamente se o hedge está equilibrado.</p>
+                <span class="card-label">Valor da freebet em foco</span>
               </section>
 
               <div class="operation-form-grid">
                 <div class="operation-form-main">
                   <section class="bet-side-card freebet-side-card form-section">
                     <div class="section-header compact freebet-side-header">
-                      <div>
-                        <h3>Casas da freebet</h3>
-                        <p class="section-helper">Onde a freebet será convertida em retorno. O profit por linha aparece automaticamente.</p>
-                      </div>
+                      <h3>Casas da freebet</h3>
                     </div>
 
                     <div class="freebet-side-layout">
@@ -392,10 +366,7 @@
 
                   <section class="bet-side-card freebet-side-card form-section form-section-emphasis">
                     <div class="section-header compact freebet-side-header">
-                      <div>
-                        <h3>Casas contrárias</h3>
-                        <p class="section-helper">Hedge da operação para estabilizar o resultado entre os cenários.</p>
-                      </div>
+                      <h3>Casas contrárias</h3>
                       <div class="side-actions">
                         <button type="button" id="add-freebet-hedge-entry-button" class="mini-button">Adicionar casa</button>
                       </div>
@@ -410,10 +381,7 @@
                 <aside class="operation-form-sidebar">
                   <section class="bet-side-card form-section summary-card">
                     <div class="section-header compact">
-                      <div>
-                        <h3>Parâmetros-chave</h3>
-                        <p class="section-helper">Campo estratégico que orienta a distribuição da operação.</p>
-                      </div>
+                      <h3>Parâmetro principal</h3>
                     </div>
 
                     <label class="form-featured-field" for="freebet-amount-input">
@@ -423,16 +391,8 @@
 
                     <div class="summary-notes">
                       <div class="detail-line">
-                        <span>Leitura dos inputs</span>
-                        <strong>Odds + stake por casa</strong>
-                      </div>
-                      <div class="detail-line">
-                        <span>Leitura dos outputs</span>
-                        <strong>Profit por linha</strong>
-                      </div>
-                      <div class="detail-line">
-                        <span>Objetivo</span>
-                        <strong>Fechar hedge com clareza</strong>
+                        <span>Operação</span>
+                        <strong>Freebet + hedge</strong>
                       </div>
                     </div>
                   </section>
@@ -440,10 +400,7 @@
               </div>
 
               <div class="form-submit-bar">
-                <div>
-                  <strong>Salvar freebet</strong>
-                  <p>Registre a operação e mantenha o controle das freebets ativas.</p>
-                </div>
+                <strong>Salvar freebet</strong>
                 <button type="submit" class="primary-button">Salvar freebet</button>
               </div>
             </form>
@@ -457,16 +414,11 @@
               <div class="section-header">
                 <h2>Novo gasto/lucrinho</h2>
               </div>
-              <p class="form-intro-copy">Registre rapidamente uma saída ou entrada complementar da operação sem perder o contexto financeiro da banca.</p>
             </div>
 
             <form id="expense-form" class="stack-form operation-form compact-operation-form">
               <section class="form-overview-panel neutral-panel">
-                <div>
-                  <span class="card-label">Fluxo rápido</span>
-                  <strong>Lançamento curto e objetivo</strong>
-                </div>
-                <p>Escolha o tipo, informe o valor e registre uma descrição breve para manter o histórico financeiro legível.</p>
+                <span class="card-label">Lançamento rápido</span>
               </section>
 
               <section class="bet-side-card form-section summary-card expense-entry-panel">
@@ -492,10 +444,7 @@
               </section>
 
               <div class="form-submit-bar">
-                <div>
-                  <strong>Salvar lançamento</strong>
-                  <p>Atualize a leitura financeira sem sair do fluxo operacional.</p>
-                </div>
+                <strong>Salvar lançamento</strong>
                 <button type="submit" class="primary-button">Salvar lançamento</button>
               </div>
             </form>
