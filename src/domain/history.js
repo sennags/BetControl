@@ -105,6 +105,10 @@ window.BetCertezaHistory = ((utils) => {
       year: 'numeric'
     });
     const options = new Map();
+    const currentDate = new Date();
+    const currentMonth = getMonthKey(currentDate);
+
+    options.set(currentMonth, capitalize(formatter.format(currentDate)));
 
     items.forEach((item) => {
       const value = item[dateField] || item.createdAt;
