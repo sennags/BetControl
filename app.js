@@ -11,11 +11,14 @@ const defaultState = {
   freebets: [],
   freebetHistory: [],
   surebetHistory: [],
-  expenses: []
+  expenses: [],
+  trash: []
 };
 
 let state = loadState();
 let selectedHistoryMonth = 'all';
+let selectedHistoryType = 'all';
+let selectedHistoryOutcome = 'all';
 let selectedHistoryDay = '';
 let selectedExpenseMonth = 'all';
 let selectedAnalysisMonth = 'all';
@@ -42,8 +45,11 @@ const elements = {
   freebetList: document.getElementById('freebet-list'),
   freebetHistoryList: document.getElementById('freebet-history-list'),
   historyList: document.getElementById('history-list'),
+  trashList: document.getElementById('trash-list'),
   expenseList: document.getElementById('expense-list'),
   historyMonthFilter: document.getElementById('history-month-filter'),
+  historyTypeFilter: document.getElementById('history-type-filter'),
+  historyOutcomeFilter: document.getElementById('history-outcome-filter'),
   historyDayFilterField: document.getElementById('history-day-filter-field'),
   historyDayFilter: document.getElementById('history-day-filter'),
   expenseMonthFilter: document.getElementById('expense-month-filter'),
@@ -63,11 +69,13 @@ const elements = {
   freebetCount: document.getElementById('freebet-count'),
   freebetHistoryCount: document.getElementById('freebet-history-count'),
   historyCount: document.getElementById('history-count'),
+  trashCount: document.getElementById('trash-count'),
   expenseCount: document.getElementById('expense-count'),
   freebetOverviewCard: document.getElementById('freebet-overview-card'),
   freebetOverviewCount: document.getElementById('freebet-overview-count'),
   freebetOverviewTotal: document.getElementById('freebet-overview-total'),
   freebetOverviewLocations: document.getElementById('freebet-overview-locations'),
+  trashSummary: document.getElementById('trash-summary'),
   mainEntries: document.getElementById('main-entries'),
   counterEntries: document.getElementById('counter-entries'),
   freebetMainEntries: document.getElementById('freebet-main-entries'),
@@ -138,6 +146,16 @@ function setupRecordFilters() {
     renderHistory();
   });
 
+  elements.historyTypeFilter.addEventListener('change', () => {
+    selectedHistoryType = elements.historyTypeFilter.value;
+    renderHistory();
+  });
+
+  elements.historyOutcomeFilter.addEventListener('change', () => {
+    selectedHistoryOutcome = elements.historyOutcomeFilter.value;
+    renderHistory();
+  });
+
   elements.historyDayFilter.addEventListener('change', () => {
     selectedHistoryDay = elements.historyDayFilter.value;
     renderHistory();
@@ -179,7 +197,8 @@ function loadState() {
       freebets: Array.isArray(parsed.freebets) ? parsed.freebets : [],
       freebetHistory: Array.isArray(parsed.freebetHistory) ? parsed.freebetHistory : [],
       surebetHistory: Array.isArray(parsed.surebetHistory) ? parsed.surebetHistory : [],
-      expenses: Array.isArray(parsed.expenses) ? parsed.expenses : []
+      expenses: Array.isArray(parsed.expenses) ? parsed.expenses : [],
+      trash: Array.isArray(parsed.trash) ? parsed.trash : []
     };
   } catch {
     return structuredClone(defaultState);
@@ -1118,6 +1137,7 @@ function render() {
   renderMonthlyAnalysis();
   renderHistory();
   renderExpenses();
+  renderTrash();
 }
 
 function renderSummary() {
@@ -1203,21 +1223,20 @@ function renderEntriesHistory() {
   elements.entriesHistoryList.innerHTML = todayEntries.map((item) => {
     const reason = escapeHtml(item.reason || 'Movimentação de banca');
     const description = item.description ? `<p>${escapeHtml(item.description)}</p>` : '';
-    const changeClass = Number(item.change || 0) >= 0 ? 'positive-text' : 'negative-text';
+    const displayChange = getEntriesHistoryDisplayAmount(item);
+    const changeClass = displayChange >= 0 ? 'positive-text' : 'negative-text';
 
     return `
       <article class="item-card entries-history-card">
         <div class="item-header">
           <h3>${reason}</h3>
           <div class="item-actions">
-            <strong class="${changeClass}">${formatSignedCurrency(item.change)}</strong>
+            <strong class="${changeClass}">${formatSignedCurrency(displayChange)}</strong>
             <button type="button" class="danger-button" data-action="delete-entry-history" data-id="${item.id}">Remover</button>
           </div>
         </div>
         ${description}
         <div class="item-meta">
-          <span class="chip">Antes: ${formatCurrency(item.before)}</span>
-          <span class="chip">Agora: ${formatCurrency(item.after)}</span>
           <span class="chip">Data: ${formatDate(item.createdAt)}</span>
         </div>
       </article>
@@ -1225,6 +1244,20 @@ function renderEntriesHistory() {
   }).join('');
 
   bindEntriesHistoryActions();
+}
+
+function getEntriesHistoryDisplayAmount(entry) {
+  const relatedSurebet = state.surebetHistory.find((item) => item.entryHistoryId === entry.id);
+  if (relatedSurebet) {
+    return getBetOutcomeAmount(relatedSurebet);
+  }
+
+  const relatedFreebet = state.freebetHistory.find((item) => item.entryHistoryId === entry.id);
+  if (relatedFreebet) {
+    return getBetOutcomeAmount(relatedFreebet);
+  }
+
+  return Number(entry.change || 0);
 }
 
 function bindEntriesHistoryActions() {
@@ -1313,7 +1346,7 @@ function buildFreebetCard(item, fromHistory = false) {
     ? `<span class="chip">Finalizada em: ${formatDate(item.settledAt || item.createdAt)}</span>`
     : `<span class="chip">Criada em: ${formatDate(item.createdAt)}</span>`;
   const outcomeChip = fromHistory
-    ? `<span class="chip">Ganhadoras: ${escapeHtml(item.settledOutcomeLabel || 'Não informado')}</span><span class="chip">Resultado: ${formatSignedCurrency(item.settledResult ?? 0)}</span>`
+    ? `<span class="chip">Ganhadoras: ${escapeHtml(item.settledOutcomeLabel || 'Não informado')}</span><span class="chip">Profit: ${formatSignedCurrency(item.settledResult ?? 0)}</span>`
     : '';
   const activeLines = fromHistory ? '' : buildFreebetWinnerRows(item, totalStake);
   const historyLines = fromHistory ? buildFreebetHistoryRows(item, totalStake) : '';
@@ -1328,8 +1361,7 @@ function buildFreebetCard(item, fromHistory = false) {
       </div>
       ${fromHistory ? historyLines : activeLines}
       <div class="item-meta">
-        <span class="chip">Total stake: ${formatCurrency(totalStake)}</span>
-        <span class="chip">Freebet a ganhar: ${formatCurrency(item.freebetAmount || 0)}</span>
+        ${fromHistory ? '' : `<span class="chip">Freebet a ganhar: ${formatCurrency(item.freebetAmount || 0)}</span>`}
         ${outcomeChip}
         ${lifecycleChip}
       </div>
@@ -1459,16 +1491,30 @@ function deleteFreebet(id, fromHistory = false) {
       return;
     }
 
+    moveBetToTrash(freebet, {
+      betType: 'freebet',
+      source: 'history',
+      historyEntryIds: [freebet.stakeEntryHistoryId, freebet.entryHistoryId],
+      bankrollDelta: -getBetOutcomeAmount(freebet)
+    });
     state.freebetHistory = state.freebetHistory.filter((item) => item.id !== id);
+    removeLinkedFreebetEntryHistory(freebet);
+    state.bankroll = normalizeCurrencyValue(state.bankroll - getBetOutcomeAmount(freebet));
   } else {
     const freebet = state.freebets.find((item) => item.id === id);
     if (!freebet) {
       return;
     }
 
+    moveBetToTrash(freebet, {
+      betType: 'freebet',
+      source: 'active',
+      historyEntryIds: [freebet.stakeEntryHistoryId],
+      bankrollDelta: getFreebetTotalStake(freebet)
+    });
     state.freebets = state.freebets.filter((item) => item.id !== id);
     if (!freebet.qualificationOutcomeLabel) {
-      state.bankroll += getFreebetTotalStake(freebet);
+      state.bankroll = normalizeCurrencyValue(state.bankroll + getFreebetTotalStake(freebet));
       removeEntryHistoryById(freebet.stakeEntryHistoryId);
     }
   }
@@ -1480,12 +1526,16 @@ function deleteFreebet(id, fromHistory = false) {
 function renderHistory() {
   const historyItems = getMainHistoryItems();
   elements.historyCount.textContent = String(historyItems.length);
+  elements.historyTypeFilter.value = selectedHistoryType;
+  elements.historyOutcomeFilter.value = selectedHistoryOutcome;
 
   const monthOptions = getMonthOptions(historyItems, 'settledAt');
   selectedHistoryMonth = syncMonthFilter(elements.historyMonthFilter, monthOptions, selectedHistoryMonth);
   const monthFilteredHistory = filterItemsByMonth(historyItems, selectedHistoryMonth, 'settledAt');
+  const typeFilteredHistory = filterHistoryByType(monthFilteredHistory, selectedHistoryType);
+  const outcomeFilteredHistory = filterHistoryByOutcome(typeFilteredHistory, selectedHistoryOutcome);
   selectedHistoryDay = syncHistoryDayFilter(elements.historyDayFilter, selectedHistoryMonth, selectedHistoryDay);
-  const filteredHistory = filterItemsByDay(monthFilteredHistory, selectedHistoryDay, 'settledAt');
+  const filteredHistory = filterItemsByDay(outcomeFilteredHistory, selectedHistoryDay, 'settledAt');
 
   if (historyItems.length === 0) {
     elements.historyList.className = 'stack-list empty-state';
@@ -1532,6 +1582,30 @@ function renderHistory() {
   bindHistoryActions();
 }
 
+function filterHistoryByType(items, type) {
+  if (type === 'all') {
+    return items;
+  }
+
+  return items.filter((item) => item.__betType === type);
+}
+
+function filterHistoryByOutcome(items, outcome) {
+  if (outcome === 'all') {
+    return items;
+  }
+
+  if (outcome === 'gain') {
+    return items.filter((item) => getBetOutcomeAmount(item) > 0);
+  }
+
+  if (outcome === 'loss') {
+    return items.filter((item) => getBetOutcomeAmount(item) < 0);
+  }
+
+  return items;
+}
+
 function getMainHistoryItems() {
   return [
     ...state.surebetHistory.map((item) => ({ ...item, __betType: 'surebet' })),
@@ -1565,14 +1639,13 @@ function buildSurebetDetails(item, fromHistory = false) {
     ? `<span class="chip">Finalizada em: ${formatDate(item.settledAt || item.createdAt)}</span>`
     : `<span class="chip">Criada em: ${formatDate(item.createdAt)}</span>`;
   const outcomeChip = fromHistory
-    ? `<span class="chip">Ganhadoras: ${escapeHtml(item.settledOutcomeLabel || 'Não informado')}</span><span class="chip">Resultado: ${formatSignedCurrency(item.settledResult ?? 0)}</span>`
+    ? `<span class="chip">Ganhadoras: ${escapeHtml(item.settledOutcomeLabel || 'Não informado')}</span><span class="chip">Profit: ${formatSignedCurrency(item.settledResult ?? 0)}</span>`
     : '';
 
   return `
     ${fromHistory ? buildSurebetHistoryRows(item, totalStake) : buildSurebetWinnerRows(item, totalStake)}
     <div class="item-meta">
-      <span class="chip">Total stake: ${formatCurrency(totalStake)}</span>
-      <span class="chip">Profit: ${formatSignedCurrency(item.profit || 0)}</span>
+      ${fromHistory ? '' : `<span class="chip">Profit: ${formatSignedCurrency(item.profit || 0)}</span>`}
       ${outcomeChip}
       ${lifecycleChip}
     </div>
@@ -1690,17 +1763,30 @@ function deleteSurebet(id, fromHistory) {
       return;
     }
 
+    moveBetToTrash(surebet, {
+      betType: 'surebet',
+      source: 'history',
+      historyEntryIds: [surebet.stakeEntryHistoryId, surebet.entryHistoryId],
+      bankrollDelta: -getBetOutcomeAmount(surebet)
+    });
     state.surebetHistory = state.surebetHistory.filter((item) => item.id !== id);
     removeEntryHistoryById(surebet.stakeEntryHistoryId);
     removeEntryHistoryById(surebet.entryHistoryId);
+    state.bankroll = normalizeCurrencyValue(state.bankroll - getBetOutcomeAmount(surebet));
   } else {
     const surebet = state.surebets.find((item) => item.id === id);
     if (!surebet) {
       return;
     }
 
+    moveBetToTrash(surebet, {
+      betType: 'surebet',
+      source: 'active',
+      historyEntryIds: [surebet.stakeEntryHistoryId],
+      bankrollDelta: getSurebetTotalStake(surebet)
+    });
     state.surebets = state.surebets.filter((item) => item.id !== id);
-    state.bankroll += getSurebetTotalStake(surebet);
+    state.bankroll = normalizeCurrencyValue(state.bankroll + getSurebetTotalStake(surebet));
     removeEntryHistoryById(surebet.stakeEntryHistoryId);
   }
 
@@ -1803,6 +1889,96 @@ function renderExpenses() {
   }).join('');
 
   bindExpenseActions();
+}
+
+function renderTrash() {
+  const trashItems = [...state.trash].sort((a, b) => new Date(b.removedAt || b.createdAt || 0) - new Date(a.removedAt || a.createdAt || 0));
+  elements.trashCount.textContent = String(trashItems.length);
+
+  if (trashItems.length === 0) {
+    elements.trashList.className = 'stack-list empty-state';
+    elements.trashList.textContent = 'Nenhuma aposta excluída.';
+    elements.trashSummary.textContent = 'Nenhuma aposta excluída.';
+    return;
+  }
+
+  const restoredProfit = trashItems
+    .filter((item) => item.source === 'history')
+    .reduce((sum, item) => sum + getBetOutcomeAmount(item.payload || {}), 0);
+
+  elements.trashSummary.textContent = `${trashItems.length} aposta(s) no lixo • Profit fora dos ganhos: ${formatSignedCurrency(-restoredProfit)}`;
+  elements.trashList.className = 'stack-list';
+  elements.trashList.innerHTML = trashItems.map((item) => buildTrashCard(item)).join('');
+
+  bindTrashActions();
+}
+
+function buildTrashCard(item) {
+  const payload = item.payload || {};
+  const betTypeLabel = item.betType === 'freebet' ? 'Freebet' : 'Surebet';
+  const sourceLabel = item.source === 'history' ? 'Histórico' : 'Ativa';
+  const amountLabel = item.source === 'history'
+    ? `Profit removido: ${formatSignedCurrency(-getBetOutcomeAmount(payload))}`
+    : `Stake devolvida: ${formatSignedCurrency(item.bankrollDelta || 0)}`;
+  const preview = buildTrashBetPreview(item);
+
+  return `
+    <article class="trash-card">
+      <div class="item-header">
+        <div>
+          <h3>${escapeHtml(payload.title || betTypeLabel)}</h3>
+          <p>${betTypeLabel} enviada para o lixo</p>
+        </div>
+        <div class="item-actions">
+          <button type="button" class="success-button" data-action="restore-trash-bet" data-id="${item.id}">Restaurar</button>
+        </div>
+      </div>
+      <div class="item-meta">
+        <span class="chip">Tipo: ${betTypeLabel}</span>
+        <span class="chip">Origem: ${sourceLabel}</span>
+        <span class="chip">${amountLabel}</span>
+        <span class="chip">Excluída em: ${formatDate(item.removedAt || payload.createdAt)}</span>
+      </div>
+      <div class="trash-preview">${preview}</div>
+    </article>
+  `;
+}
+
+function buildTrashBetPreview(item) {
+  const payload = item.payload || {};
+  const isHistory = item.source === 'history';
+
+  if (item.betType === 'freebet') {
+    const totalStake = getFreebetTotalStake(payload);
+    return `
+      <article class="item-card freebet-card">
+        ${buildFreebetHistoryRows(isHistory ? payload : { ...payload, selectedWinnerKeys: [] }, totalStake)}
+        <div class="item-meta">
+          ${isHistory
+            ? `<span class="chip">Profit: ${formatSignedCurrency(getBetOutcomeAmount(payload))}</span><span class="chip">Finalizada em: ${formatDate(payload.settledAt || payload.createdAt)}</span>`
+            : `<span class="chip">Profit esperado: ${formatSignedCurrency(payload.guaranteedProfit || 0)}</span><span class="chip">Criada em: ${formatDate(payload.createdAt)}</span><span class="chip">Freebet a ganhar: ${formatCurrency(payload.freebetAmount || 0)}</span>`}
+        </div>
+      </article>
+    `;
+  }
+
+  const totalStake = getSurebetTotalStake(payload);
+  return `
+    <article class="item-card freebet-card">
+      ${buildSurebetHistoryRows(isHistory ? payload : { ...payload, selectedWinnerKeys: [] }, totalStake)}
+      <div class="item-meta">
+        ${isHistory
+          ? `<span class="chip">Profit: ${formatSignedCurrency(getBetOutcomeAmount(payload))}</span><span class="chip">Finalizada em: ${formatDate(payload.settledAt || payload.createdAt)}</span>`
+          : `<span class="chip">Profit esperado: ${formatSignedCurrency(payload.profit || 0)}</span><span class="chip">Criada em: ${formatDate(payload.createdAt)}</span>`}
+      </div>
+    </article>
+  `;
+}
+
+function bindTrashActions() {
+  elements.trashList.querySelectorAll('[data-action="restore-trash-bet"]').forEach((button) => {
+    button.addEventListener('click', () => restoreTrashBet(button.dataset.id));
+  });
 }
 
 function renderMonthlyAnalysis() {
@@ -1987,6 +2163,76 @@ function removeEntryHistoryById(entryHistoryId) {
   }
 
   state.entriesHistory = state.entriesHistory.filter((item) => item.id !== entryHistoryId);
+}
+
+function captureEntryHistorySnapshots(entryHistoryIds = []) {
+  return entryHistoryIds
+    .filter(Boolean)
+    .map((entryHistoryId) => state.entriesHistory.find((item) => item.id === entryHistoryId))
+    .filter(Boolean)
+    .map((item) => ({ ...item }));
+}
+
+function insertEntryHistorySnapshots(entries = []) {
+  entries.forEach((entry) => {
+    if (!entry?.id || state.entriesHistory.some((item) => item.id === entry.id)) {
+      return;
+    }
+
+    state.entriesHistory.push({ ...entry });
+  });
+
+  state.entriesHistory.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+}
+
+function moveBetToTrash(payload, options) {
+  const trashItem = {
+    id: crypto.randomUUID(),
+    betType: options.betType,
+    source: options.source,
+    removedAt: new Date().toISOString(),
+    bankrollDelta: Number(options.bankrollDelta || 0),
+    historyEntries: captureEntryHistorySnapshots(options.historyEntryIds),
+    payload: structuredClone(payload)
+  };
+
+  state.trash.unshift(trashItem);
+}
+
+function restoreTrashBet(trashId) {
+  const trashIndex = state.trash.findIndex((item) => item.id === trashId);
+  if (trashIndex === -1) {
+    return;
+  }
+
+  const [trashItem] = state.trash.splice(trashIndex, 1);
+  const payload = structuredClone(trashItem.payload || {});
+  const existsInTarget = trashItem.betType === 'freebet'
+    ? (trashItem.source === 'history' ? state.freebetHistory : state.freebets).some((item) => item.id === payload.id)
+    : (trashItem.source === 'history' ? state.surebetHistory : state.surebets).some((item) => item.id === payload.id);
+
+  if (existsInTarget) {
+    state.trash.splice(trashIndex, 0, trashItem);
+    alert('Essa aposta já foi restaurada e ainda existe no destino.');
+    return;
+  }
+
+  if (trashItem.betType === 'freebet') {
+    if (trashItem.source === 'history') {
+      state.freebetHistory.unshift(payload);
+    } else {
+      state.freebets.unshift(payload);
+    }
+  } else if (trashItem.source === 'history') {
+    state.surebetHistory.unshift(payload);
+  } else {
+    state.surebets.unshift(payload);
+  }
+
+  state.bankroll = normalizeCurrencyValue(state.bankroll - Number(trashItem.bankrollDelta || 0));
+  insertEntryHistorySnapshots(trashItem.historyEntries);
+  saveState();
+  render();
 }
 
 function deleteEntryHistory(entryHistoryId) {

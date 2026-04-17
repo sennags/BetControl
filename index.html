@@ -99,6 +99,22 @@
                   <span>Mês</span>
                   <select id="history-month-filter"></select>
                 </label>
+                <label class="filter-field">
+                  <span>Tipo</span>
+                  <select id="history-type-filter">
+                    <option value="all">Todas</option>
+                    <option value="surebet">Surebets</option>
+                    <option value="freebet">Freebets</option>
+                  </select>
+                </label>
+                <label class="filter-field">
+                  <span>Resultado</span>
+                  <select id="history-outcome-filter">
+                    <option value="all">Todos</option>
+                    <option value="gain">Só ganhos</option>
+                    <option value="loss">Só perdas</option>
+                  </select>
+                </label>
                 <label id="history-day-filter-field" class="filter-field" hidden>
                   <span>Dia</span>
                   <input id="history-day-filter" type="date" disabled>
@@ -107,6 +123,21 @@
               </div>
               <div id="history-list" class="stack-list empty-state">
                 Nenhuma aposta batida ainda.
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <div id="trash" class="tab-panel" role="tabpanel" hidden>
+          <div class="panel-grid single-column">
+            <section class="card history-card">
+              <div class="section-header">
+                <h2>Lixo</h2>
+                <span id="trash-count" class="badge">0</span>
+              </div>
+              <div id="trash-summary" class="filter-summary">Nenhuma aposta excluída.</div>
+              <div id="trash-list" class="stack-list empty-state">
+                Nenhuma aposta excluída.
               </div>
             </section>
           </div>
