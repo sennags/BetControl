@@ -605,7 +605,14 @@ function renderFreebetOverview() {
 }
 
 function renderEntriesHistory() {
-  const todayEntries = state.entriesHistory.filter((item) => isSameDay(item.createdAt, new Date()));
+  const hiddenReasons = new Set(['Surebet registrada', 'Freebet registrada']);
+  const todayEntries = state.entriesHistory.filter((item) => {
+    if (!isSameDay(item.createdAt, new Date())) {
+      return false;
+    }
+
+    return !hiddenReasons.has(item.reason);
+  });
   elements.entriesHistoryCount.textContent = String(todayEntries.length);
 
   if (todayEntries.length === 0) {

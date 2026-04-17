@@ -383,9 +383,9 @@ select {
 
 .freebet-winner-row {
   display: grid;
-  grid-template-columns: auto minmax(0, 1.6fr) repeat(3, auto);
-  gap: 10px;
-  align-items: center;
+  grid-template-columns: auto minmax(0, 1.5fr) repeat(3, minmax(96px, 1fr));
+  gap: 12px;
+  align-items: stretch;
   padding: 10px 12px;
   border: 1px solid var(--line);
   border-radius: 12px;
@@ -398,8 +398,27 @@ select {
 }
 
 .freebet-winner-house {
+  display: flex;
+  align-items: center;
   font-weight: 700;
   color: var(--text);
+}
+
+.winner-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.winner-metric-label {
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+.winner-metric strong {
+  color: var(--text);
+  line-height: 1.2;
 }
 
 .history-row {
@@ -601,5 +620,9 @@ select {
 
   .money {
     font-size: 1.7rem;
+  }
+
+  .winner-metric {
+    grid-column: 1;
   }
 }

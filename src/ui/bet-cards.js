@@ -21,9 +21,9 @@ window.BetCertezaBetCards = ((utils, calculations) => {
       <label class="freebet-winner-row">
         <input type="checkbox" data-freebet-winner data-entry-key="${entry.key}">
         <span class="freebet-winner-house">${escapeHtml(entry.house || 'Sem casa')}</span>
-        <span>odd ${Number(entry.odd || 0).toFixed(2)}</span>
-        <span>Stake ${formatCurrency(entry.amount)}</span>
-        <span>Profit ${formatSignedCurrency(getFreebetEntryProfit(entry, totalStake))}</span>
+        <span class="winner-metric"><span class="winner-metric-label">Odd</span><strong>${Number(entry.odd || 0).toFixed(2)}</strong></span>
+        <span class="winner-metric"><span class="winner-metric-label">Stake</span><strong>${formatCurrency(entry.amount)}</strong></span>
+        <span class="winner-metric"><span class="winner-metric-label">Profit</span><strong>${formatSignedCurrency(getFreebetEntryProfit(entry, totalStake))}</strong></span>
       </label>
     `).join('');
   }
@@ -37,9 +37,9 @@ window.BetCertezaBetCards = ((utils, calculations) => {
       return `
         <div class="freebet-winner-row history-row ${isWinner ? 'winner-row' : ''}">
           <span class="freebet-winner-house">${escapeHtml(entry.house || 'Sem casa')}</span>
-          <span>odd ${Number(entry.odd || 0).toFixed(2)}</span>
-          <span>Stake ${formatCurrency(entry.amount)}</span>
-          <span>Profit ${formatSignedCurrency(getFreebetEntryProfit(entry, totalStake))}</span>
+          <span class="winner-metric"><span class="winner-metric-label">Odd</span><strong>${Number(entry.odd || 0).toFixed(2)}</strong></span>
+          <span class="winner-metric"><span class="winner-metric-label">Stake</span><strong>${formatCurrency(entry.amount)}</strong></span>
+          <span class="winner-metric"><span class="winner-metric-label">Profit</span><strong>${formatSignedCurrency(getFreebetEntryProfit(entry, totalStake))}</strong></span>
         </div>
       `;
     }).join('');
@@ -81,9 +81,9 @@ window.BetCertezaBetCards = ((utils, calculations) => {
       <label class="freebet-winner-row">
         <input type="checkbox" data-surebet-winner data-entry-key="${entry.key}">
         <span class="freebet-winner-house">${escapeHtml(entry.house || 'Sem casa')}</span>
-        <span>odd ${Number(entry.odd || 0).toFixed(2)}</span>
-        <span>Stake ${formatCurrency(entry.amount)}</span>
-        <span>Profit ${formatSignedCurrency(getFreebetEntryProfit(entry, totalStake))}</span>
+        <span class="winner-metric"><span class="winner-metric-label">Odd</span><strong>${Number(entry.odd || 0).toFixed(2)}</strong></span>
+        <span class="winner-metric"><span class="winner-metric-label">Stake</span><strong>${formatCurrency(entry.amount)}</strong></span>
+        <span class="winner-metric"><span class="winner-metric-label">Profit</span><strong>${formatSignedCurrency(getFreebetEntryProfit(entry, totalStake))}</strong></span>
       </label>
     `).join('');
   }
@@ -97,9 +97,9 @@ window.BetCertezaBetCards = ((utils, calculations) => {
       return `
         <div class="freebet-winner-row history-row ${isWinner ? 'winner-row' : ''}">
           <span class="freebet-winner-house">${escapeHtml(entry.house || 'Sem casa')}</span>
-          <span>odd ${Number(entry.odd || 0).toFixed(2)}</span>
-          <span>Stake ${formatCurrency(entry.amount)}</span>
-          <span>Profit ${formatSignedCurrency(getFreebetEntryProfit(entry, totalStake))}</span>
+          <span class="winner-metric"><span class="winner-metric-label">Odd</span><strong>${Number(entry.odd || 0).toFixed(2)}</strong></span>
+          <span class="winner-metric"><span class="winner-metric-label">Stake</span><strong>${formatCurrency(entry.amount)}</strong></span>
+          <span class="winner-metric"><span class="winner-metric-label">Profit</span><strong>${formatSignedCurrency(getFreebetEntryProfit(entry, totalStake))}</strong></span>
         </div>
       `;
     }).join('');
