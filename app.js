@@ -55,6 +55,12 @@ const {
 } = window.BetCertezaCalculations;
 
 const {
+  buildFreebetCard,
+  buildSurebetCard,
+  buildMainHistoryCard
+} = window.BetCertezaBetCards;
+
+const {
   getSettledBetHistoryItems: selectSettledBetHistoryItems,
   getEntriesHistoryDisplayAmount: selectEntriesHistoryDisplayAmount,
   filterHistoryByType: applyHistoryTypeFilter,
@@ -1143,20 +1149,7 @@ function renderSurebets() {
   }
 
   elements.surebetList.className = 'stack-list';
-  elements.surebetList.innerHTML = state.surebets.map((item) => {
-    return `
-      <article class="item-card freebet-card" data-surebet-id="${item.id}">
-        <div class="item-header">
-          <h3>${escapeHtml(item.title)}</h3>
-          <div class="item-actions">
-            <button type="button" class="success-button" data-action="finish-surebet" data-id="${item.id}">Feito</button>
-            <button type="button" class="danger-button" data-action="delete-surebet" data-id="${item.id}">Excluir</button>
-          </div>
-        </div>
-        ${buildSurebetDetails(item, false)}
-      </article>
-    `;
-  }).join('');
+  elements.surebetList.innerHTML = state.surebets.map((item) => buildSurebetCard(item)).join('');
 
   bindSurebetActions();
 }
@@ -1200,66 +1193,6 @@ function renderFreebets() {
   }
 
   bindFreebetActions();
-}
-
-function buildFreebetCard(item, fromHistory = false) {
-  const hedgeEntries = Array.isArray(item.hedgeEntries) ? item.hedgeEntries : [];
-  const freebetEntries = Array.isArray(item.freebetEntries) ? item.freebetEntries : [];
-  const totalStake = getFreebetTotalStake(item);
-  const actionButton = fromHistory
-    ? `<button type="button" class="danger-button" data-action="delete-freebet-history" data-id="${item.id}">Excluir</button>`
-    : `<button type="button" class="success-button" data-action="finish-freebet" data-id="${item.id}">Feito</button><button type="button" class="danger-button" data-action="delete-freebet" data-id="${item.id}">Excluir</button>`;
-  const lifecycleChip = fromHistory
-    ? `<span class="chip">Finalizada em: ${formatDate(item.settledAt || item.createdAt)}</span>`
-    : `<span class="chip">Criada em: ${formatDate(item.createdAt)}</span>`;
-  const outcomeChip = fromHistory
-    ? `<span class="chip">Ganhadoras: ${escapeHtml(item.settledOutcomeLabel || 'Não informado')}</span><span class="chip">Profit: ${formatSignedCurrency(item.settledResult ?? 0)}</span>`
-    : '';
-  const activeLines = fromHistory ? '' : buildFreebetWinnerRows(item, totalStake);
-  const historyLines = fromHistory ? buildFreebetHistoryRows(item, totalStake) : '';
-
-  return `
-    <article class="item-card freebet-card" data-freebet-id="${item.id}">
-      <div class="item-header">
-        <h3>${escapeHtml(item.title)}</h3>
-        <div class="item-actions">
-          ${actionButton}
-        </div>
-      </div>
-      ${fromHistory ? historyLines : activeLines}
-      <div class="item-meta">
-        ${fromHistory ? '' : `<span class="chip">Freebet a ganhar: ${formatCurrency(item.freebetAmount || 0)}</span>`}
-        ${outcomeChip}
-        ${lifecycleChip}
-      </div>
-    </article>
-  `;
-}
-
-function buildFreebetWinnerRows(item, totalStake) {
-  return getFreebetSelectableEntries(item).map((entry) => `
-    <label class="freebet-winner-row">
-      <input type="checkbox" data-freebet-winner data-entry-key="${entry.key}">
-      <span class="freebet-winner-house">${escapeHtml(entry.house || 'Sem casa')}</span>
-      <span>odd ${Number(entry.odd || 0).toFixed(2)}</span>
-      <span>Stake ${formatCurrency(entry.amount)}</span>
-      <span>Profit ${formatSignedCurrency(getFreebetEntryProfit(entry, totalStake))}</span>
-    </label>
-  `).join('');
-}
-
-function buildFreebetHistoryRows(item, totalStake) {
-  return getFreebetSelectableEntries(item).map((entry) => {
-    const isWinner = Array.isArray(item.selectedWinnerKeys) && item.selectedWinnerKeys.includes(entry.key);
-    return `
-      <div class="freebet-winner-row history-row ${isWinner ? 'winner-row' : ''}">
-        <span class="freebet-winner-house">${escapeHtml(entry.house || 'Sem casa')}</span>
-        <span>odd ${Number(entry.odd || 0).toFixed(2)}</span>
-        <span>Stake ${formatCurrency(entry.amount)}</span>
-        <span>Profit ${formatSignedCurrency(getFreebetEntryProfit(entry, totalStake))}</span>
-      </div>
-    `;
-  }).join('');
 }
 
 function bindFreebetActions() {
@@ -1407,71 +1340,6 @@ function renderHistory() {
   }).join('');
 
   bindHistoryActions();
-}
-
-function buildMainHistoryCard(item) {
-  if (item.__betType === 'freebet') {
-    return buildFreebetCard(item, true);
-  }
-
-  const details = buildSurebetDetails(item, true);
-  return `
-    <article class="item-card">
-      <div class="item-header">
-        <h3>${escapeHtml(item.title)}</h3>
-        <div class="item-actions">
-          <button type="button" class="danger-button" data-action="delete-history-surebet" data-id="${item.id}">Excluir</button>
-        </div>
-      </div>
-      <p><strong>Batida em:</strong> ${formatDate(item.settledAt || item.createdAt)}</p>
-      ${details}
-    </article>
-  `;
-}
-
-function buildSurebetDetails(item, fromHistory = false) {
-  const totalStake = getSurebetTotalStake(item);
-  const lifecycleChip = fromHistory
-    ? `<span class="chip">Finalizada em: ${formatDate(item.settledAt || item.createdAt)}</span>`
-    : `<span class="chip">Criada em: ${formatDate(item.createdAt)}</span>`;
-  const outcomeChip = fromHistory
-    ? `<span class="chip">Ganhadoras: ${escapeHtml(item.settledOutcomeLabel || 'Não informado')}</span><span class="chip">Profit: ${formatSignedCurrency(item.settledResult ?? 0)}</span>`
-    : '';
-
-  return `
-    ${fromHistory ? buildSurebetHistoryRows(item, totalStake) : buildSurebetWinnerRows(item, totalStake)}
-    <div class="item-meta">
-      ${fromHistory ? '' : `<span class="chip">Profit: ${formatSignedCurrency(item.profit || 0)}</span>`}
-      ${outcomeChip}
-      ${lifecycleChip}
-    </div>
-  `;
-}
-
-function buildSurebetWinnerRows(item, totalStake) {
-  return getSurebetSelectableEntries(item).map((entry) => `
-    <label class="freebet-winner-row">
-      <input type="checkbox" data-surebet-winner data-entry-key="${entry.key}">
-      <span class="freebet-winner-house">${escapeHtml(entry.house || 'Sem casa')}</span>
-      <span>odd ${Number(entry.odd || 0).toFixed(2)}</span>
-      <span>Stake ${formatCurrency(entry.amount)}</span>
-      <span>Profit ${formatSignedCurrency(getFreebetEntryProfit(entry, totalStake))}</span>
-    </label>
-  `).join('');
-}
-
-function buildSurebetHistoryRows(item, totalStake) {
-  return getSurebetSelectableEntries(item).map((entry) => {
-    const isWinner = Array.isArray(item.selectedWinnerKeys) && item.selectedWinnerKeys.includes(entry.key);
-    return `
-      <div class="freebet-winner-row history-row ${isWinner ? 'winner-row' : ''}">
-        <span class="freebet-winner-house">${escapeHtml(entry.house || 'Sem casa')}</span>
-        <span>odd ${Number(entry.odd || 0).toFixed(2)}</span>
-        <span>Stake ${formatCurrency(entry.amount)}</span>
-        <span>Profit ${formatSignedCurrency(getFreebetEntryProfit(entry, totalStake))}</span>
-      </div>
-    `;
-  }).join('');
 }
 
 function bindSurebetActions() {
