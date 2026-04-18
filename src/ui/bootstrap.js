@@ -73,6 +73,21 @@ window.BetControlBootstrap = (() => {
       }
     }
 
+    function syncSceneCopy(button) {
+      const target = button?.dataset.tab || 'dashboard';
+      if (document?.body) {
+        document.body.dataset.scene = target;
+      }
+
+      if (elements.currentSceneTitle && button?.dataset.sceneTitle) {
+        elements.currentSceneTitle.textContent = button.dataset.sceneTitle;
+      }
+
+      if (elements.currentSceneCopy && button?.dataset.sceneCopy) {
+        elements.currentSceneCopy.textContent = button.dataset.sceneCopy;
+      }
+    }
+
     function setupTabShortcuts() {
       elements.openTabButtons.forEach((button) => {
         button.addEventListener('click', () => switchToTab(button.dataset.openTab));
@@ -95,8 +110,16 @@ window.BetControlBootstrap = (() => {
             panel.classList.toggle('active', active);
             panel.hidden = !active;
           });
+
+          syncSceneCopy(button);
         });
       });
+
+      const initialButton = [...elements.tabButtons].find((button) => button.classList.contains('active'))
+        || elements.tabButtons[0];
+      if (initialButton) {
+        syncSceneCopy(initialButton);
+      }
     }
 
     function setupBankroll() {

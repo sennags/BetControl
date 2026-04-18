@@ -101,7 +101,10 @@ const elements = {
   dashboardActiveSurebets: document.getElementById('dashboard-active-surebets'),
   dashboardActiveFreebets: document.getElementById('dashboard-active-freebets'),
   dashboardInsightText: document.getElementById('dashboard-insight-text'),
+  bankrollValueGhost: document.getElementById('bankroll-value-ghost'),
   saveBankrollButton: document.getElementById('save-bankroll-button'),
+  currentSceneTitle: document.getElementById('current-scene-title'),
+  currentSceneCopy: document.getElementById('current-scene-copy'),
   surebetForm: document.getElementById('surebet-form'),
   freebetForm: document.getElementById('freebet-form'),
   expenseForm: document.getElementById('expense-form'),
@@ -797,6 +800,9 @@ function renderSummary() {
   }
 
   elements.bankrollValue.textContent = formatCurrency(summary.bankroll);
+  if (elements.bankrollValueGhost) {
+    elements.bankrollValueGhost.textContent = formatCurrency(summary.bankroll);
+  }
   elements.gainValue.textContent = formatCurrency(summary.gains);
   elements.lossValue.textContent = formatCurrency(summary.losses);
   elements.dashboardNetValue.textContent = formatSignedCurrency(net);
