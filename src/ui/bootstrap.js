@@ -73,6 +73,18 @@ window.BetControlBootstrap = (() => {
       }
     }
 
+    function syncSceneCopy(button) {
+      const target = button?.dataset.tab || 'dashboard';
+      if (document?.body) {
+        document.body.dataset.scene = target;
+      }
+
+      if (elements.currentSceneTitle && button?.dataset.sceneTitle) {
+        elements.currentSceneTitle.textContent = button.dataset.sceneTitle;
+      }
+
+    }
+
     function setupTabShortcuts() {
       elements.openTabButtons.forEach((button) => {
         button.addEventListener('click', () => switchToTab(button.dataset.openTab));
@@ -95,8 +107,16 @@ window.BetControlBootstrap = (() => {
             panel.classList.toggle('active', active);
             panel.hidden = !active;
           });
+
+          syncSceneCopy(button);
         });
       });
+
+      const initialButton = [...elements.tabButtons].find((button) => button.classList.contains('active'))
+        || elements.tabButtons[0];
+      if (initialButton) {
+        syncSceneCopy(initialButton);
+      }
     }
 
     function setupBankroll() {
@@ -151,10 +171,6 @@ window.BetControlBootstrap = (() => {
 
       elements.freebetMainEntries.addEventListener('input', handleFreebetInput);
       elements.freebetHedgeEntries.addEventListener('input', handleFreebetInput);
-      elements.freebetAmountInput.addEventListener('input', () => {
-        rebalanceFreebetStakesFromOdds();
-        updateFreebetResults();
-      });
 
       applyFreebetBalancedDefaults();
       updateFreebetResults();
@@ -175,10 +191,6 @@ window.BetControlBootstrap = (() => {
       elements.surebetTotalInput.addEventListener('input', () => {
         rebalanceSurebetStakesFromOdds();
         updateSurebetResults();
-        updateSurebetPreview?.({ source: 'controls' });
-      });
-
-      elements.fixedTotalInput?.addEventListener('input', () => {
         updateSurebetPreview?.({ source: 'controls' });
       });
       elements.mainOddInput?.addEventListener('input', () => {

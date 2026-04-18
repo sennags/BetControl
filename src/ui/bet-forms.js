@@ -17,10 +17,7 @@ window.BetControlBetForms = ((calculations, utils) => {
       return Boolean(
         elements.surebetTotalInput
         && elements.profitInput
-        && elements.mainResultValue
-        && elements.counterResultValue
         && elements.calculatedProfitPercent
-        && elements.surebetStatus
       );
     }
 
@@ -91,12 +88,27 @@ window.BetControlBetForms = ((calculations, utils) => {
     }
 
     function getSurebetTargetTotal() {
-      const value = Number(elements.surebetTotalInput?.value);
+      const currentStake = getSurebetRows().reduce((sum, row) => {
+        const amount = Number(row.querySelector('[name="amount"]').value);
+        return sum + (Number.isNaN(amount) ? 0 : amount);
+      }, 0);
+      const value = currentStake > 0 ? currentStake : Number(elements.surebetTotalInput?.value);
       return Number.isNaN(value) || value <= 0 ? defaultSurebetTotal : value;
     }
 
+    function syncSurebetTargetInput() {
+      if (!elements.surebetTotalInput) {
+        return;
+      }
+
+      elements.surebetTotalInput.value = String(getSurebetTargetTotal());
+    }
+
     function getFreebetTargetTotal() {
-      const value = Number(elements.freebetAmountInput.value);
+      const value = getFreebetRows().reduce((sum, row) => {
+        const amount = Number(row.querySelector('[name="amount"]').value);
+        return sum + (Number.isNaN(amount) ? 0 : amount);
+      }, 0);
       return Number.isNaN(value) || value <= 0 ? defaultFreebetTotal : value;
     }
 
@@ -105,6 +117,8 @@ window.BetControlBetForms = ((calculations, utils) => {
       if (rows.length === 0) {
         return;
       }
+
+      syncSurebetTargetInput();
 
       const entries = rows.map((row) => {
         const odd = Number(row.querySelector('[name="odd"]').value);
@@ -243,15 +257,6 @@ window.BetControlBetForms = ((calculations, utils) => {
       }
     }
 
-    function updateSurebetStatus(value, tone = 'neutral') {
-      if (!elements.surebetStatus) {
-        return;
-      }
-
-      elements.surebetStatus.textContent = value;
-      elements.surebetStatus.className = `form-status-badge ${tone}`;
-    }
-
     function sumEntryAmounts(container) {
       return [...container.querySelectorAll('.entry-row')].reduce((sum, row) => {
         const value = Number(row.querySelector('[name="amount"]').value);
@@ -278,6 +283,7 @@ window.BetControlBetForms = ((calculations, utils) => {
       const { source = 'controls' } = options;
 
       if (source === 'controls') {
+        syncSurebetTargetInput();
         rebalanceSurebetStakesFromOdds();
         updateSurebetResults();
       }
@@ -290,30 +296,16 @@ window.BetControlBetForms = ((calculations, utils) => {
 
         elements.profitInput.value = formatSignedCurrency(displayedProfit);
         updateProfitInputState(displayedProfit);
-        elements.mainResultValue.textContent = formatSignedCurrency(calculation.resultIfFreebetWins);
-        elements.counterResultValue.textContent = formatSignedCurrency(calculation.resultIfHedgeWins);
         elements.calculatedProfitPercent.textContent = formatPercent(calculation.totalStake > 0 ? displayedProfit / calculation.totalStake : 0);
-
-        if (displayedProfit > 0) {
-          updateSurebetStatus('Surebet válida', 'positive');
-        } else if (calculation.resultIfFreebetWins < 0 || calculation.resultIfHedgeWins < 0) {
-          updateSurebetStatus('Há cenário negativo', 'negative');
-        } else if (displayedProfit < 0) {
-          updateSurebetStatus('Não é surebet', 'negative');
-        } else {
-          updateSurebetStatus('Empate técnico', 'neutral');
-        }
       } catch {
         elements.profitInput.value = formatCurrency(0);
         updateProfitInputState(0);
-        elements.mainResultValue.textContent = formatSignedCurrency(0);
-        elements.counterResultValue.textContent = formatSignedCurrency(0);
         elements.calculatedProfitPercent.textContent = formatPercent(0);
-        updateSurebetStatus('Preencha odds válidas', 'neutral');
       }
     }
 
     function handleFixedSideChange() {
+      syncSurebetTargetInput();
       updateSurebetPreview({ source: 'controls' });
     }
 
