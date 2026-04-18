@@ -228,6 +228,14 @@ label,
   gap: var(--space-2);
 }
 
+.rail-brand h1 {
+  max-width: 100%;
+  font-size: clamp(2.8rem, 4.4vw, 4.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.07em;
+  overflow-wrap: anywhere;
+}
+
 .app-stage {
   display: flex;
   flex-direction: column;
