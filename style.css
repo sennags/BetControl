@@ -219,8 +219,6 @@ label,
 }
 
 .rail-copy,
-.scene-copy,
-.panel-copy,
 .dashboard-balance-copy,
 .rail-note p,
 .dashboard-insight-text,
@@ -791,21 +789,7 @@ select {
 }
 
 .studio-overview-bar {
-  align-items: end;
-}
-
-.overview-strong {
-  display: block;
-  margin-top: var(--space-2);
-  color: var(--text-soft);
-  font-size: 1rem;
-  font-weight: 400;
-  line-height: 1.35;
-  letter-spacing: -0.03em;
-}
-
-.studio-top-control {
-  min-width: 220px;
+  align-items: center;
 }
 
 .highlight-panel,

@@ -83,9 +83,6 @@ window.BetControlBootstrap = (() => {
         elements.currentSceneTitle.textContent = button.dataset.sceneTitle;
       }
 
-      if (elements.currentSceneCopy && button?.dataset.sceneCopy) {
-        elements.currentSceneCopy.textContent = button.dataset.sceneCopy;
-      }
     }
 
     function setupTabShortcuts() {
@@ -174,10 +171,6 @@ window.BetControlBootstrap = (() => {
 
       elements.freebetMainEntries.addEventListener('input', handleFreebetInput);
       elements.freebetHedgeEntries.addEventListener('input', handleFreebetInput);
-      elements.freebetAmountInput.addEventListener('input', () => {
-        rebalanceFreebetStakesFromOdds();
-        updateFreebetResults();
-      });
 
       applyFreebetBalancedDefaults();
       updateFreebetResults();
@@ -198,10 +191,6 @@ window.BetControlBootstrap = (() => {
       elements.surebetTotalInput.addEventListener('input', () => {
         rebalanceSurebetStakesFromOdds();
         updateSurebetResults();
-        updateSurebetPreview?.({ source: 'controls' });
-      });
-
-      elements.fixedTotalInput?.addEventListener('input', () => {
         updateSurebetPreview?.({ source: 'controls' });
       });
       elements.mainOddInput?.addEventListener('input', () => {
