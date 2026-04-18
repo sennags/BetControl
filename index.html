@@ -65,76 +65,76 @@
         </div>
       </header>
 
-      <section class="signal-grid">
-        <article class="signal-card">
-          <span class="card-label">Saldo líquido</span>
-          <strong id="dashboard-net-value" class="money small-money">R$ 0,00</strong>
-          <div id="dashboard-net-badge" class="dashboard-trend-badge neutral">Mês neutro</div>
-        </article>
-
-        <article class="signal-card">
-          <span class="card-label">Exposição aberta</span>
-          <strong id="dashboard-open-exposure" class="money small-money">R$ 0,00</strong>
-        </article>
-
-        <article class="signal-card">
-          <span class="card-label">Surebets ativas</span>
-          <strong id="dashboard-active-surebets" class="money small-money">0</strong>
-        </article>
-
-        <article class="signal-card">
-          <span class="card-label">Freebets ativas</span>
-          <strong id="dashboard-active-freebets" class="money small-money">0</strong>
-        </article>
-      </section>
-
-      <section class="overview-grid">
-        <article class="card highlight-card dashboard-balance-card cinematic-balance-card">
-          <div class="dashboard-balance-topline">
-            <div class="dashboard-balance-heading">
-              <p class="eyebrow">Painel mestre</p>
-              <span class="card-label">Patrimônio operacional</span>
-              <strong class="money dashboard-balance-value" id="bankroll-value-ghost">R$ 0,00</strong>
-              <p class="dashboard-balance-copy">A banca comanda o ritmo da operação. Use este plano para ler o mês e decidir onde abrir, fechar ou aliviar capital.</p>
-            </div>
-          </div>
-
-          <div class="dashboard-kpi-grid">
-            <article class="dashboard-kpi-card gain-card">
-              <span class="card-label">Ganhos no mês</span>
-              <strong id="gain-value" class="money small-money">R$ 0,00</strong>
-            </article>
-
-            <article class="dashboard-kpi-card loss-card">
-              <span class="card-label">Saídas no mês</span>
-              <strong id="loss-value" class="money small-money">R$ 0,00</strong>
-            </article>
-          </div>
-        </article>
-
-        <div class="overview-side-column">
-          <article class="card dashboard-side-card dashboard-insight-card">
-            <div class="dashboard-side-header">
-              <span class="card-label">Leitura do período</span>
-              <span class="status-dot positive"></span>
-            </div>
-            <p id="dashboard-insight-text" class="dashboard-insight-text">Sem movimentação suficiente para analisar o período.</p>
-          </article>
-
-          <article id="freebet-overview-card" class="card clickable-card quick-open-card" data-open-tab="freebets">
-            <div class="section-header compact">
-              <h3>Carteira de freebets</h3>
-              <span id="freebet-overview-count" class="badge">0</span>
-            </div>
-            <strong id="freebet-overview-total" class="money small-money">R$ 0,00</strong>
-            <div id="freebet-overview-locations" class="stack-list empty-state compact-stack">Nenhuma freebet cadastrada ainda.</div>
-          </article>
-        </div>
-      </section>
-
       <section class="workspace-shell">
         <div id="dashboard" class="tab-panel active" role="tabpanel">
           <div class="scene-panel">
+            <section class="signal-grid dashboard-only-grid">
+              <article class="signal-card">
+                <span class="card-label">Saldo líquido</span>
+                <strong id="dashboard-net-value" class="money small-money">R$ 0,00</strong>
+                <div id="dashboard-net-badge" class="dashboard-trend-badge neutral">Mês neutro</div>
+              </article>
+
+              <article class="signal-card">
+                <span class="card-label">Exposição aberta</span>
+                <strong id="dashboard-open-exposure" class="money small-money">R$ 0,00</strong>
+              </article>
+
+              <article class="signal-card">
+                <span class="card-label">Surebets ativas</span>
+                <strong id="dashboard-active-surebets" class="money small-money">0</strong>
+              </article>
+
+              <article class="signal-card">
+                <span class="card-label">Freebets ativas</span>
+                <strong id="dashboard-active-freebets" class="money small-money">0</strong>
+              </article>
+            </section>
+
+            <section class="overview-grid dashboard-only-grid">
+              <article class="card highlight-card dashboard-balance-card cinematic-balance-card">
+                <div class="dashboard-balance-topline">
+                  <div class="dashboard-balance-heading">
+                    <p class="eyebrow">Painel mestre</p>
+                    <span class="card-label">Patrimônio operacional</span>
+                    <strong class="money dashboard-balance-value" id="bankroll-value-ghost">R$ 0,00</strong>
+                    <p class="dashboard-balance-copy">A banca comanda o ritmo da operação. Use este plano para ler o mês e decidir onde abrir, fechar ou aliviar capital.</p>
+                  </div>
+                </div>
+
+                <div class="dashboard-kpi-grid">
+                  <article class="dashboard-kpi-card gain-card">
+                    <span class="card-label">Ganhos no mês</span>
+                    <strong id="gain-value" class="money small-money">R$ 0,00</strong>
+                  </article>
+
+                  <article class="dashboard-kpi-card loss-card">
+                    <span class="card-label">Saídas no mês</span>
+                    <strong id="loss-value" class="money small-money">R$ 0,00</strong>
+                  </article>
+                </div>
+              </article>
+
+              <div class="overview-side-column">
+                <article class="card dashboard-side-card dashboard-insight-card">
+                  <div class="dashboard-side-header">
+                    <span class="card-label">Leitura do período</span>
+                    <span class="status-dot positive"></span>
+                  </div>
+                  <p id="dashboard-insight-text" class="dashboard-insight-text">Sem movimentação suficiente para analisar o período.</p>
+                </article>
+
+                <article id="freebet-overview-card" class="card clickable-card quick-open-card" data-open-tab="freebets">
+                  <div class="section-header compact">
+                    <h3>Carteira de freebets</h3>
+                    <span id="freebet-overview-count" class="badge">0</span>
+                  </div>
+                  <strong id="freebet-overview-total" class="money small-money">R$ 0,00</strong>
+                  <div id="freebet-overview-locations" class="stack-list empty-state compact-stack">Nenhuma freebet cadastrada ainda.</div>
+                </article>
+              </div>
+            </section>
+
             <div class="panel-heading editorial-heading">
               <div>
                 <p class="eyebrow">Capítulo 01</p>
