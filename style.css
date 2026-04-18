@@ -461,6 +461,36 @@ label,
     rgba(255, 255, 255, 0.01);
 }
 
+#dashboard .scene-panel,
+#monthly-analysis .scene-panel {
+  gap: var(--space-4);
+}
+
+#dashboard .panel-heading,
+#monthly-analysis .panel-heading {
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+#dashboard .section-card,
+#monthly-analysis .section-card {
+  padding: var(--space-5);
+}
+
+#dashboard .control-grid,
+#monthly-analysis .analysis-grid,
+#monthly-analysis .analysis-details-grid {
+  gap: var(--space-3);
+}
+
+#monthly-analysis .filter-bar {
+  padding: var(--space-4);
+}
+
+#monthly-analysis .metric-card {
+  padding: var(--space-5);
+}
+
 .workspace-shell {
   flex-direction: column;
 }
