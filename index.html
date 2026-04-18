@@ -349,33 +349,89 @@
 
             <section class="card form-card operation-scene-card">
               <form id="surebet-form" class="stack-form operation-form">
-                <section class="form-overview-panel highlight-panel">
-                  <span class="card-label">Distribuição automática por stake total</span>
+                <section class="form-overview-panel highlight-panel studio-overview-bar">
+                  <div>
+                    <span class="card-label">Distribuição automática por stake total</span>
+                    <strong class="overview-strong">O cálculo reage em tempo real conforme odds e stakes mudam.</strong>
+                  </div>
+                  <label class="inline-field studio-top-control" for="fixed-total-input">
+                    <span>Stake alvo</span>
+                    <input id="fixed-total-input" type="number" min="1" step="0.01" value="100" placeholder="100,00">
+                  </label>
                 </section>
 
                 <input id="surebet-total-input" name="surebetTotal" type="hidden" value="100">
 
-                <div class="operation-form-main studio-columns">
-                  <section class="bet-side-card freebet-side-card form-section studio-block">
-                    <div class="section-header compact freebet-side-header">
-                      <h3>Lado principal</h3>
-                    </div>
-                    <div class="freebet-side-layout">
-                      <div id="main-entries" class="entries-list"></div>
-                    </div>
-                  </section>
-
-                  <section class="bet-side-card freebet-side-card form-section form-section-emphasis studio-block">
-                    <div class="section-header compact freebet-side-header">
-                      <h3>Lado contrário</h3>
-                      <div class="side-actions">
-                        <button type="button" id="add-surebet-counter-entry-button" class="mini-button">Adicionar casa</button>
+                <div class="operation-form-grid studio-grid surebet-studio-grid">
+                  <div class="operation-form-main studio-columns">
+                    <section class="bet-side-card freebet-side-card form-section studio-block">
+                      <div class="section-header compact freebet-side-header">
+                        <div>
+                          <span class="card-label">Plano A</span>
+                          <h3>Lado principal</h3>
+                        </div>
+                        <div class="side-actions">
+                          <button type="button" class="mini-button" data-add-entry="main">Adicionar casa</button>
+                        </div>
                       </div>
-                    </div>
-                    <div class="freebet-side-layout">
-                      <div id="counter-entries" class="entries-list"></div>
-                    </div>
-                  </section>
+                      <div class="freebet-side-layout">
+                        <div id="main-entries" class="entries-list"></div>
+                      </div>
+                    </section>
+
+                    <section class="bet-side-card freebet-side-card form-section form-section-emphasis studio-block">
+                      <div class="section-header compact freebet-side-header">
+                        <div>
+                          <span class="card-label">Plano B</span>
+                          <h3>Lado contrário</h3>
+                        </div>
+                        <div class="side-actions">
+                          <button type="button" id="add-surebet-counter-entry-button" class="mini-button">Adicionar casa</button>
+                        </div>
+                      </div>
+                      <div class="freebet-side-layout">
+                        <div id="counter-entries" class="entries-list"></div>
+                      </div>
+                    </section>
+                  </div>
+
+                  <aside class="operation-form-sidebar">
+                    <section class="bet-side-card form-section summary-card studio-aside surebet-preview-card">
+                      <div class="section-header compact">
+                        <h3>Monitor da surebet</h3>
+                        <span id="surebet-status" class="form-status-badge neutral">Preencha odds válidas</span>
+                      </div>
+
+                      <div class="studio-monitor-grid">
+                        <label class="readonly-metric-field">
+                          <span>Profit projetado</span>
+                          <input id="profit-input" type="text" readonly value="R$ 0,00">
+                        </label>
+
+                        <div class="studio-monitor-line">
+                          <span class="card-label">Resultado A</span>
+                          <strong id="main-result-value">R$ 0,00</strong>
+                        </div>
+
+                        <div class="studio-monitor-line">
+                          <span class="card-label">Resultado B</span>
+                          <strong id="counter-result-value">R$ 0,00</strong>
+                        </div>
+
+                        <div class="studio-monitor-line">
+                          <span class="card-label">Profit %</span>
+                          <strong id="calculated-profit-percent">0,00%</strong>
+                        </div>
+                      </div>
+
+                      <div class="summary-notes">
+                        <div class="detail-line">
+                          <span>Leitura</span>
+                          <strong>Distribuição automática com preview editorial</strong>
+                        </div>
+                      </div>
+                    </section>
+                  </aside>
                 </div>
 
                 <div class="form-submit-bar">
@@ -399,15 +455,24 @@
 
             <section class="card form-card operation-scene-card">
               <form id="freebet-form" class="stack-form operation-form">
-                <section class="form-overview-panel accent-panel">
-                  <span class="card-label">Valor da freebet em foco</span>
+                <section class="form-overview-panel accent-panel studio-overview-bar">
+                  <div>
+                    <span class="card-label">Valor da freebet em foco</span>
+                    <strong class="overview-strong">O hedge redistribui automaticamente com base nas odds informadas.</strong>
+                  </div>
                 </section>
 
                 <div class="operation-form-grid studio-grid">
                   <div class="operation-form-main studio-columns">
                     <section class="bet-side-card freebet-side-card form-section studio-block">
                       <div class="section-header compact freebet-side-header">
-                        <h3>Lado da freebet</h3>
+                        <div>
+                          <span class="card-label">Origem</span>
+                          <h3>Lado da freebet</h3>
+                        </div>
+                        <div class="side-actions">
+                          <button type="button" class="mini-button" data-add-entry="freebetMain">Adicionar casa</button>
+                        </div>
                       </div>
                       <div class="freebet-side-layout">
                         <div id="freebet-main-entries" class="entries-list"></div>
@@ -416,7 +481,10 @@
 
                     <section class="bet-side-card freebet-side-card form-section form-section-emphasis studio-block">
                       <div class="section-header compact freebet-side-header">
-                        <h3>Hedge</h3>
+                        <div>
+                          <span class="card-label">Proteção</span>
+                          <h3>Hedge</h3>
+                        </div>
                         <div class="side-actions">
                           <button type="button" id="add-freebet-hedge-entry-button" class="mini-button">Adicionar casa</button>
                         </div>
@@ -442,6 +510,10 @@
                         <div class="detail-line">
                           <span>Operação</span>
                           <strong>Freebet + hedge</strong>
+                        </div>
+                        <div class="detail-line">
+                          <span>Distribuição</span>
+                          <strong>Automática pelas odds</strong>
                         </div>
                       </div>
                     </section>
@@ -469,8 +541,11 @@
 
             <section class="card form-card operation-scene-card compact-ledger-form">
               <form id="expense-form" class="stack-form operation-form compact-operation-form">
-                <section class="form-overview-panel neutral-panel">
-                  <span class="card-label">Lançamento rápido</span>
+                <section class="form-overview-panel neutral-panel studio-overview-bar">
+                  <div>
+                    <span class="card-label">Lançamento rápido</span>
+                    <strong class="overview-strong">Registre impacto direto na banca com contexto curto e leitura clara.</strong>
+                  </div>
                 </section>
 
                 <section class="bet-side-card form-section summary-card expense-entry-panel">

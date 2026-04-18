@@ -91,8 +91,19 @@ window.BetControlBetForms = ((calculations, utils) => {
     }
 
     function getSurebetTargetTotal() {
-      const value = Number(elements.surebetTotalInput?.value);
+      const controlValue = Number(elements.fixedTotalInput?.value);
+      const value = Number.isNaN(controlValue) || controlValue <= 0
+        ? Number(elements.surebetTotalInput?.value)
+        : controlValue;
       return Number.isNaN(value) || value <= 0 ? defaultSurebetTotal : value;
+    }
+
+    function syncSurebetTargetInput() {
+      if (!elements.surebetTotalInput) {
+        return;
+      }
+
+      elements.surebetTotalInput.value = String(getSurebetTargetTotal());
     }
 
     function getFreebetTargetTotal() {
@@ -105,6 +116,8 @@ window.BetControlBetForms = ((calculations, utils) => {
       if (rows.length === 0) {
         return;
       }
+
+      syncSurebetTargetInput();
 
       const entries = rows.map((row) => {
         const odd = Number(row.querySelector('[name="odd"]').value);
@@ -278,6 +291,7 @@ window.BetControlBetForms = ((calculations, utils) => {
       const { source = 'controls' } = options;
 
       if (source === 'controls') {
+        syncSurebetTargetInput();
         rebalanceSurebetStakesFromOdds();
         updateSurebetResults();
       }
@@ -314,6 +328,7 @@ window.BetControlBetForms = ((calculations, utils) => {
     }
 
     function handleFixedSideChange() {
+      syncSurebetTargetInput();
       updateSurebetPreview({ source: 'controls' });
     }
 

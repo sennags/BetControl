@@ -790,6 +790,24 @@ select {
   background: rgba(255, 255, 255, 0.018);
 }
 
+.studio-overview-bar {
+  align-items: end;
+}
+
+.overview-strong {
+  display: block;
+  margin-top: var(--space-2);
+  color: var(--text-soft);
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.35;
+  letter-spacing: -0.03em;
+}
+
+.studio-top-control {
+  min-width: 220px;
+}
+
 .highlight-panel,
 .accent-panel,
 .neutral-panel,
@@ -803,15 +821,62 @@ select {
   align-items: start;
 }
 
+.surebet-studio-grid {
+  grid-template-columns: minmax(0, 1.5fr) minmax(300px, 0.85fr);
+}
+
 .studio-columns {
   display: grid;
   gap: var(--space-5);
+}
+
+.studio-block {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.032) 0%, rgba(255, 255, 255, 0.012) 100%),
+    rgba(255, 255, 255, 0.01);
+}
+
+.studio-block .section-header {
+  align-items: end;
 }
 
 .studio-aside,
 .summary-card {
   position: sticky;
   top: var(--space-5);
+}
+
+.surebet-preview-card {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.012) 100%),
+    rgba(255, 255, 255, 0.012);
+}
+
+.studio-monitor-grid {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.studio-monitor-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: 56px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.studio-monitor-line strong {
+  font-size: 1.05rem;
+  font-weight: 400;
+  letter-spacing: -0.03em;
+}
+
+.readonly-metric-field input {
+  font-size: 1.15rem;
 }
 
 .form-featured-field input,
@@ -830,6 +895,9 @@ select {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(220px, 1fr) auto;
   align-items: end;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.028) 0%, rgba(255, 255, 255, 0.012) 100%),
+    rgba(255, 255, 255, 0.012);
 }
 
 .freebet-entry-row {
@@ -1028,7 +1096,8 @@ select {
   .panel-heading,
   .editorial-heading,
   .scene-toolbar,
-  .form-submit-bar {
+  .form-submit-bar,
+  .studio-overview-bar {
     flex-direction: column;
     align-items: stretch;
   }
