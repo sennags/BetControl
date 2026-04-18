@@ -995,11 +995,37 @@ select {
 }
 
 .freebet-winner-row input {
-  width: 16px;
-  height: 16px;
+  position: relative;
+  width: 18px;
+  height: 18px;
   margin: 0;
   justify-self: center;
-  accent-color: var(--text-soft);
+  border: 1px solid var(--line-strong);
+  border-radius: 4px;
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.freebet-winner-row input:checked {
+  border-color: var(--text-soft);
+  background: var(--text-soft);
+}
+
+.freebet-winner-row input:checked::after {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 1px;
+  width: 4px;
+  height: 9px;
+  border-right: 2px solid #0c0c0c;
+  border-bottom: 2px solid #0c0c0c;
+  transform: rotate(45deg);
+}
+
+.freebet-winner-row input:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.35);
+  outline-offset: 2px;
 }
 
 .freebet-winner-house,
