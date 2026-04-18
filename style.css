@@ -144,9 +144,9 @@ small {
   z-index: 1;
   display: grid;
   grid-template-columns: minmax(260px, var(--rail-width)) minmax(0, 1fr);
-  max-width: var(--container);
+  width: 100%;
   min-height: 100vh;
-  margin: 0 auto;
+  margin: 0;
 }
 
 .app-rail {
