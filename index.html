@@ -15,47 +15,65 @@
       <div class="topbar-brand">
         <p class="eyebrow">Controle de surebets e custos</p>
         <h1>BetControl</h1>
+        <p class="topbar-copy">Ledger operacional para banca, arbitragem e fluxo financeiro em uma interface densa, escura e orientada por resultado.</p>
       </div>
-      <button id="save-bankroll-button" class="secondary-button">Salvar banca</button>
+      <div class="topbar-actions">
+        <div class="topbar-meta">
+          <span class="card-label">Modo operacional</span>
+          <strong>Dark finance cockpit</strong>
+        </div>
+        <button id="save-bankroll-button" class="secondary-button">Salvar banca</button>
+      </div>
     </header>
 
     <main class="editorial-main">
       <section class="dashboard-hero-grid">
         <article class="card highlight-card dashboard-balance-card">
           <div class="dashboard-balance-topline">
-            <div>
+            <div class="dashboard-balance-heading">
+              <p class="eyebrow">Painel principal</p>
               <span class="card-label">Patrimônio operacional</span>
               <strong id="bankroll-value" class="money dashboard-balance-value">R$ 0,00</strong>
+              <p class="dashboard-balance-copy">A banca centraliza o ritmo da operação. Use este painel para leitura rápida do mês e ajuste manual quando houver novo aporte ou retirada.</p>
             </div>
             <div id="dashboard-net-badge" class="dashboard-trend-badge neutral">Mês neutro</div>
           </div>
 
-          <div class="dashboard-kpi-grid">
-            <article class="dashboard-kpi-card">
-              <span class="card-label">Saldo líquido do mês</span>
-              <strong id="dashboard-net-value" class="money small-money">R$ 0,00</strong>
-            </article>
+          <div class="dashboard-balance-content">
+            <div class="dashboard-kpi-grid">
+              <article class="dashboard-kpi-card">
+                <span class="card-label">Saldo líquido do mês</span>
+                <strong id="dashboard-net-value" class="money small-money">R$ 0,00</strong>
+              </article>
 
-            <article class="dashboard-kpi-card">
-              <span class="card-label">Exposição aberta</span>
-              <strong id="dashboard-open-exposure" class="money small-money">R$ 0,00</strong>
-            </article>
+              <article class="dashboard-kpi-card">
+                <span class="card-label">Exposição aberta</span>
+                <strong id="dashboard-open-exposure" class="money small-money">R$ 0,00</strong>
+              </article>
 
-            <article class="dashboard-kpi-card">
-              <span class="card-label">Surebets ativas</span>
-              <strong id="dashboard-active-surebets" class="money small-money">0</strong>
-            </article>
+              <article class="dashboard-kpi-card">
+                <span class="card-label">Surebets ativas</span>
+                <strong id="dashboard-active-surebets" class="money small-money">0</strong>
+              </article>
 
-            <article class="dashboard-kpi-card">
-              <span class="card-label">Freebets ativas</span>
-              <strong id="dashboard-active-freebets" class="money small-money">0</strong>
-            </article>
+              <article class="dashboard-kpi-card">
+                <span class="card-label">Freebets ativas</span>
+                <strong id="dashboard-active-freebets" class="money small-money">0</strong>
+              </article>
+            </div>
+
+            <aside class="dashboard-bankroll-rail">
+              <div class="dashboard-rail-copy">
+                <span class="card-label">Ajuste manual</span>
+                <p>Edite a banca e publique o novo marco operacional sem perder o histórico de transição.</p>
+              </div>
+
+              <label class="inline-field dashboard-bankroll-editor" for="bankroll-input">
+                <span>Editar banca</span>
+                <input id="bankroll-input" type="number" min="0" step="0.01" placeholder="0,00">
+              </label>
+            </aside>
           </div>
-
-          <label class="inline-field dashboard-bankroll-editor" for="bankroll-input">
-            <span>Editar banca</span>
-            <input id="bankroll-input" type="number" min="0" step="0.01" placeholder="0,00">
-          </label>
         </article>
 
         <div class="dashboard-side-column">
@@ -83,29 +101,48 @@
       </section>
 
       <section class="tabs-section">
-        <div class="tabs-layout">
-          <div class="tabs-group">
-            <span class="tabs-group-label">Visão geral</span>
-            <div class="tabs" role="tablist" aria-label="Abas principais">
-              <button class="tab-button active" data-tab="dashboard" role="tab" aria-selected="true">Resumo</button>
-              <button class="tab-button" data-tab="history" role="tab" aria-selected="false">Histórico</button>
-              <button class="tab-button" data-tab="monthly-analysis" role="tab" aria-selected="false">Análise mensal</button>
-              <button class="tab-button" data-tab="freebets" role="tab" aria-selected="false">Freebets</button>
-              <button class="tab-button" data-tab="expenses" role="tab" aria-selected="false">Gastos/Lucrinho</button>
+        <div class="tabs-shell card">
+          <div class="tabs-intro">
+            <div>
+              <p class="eyebrow">Navegação operacional</p>
+              <h2>Fluxos da aplicação</h2>
             </div>
+            <p class="tabs-copy">A navegação foi reorganizada em duas frentes: leitura do sistema e criação de novos movimentos. A lógica de tabs permanece a mesma.</p>
           </div>
 
-          <div class="tabs-group">
-            <span class="tabs-group-label">Adicionar</span>
-            <div class="tabs" role="tablist" aria-label="Abas de cadastro">
-              <button class="tab-button tab-button-accent" data-tab="surebet" role="tab" aria-selected="false">Nova surebet</button>
-              <button class="tab-button tab-button-accent" data-tab="freebet" role="tab" aria-selected="false">Nova freebet</button>
-              <button class="tab-button tab-button-accent" data-tab="expense" role="tab" aria-selected="false">Novo gasto/lucrinho</button>
+          <div class="tabs-layout">
+            <div class="tabs-group">
+              <span class="tabs-group-label">Visão geral</span>
+              <div class="tabs" role="tablist" aria-label="Abas principais">
+                <button class="tab-button active" data-tab="dashboard" role="tab" aria-selected="true">Resumo</button>
+                <button class="tab-button" data-tab="history" role="tab" aria-selected="false">Histórico</button>
+                <button class="tab-button" data-tab="monthly-analysis" role="tab" aria-selected="false">Análise mensal</button>
+                <button class="tab-button" data-tab="freebets" role="tab" aria-selected="false">Freebets</button>
+                <button class="tab-button" data-tab="expenses" role="tab" aria-selected="false">Gastos/Lucrinho</button>
+              </div>
+            </div>
+
+            <div class="tabs-group">
+              <span class="tabs-group-label">Adicionar</span>
+              <div class="tabs" role="tablist" aria-label="Abas de cadastro">
+                <button class="tab-button tab-button-accent" data-tab="surebet" role="tab" aria-selected="false">Nova surebet</button>
+                <button class="tab-button tab-button-accent" data-tab="freebet" role="tab" aria-selected="false">Nova freebet</button>
+                <button class="tab-button tab-button-accent" data-tab="expense" role="tab" aria-selected="false">Novo gasto/lucrinho</button>
+              </div>
             </div>
           </div>
         </div>
 
         <div id="dashboard" class="tab-panel active" role="tabpanel">
+          <div class="tab-panel-frame">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Dashboard</p>
+                <h2>Operações abertas</h2>
+              </div>
+              <p class="panel-copy">Surebets em aberto, entradas do dia e posição atual das freebets em uma leitura única.</p>
+            </div>
+
           <div class="panel-grid">
             <section class="card">
               <div class="section-header">
@@ -138,9 +175,19 @@
               </div>
             </section>
           </div>
+          </div>
         </div>
 
         <div id="history" class="tab-panel" role="tabpanel" hidden>
+          <div class="tab-panel-frame">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Arquivo operacional</p>
+                <h2>Histórico consolidado</h2>
+              </div>
+              <p class="panel-copy">Filtre por período, tipo e resultado para revisar o comportamento recente da operação.</p>
+            </div>
+
           <div class="panel-grid single-column">
             <section class="card history-card">
               <div class="section-header">
@@ -179,9 +226,19 @@
               </div>
             </section>
           </div>
+          </div>
         </div>
 
         <div id="monthly-analysis" class="tab-panel" role="tabpanel" hidden>
+          <div class="tab-panel-frame">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Leitura mensal</p>
+                <h2>Análise de performance</h2>
+              </div>
+              <p class="panel-copy">O painel mensal reúne profit, gastos, lucrinho e volume de apostas para leitura de tendência.</p>
+            </div>
+
           <div class="panel-grid single-column">
             <section class="card">
               <div class="section-header">
@@ -240,9 +297,19 @@
               </div>
             </section>
           </div>
+          </div>
         </div>
 
         <div id="expenses" class="tab-panel" role="tabpanel" hidden>
+          <div class="tab-panel-frame">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Fluxo financeiro</p>
+                <h2>Saídas e lucrinho</h2>
+              </div>
+              <p class="panel-copy">Movimentações financeiras fora da liquidação direta das bets ficam concentradas aqui.</p>
+            </div>
+
           <div class="panel-grid single-column">
             <section class="card">
               <div class="section-header">
@@ -261,9 +328,19 @@
               </div>
             </section>
           </div>
+          </div>
         </div>
 
         <div id="freebets" class="tab-panel" role="tabpanel" hidden>
+          <div class="tab-panel-frame">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Carteira de freebets</p>
+                <h2>Controle de freebets</h2>
+              </div>
+              <p class="panel-copy">Acompanhe posições ativas e o histórico das freebets concluídas sem sair da mesma área.</p>
+            </div>
+
           <div class="panel-grid single-column">
             <section class="card">
               <div class="section-header">
@@ -285,15 +362,18 @@
               </div>
             </section>
           </div>
+          </div>
         </div>
 
         <div id="surebet" class="tab-panel" role="tabpanel" hidden>
-          <section class="card form-card">
+          <div class="tab-panel-frame tab-panel-frame-form">
+          <section class="card form-card operations-stage">
             <div class="form-heading-block">
               <p class="eyebrow">Nova operação</p>
               <div class="section-header">
                 <h2>Nova surebet</h2>
               </div>
+              <p class="section-helper">Monte os lados da operação em uma superfície única, com blocos separados para leitura imediata das casas principais e contrárias.</p>
             </div>
 
             <form id="surebet-form" class="stack-form operation-form">
@@ -303,7 +383,7 @@
 
               <input id="surebet-total-input" name="surebetTotal" type="hidden" value="100">
 
-              <div class="operation-form-main surebet-form-layout">
+              <div class="operation-form-main surebet-form-layout operations-layout">
                 <section class="bet-side-card freebet-side-card form-section">
                   <div class="section-header compact freebet-side-header">
                     <h3>Casas da surebet</h3>
@@ -334,15 +414,18 @@
               </div>
             </form>
           </section>
+          </div>
         </div>
 
         <div id="freebet" class="tab-panel" role="tabpanel" hidden>
-          <section class="card form-card">
+          <div class="tab-panel-frame tab-panel-frame-form">
+          <section class="card form-card operations-stage">
             <div class="form-heading-block">
               <p class="eyebrow">Nova operação</p>
               <div class="section-header">
                 <h2>Nova freebet</h2>
               </div>
+              <p class="section-helper">Organize as casas da freebet e do hedge em painéis paralelos, mantendo o parâmetro principal sempre visível.</p>
             </div>
 
             <form id="freebet-form" class="stack-form operation-form">
@@ -403,15 +486,18 @@
               </div>
             </form>
           </section>
+          </div>
         </div>
 
         <div id="expense" class="tab-panel" role="tabpanel" hidden>
-          <section class="card form-card">
+          <div class="tab-panel-frame tab-panel-frame-form">
+          <section class="card form-card operations-stage">
             <div class="form-heading-block">
               <p class="eyebrow">Lançamento financeiro</p>
               <div class="section-header">
                 <h2>Novo gasto/lucrinho</h2>
               </div>
+              <p class="section-helper">Use este formulário para registrar saídas operacionais e entradas auxiliares sem interferir na leitura das apostas.</p>
             </div>
 
             <form id="expense-form" class="stack-form operation-form compact-operation-form">
@@ -447,6 +533,7 @@
               </div>
             </form>
           </section>
+          </div>
         </div>
       </section>
     </main>
