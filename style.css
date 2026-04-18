@@ -996,14 +996,18 @@ select {
 
 .freebet-winner-row input {
   position: relative;
+  min-height: 12px;
   width: 14px;
   height: 14px;
   margin: 0;
+  padding: 0;
   justify-self: center;
+  align-self: center;
   border: 1px solid var(--line-strong);
   border-radius: 4px;
   background: var(--surface);
   cursor: pointer;
+  flex: 0 0 14px;
 }
 
 .freebet-winner-row input:checked {
