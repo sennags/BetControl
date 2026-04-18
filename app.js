@@ -872,17 +872,26 @@ function renderEntriesHistory() {
     const changeClass = displayChange >= 0 ? 'positive-text' : 'negative-text';
 
     return `
-      <article class="item-card entries-history-card">
-        <div class="item-header">
-          <h3>${reason}</h3>
-          <div class="item-actions">
-            <strong class="${changeClass}">${formatSignedCurrency(displayChange)}</strong>
+      <article class="item-card ledger-card entries-history-card">
+        <div class="ledger-card-head">
+          <div class="ledger-card-title-block">
+            <span class="eyebrow">Ledger diário</span>
+            <h3>${reason}</h3>
+            <div class="ledger-hero-amount">
+              <span class="card-label">Impacto</span>
+              <strong class="${changeClass}">${formatSignedCurrency(displayChange)}</strong>
+            </div>
+          </div>
+          <div class="item-actions ledger-card-actions">
             <button type="button" class="danger-button" data-action="delete-entry-history" data-id="${item.id}">Remover</button>
           </div>
         </div>
         ${description}
-        <div class="item-meta">
-          <span class="chip">Data: ${formatDate(item.createdAt)}</span>
+        <div class="ledger-metric-strip">
+          <div class="ledger-metric-cell">
+            <span class="card-label">Data</span>
+            <strong>${formatDate(item.createdAt)}</strong>
+          </div>
         </div>
       </article>
     `;
@@ -1269,20 +1278,37 @@ function renderExpenses() {
     const cardClass = item.entryType === 'lucrinho' ? 'sidegain-entry' : 'expense-entry';
     const signedAmount = item.entryType === 'lucrinho' ? formatSignedCurrency(item.amount) : formatSignedCurrency(-item.amount);
     return `
-      <article class="item-card expense-card ${cardClass}">
-        <div class="item-header">
-          <h3>${typeLabel}</h3>
-          <div class="item-actions">
+      <article class="item-card expense-card ledger-card ${cardClass}">
+        <div class="ledger-card-head">
+          <div class="ledger-card-title-block">
+            <span class="eyebrow">Fluxo financeiro</span>
+            <h3>${typeLabel}</h3>
+            <div class="ledger-hero-amount">
+              <span class="card-label">Impacto</span>
+              <strong>${signedAmount}</strong>
+            </div>
+          </div>
+          <div class="item-actions ledger-card-actions">
             <button type="button" class="secondary-button" data-action="edit-expense" data-id="${item.id}">Editar</button>
             <button type="button" class="danger-button" data-action="delete-expense" data-id="${item.id}">Excluir</button>
           </div>
         </div>
         <p>${escapeHtml(item.description)}</p>
-        <div class="item-meta">
-          <span class="chip">Tipo: ${typeLabel}</span>
-          <span class="chip">Valor: ${signedAmount}</span>
-          ${item.bankrollBefore != null && item.bankrollAfter != null ? `<span class="chip">Antes ${formatCurrency(item.bankrollBefore)} | Depois ${formatCurrency(item.bankrollAfter)}</span>` : ''}
-          <span class="chip">Data: ${formatDate(item.createdAt)}</span>
+        <div class="ledger-metric-strip">
+          <div class="ledger-metric-cell">
+            <span class="card-label">Tipo</span>
+            <strong>${typeLabel}</strong>
+          </div>
+          <div class="ledger-metric-cell">
+            <span class="card-label">Data</span>
+            <strong>${formatDate(item.createdAt)}</strong>
+          </div>
+          ${item.bankrollBefore != null && item.bankrollAfter != null ? `
+            <div class="ledger-metric-cell ledger-metric-cell-wide">
+              <span class="card-label">Transição de banca</span>
+              <strong>${formatCurrency(item.bankrollBefore)} -> ${formatCurrency(item.bankrollAfter)}</strong>
+            </div>
+          ` : ''}
         </div>
       </article>
     `;

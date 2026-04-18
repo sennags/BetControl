@@ -34,6 +34,43 @@ window.BetControlBetCards = ((utils, calculations) => {
     }).join('');
   }
 
+  function buildCardHeader(title, eyebrow, actions, amountLabel = '', amountValue = '') {
+    const amountBlock = amountLabel
+      ? `
+        <div class="ledger-hero-amount">
+          <span class="card-label">${escapeHtml(amountLabel)}</span>
+          <strong>${escapeHtml(amountValue)}</strong>
+        </div>
+      `
+      : '';
+
+    return `
+      <div class="ledger-card-head">
+        <div class="ledger-card-title-block">
+          <span class="eyebrow">${escapeHtml(eyebrow)}</span>
+          <h3>${escapeHtml(title)}</h3>
+          ${amountBlock}
+        </div>
+        <div class="item-actions ledger-card-actions">
+          ${actions}
+        </div>
+      </div>
+    `;
+  }
+
+  function buildMetricStrip(metrics) {
+    return `
+      <div class="ledger-metric-strip">
+        ${metrics.map((metric) => `
+          <div class="ledger-metric-cell">
+            <span class="card-label">${escapeHtml(metric.label)}</span>
+            <strong>${escapeHtml(metric.value)}</strong>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
   function buildEntryPrintGroups(groups) {
     const visibleGroups = groups.map((group) => ({
       ...group,
@@ -47,9 +84,9 @@ window.BetControlBetCards = ((utils, calculations) => {
     }
 
     return `
-      <div class="bet-print-groups">
+      <div class="bet-print-groups ledger-print-groups">
         ${visibleGroups.map((group) => `
-          <section class="bet-print-group">
+          <section class="bet-print-group ledger-print-group">
             <strong class="bet-print-group-title">${escapeHtml(group.label)}</strong>
             <div class="bet-print-list">
               ${group.entries.map((entry, index) => {
@@ -70,9 +107,9 @@ window.BetControlBetCards = ((utils, calculations) => {
     }
 
     return `
-      <div class="bet-print-groups">
+      <div class="bet-print-groups ledger-print-groups">
         ${visibleGroups.map((group) => `
-          <section class="bet-print-group">
+          <section class="bet-print-group ledger-print-group">
             <strong class="bet-print-group-title">${escapeHtml(group.label)}</strong>
             <div class="bet-print-list">
               ${buildPrintActions(group.prints, group.buttonLabel, group.downloadPrefix)}
@@ -87,7 +124,7 @@ window.BetControlBetCards = ((utils, calculations) => {
     const totalStake = getFreebetTotalStake(item);
 
     return getFreebetSelectableEntries(item).map((entry) => `
-      <label class="freebet-winner-row">
+      <label class="freebet-winner-row ledger-outcome-row">
         <input type="checkbox" data-freebet-winner data-entry-key="${entry.key}">
         <span class="freebet-winner-house">${escapeHtml(entry.house || 'Sem casa')}</span>
         <span class="winner-metric"><span class="winner-metric-label">Odd</span><strong>${Number(entry.odd || 0).toFixed(2)}</strong></span>
@@ -104,7 +141,7 @@ window.BetControlBetCards = ((utils, calculations) => {
       const isWinner = Array.isArray(item.selectedWinnerKeys) && item.selectedWinnerKeys.includes(entry.key);
 
       return `
-        <div class="freebet-winner-row history-row ${isWinner ? 'winner-row' : ''}">
+        <div class="freebet-winner-row history-row ledger-outcome-row ${isWinner ? 'winner-row' : ''}">
           <span class="freebet-winner-house">${escapeHtml(entry.house || 'Sem casa')}</span>
           <span class="winner-metric"><span class="winner-metric-label">Odd</span><strong>${Number(entry.odd || 0).toFixed(2)}</strong></span>
           <span class="winner-metric"><span class="winner-metric-label">Stake</span><strong>${formatCurrency(entry.amount)}</strong></span>
@@ -126,13 +163,13 @@ window.BetControlBetCards = ((utils, calculations) => {
       : '';
 
     return `
-      <article class="item-card freebet-card" data-freebet-id="${item.id}">
-        <div class="item-header">
-          <h3>${escapeHtml(item.title)}</h3>
-          <div class="item-actions">
-            ${actionButton}
-          </div>
-        </div>
+      <article class="item-card freebet-card ledger-card" data-freebet-id="${item.id}">
+        ${buildCardHeader(item.title, fromHistory ? 'Freebet liquidada' : 'Freebet ativa', actionButton, fromHistory ? 'Profit liquidado' : 'Freebet a ganhar', fromHistory ? formatSignedCurrency(item.settledResult ?? 0) : formatCurrency(item.freebetAmount || 0))}
+        ${buildMetricStrip([
+          { label: 'Stake freebet', value: formatCurrency(item.freebetStake || 0) },
+          { label: 'Stake hedge', value: formatCurrency(item.hedgeStake || 0) },
+          { label: 'Profit travado', value: formatSignedCurrency(item.guaranteedProfit || 0) }
+        ])}
         ${fromHistory ? buildFreebetHistoryRows(item) : buildFreebetWinnerRows(item)}
         ${buildEntryPrintGroups([
           { label: 'Prints da freebet', entries: item.freebetEntries, fallbackLabel: 'Casa da freebet', downloadPrefix: 'freebet' },
@@ -154,7 +191,7 @@ window.BetControlBetCards = ((utils, calculations) => {
     const totalStake = getSurebetTotalStake(item);
 
     return getSurebetSelectableEntries(item).map((entry) => `
-      <label class="freebet-winner-row">
+      <label class="freebet-winner-row ledger-outcome-row">
         <input type="checkbox" data-surebet-winner data-entry-key="${entry.key}">
         <span class="freebet-winner-house">${escapeHtml(entry.house || 'Sem casa')}</span>
         <span class="winner-metric"><span class="winner-metric-label">Odd</span><strong>${Number(entry.odd || 0).toFixed(2)}</strong></span>
@@ -171,7 +208,7 @@ window.BetControlBetCards = ((utils, calculations) => {
       const isWinner = Array.isArray(item.selectedWinnerKeys) && item.selectedWinnerKeys.includes(entry.key);
 
       return `
-        <div class="freebet-winner-row history-row ${isWinner ? 'winner-row' : ''}">
+        <div class="freebet-winner-row history-row ledger-outcome-row ${isWinner ? 'winner-row' : ''}">
           <span class="freebet-winner-house">${escapeHtml(entry.house || 'Sem casa')}</span>
           <span class="winner-metric"><span class="winner-metric-label">Odd</span><strong>${Number(entry.odd || 0).toFixed(2)}</strong></span>
           <span class="winner-metric"><span class="winner-metric-label">Stake</span><strong>${formatCurrency(entry.amount)}</strong></span>
@@ -208,14 +245,13 @@ window.BetControlBetCards = ((utils, calculations) => {
 
   function buildSurebetCard(item) {
     return `
-      <article class="item-card freebet-card" data-surebet-id="${item.id}">
-        <div class="item-header">
-          <h3>${escapeHtml(item.title)}</h3>
-          <div class="item-actions">
-            <button type="button" class="success-button" data-action="finish-surebet" data-id="${item.id}">Feito</button>
-            <button type="button" class="danger-button" data-action="delete-surebet" data-id="${item.id}">Excluir</button>
-          </div>
-        </div>
+      <article class="item-card freebet-card ledger-card" data-surebet-id="${item.id}">
+        ${buildCardHeader(item.title, 'Surebet ativa', `<button type="button" class="success-button" data-action="finish-surebet" data-id="${item.id}">Feito</button><button type="button" class="danger-button" data-action="delete-surebet" data-id="${item.id}">Excluir</button>`, 'Profit projetado', formatSignedCurrency(item.profit || 0))}
+        ${buildMetricStrip([
+          { label: 'Stake total', value: formatCurrency(getSurebetTotalStake(item)) },
+          { label: 'Resultado A', value: formatSignedCurrency(item.mainResult || 0) },
+          { label: 'Resultado B', value: formatSignedCurrency(item.counterResult || 0) }
+        ])}
         ${buildSurebetDetails(item, false)}
       </article>
     `;
@@ -227,14 +263,13 @@ window.BetControlBetCards = ((utils, calculations) => {
     }
 
     return `
-      <article class="item-card">
-        <div class="item-header">
-          <h3>${escapeHtml(item.title)}</h3>
-          <div class="item-actions">
-            <button type="button" class="danger-button" data-action="delete-history-surebet" data-id="${item.id}">Excluir</button>
-          </div>
-        </div>
-        <p><strong>Batida em:</strong> ${formatDate(item.settledAt || item.createdAt)}</p>
+      <article class="item-card ledger-card history-ledger-card">
+        ${buildCardHeader(item.title, 'Surebet liquidada', `<button type="button" class="danger-button" data-action="delete-history-surebet" data-id="${item.id}">Excluir</button>`, 'Profit liquidado', formatSignedCurrency(item.settledResult ?? 0))}
+        ${buildMetricStrip([
+          { label: 'Batida em', value: formatDate(item.settledAt || item.createdAt) },
+          { label: 'Stake total', value: formatCurrency(getSurebetTotalStake(item)) },
+          { label: 'Ganhadoras', value: item.settledOutcomeLabel || 'Nao informado' }
+        ])}
         ${buildSurebetDetails(item, true)}
       </article>
     `;
