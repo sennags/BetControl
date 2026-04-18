@@ -96,8 +96,8 @@ window.BetControlBetForms = ((calculations, utils) => {
     }
 
     function getFreebetTargetTotal() {
-      const value = Number(elements.freebetAmountInput.value);
-      return Number.isNaN(value) || value <= 0 ? defaultFreebetTotal : value;
+      const currentTotal = sumEntryAmounts(elements.freebetMainEntries) + sumEntryAmounts(elements.freebetHedgeEntries);
+      return currentTotal > 0 ? currentTotal : defaultFreebetTotal;
     }
 
     function rebalanceSurebetStakesFromOdds() {

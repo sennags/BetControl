@@ -4,9 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BetControl</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -379,13 +376,14 @@
                 <aside class="operation-form-sidebar">
                   <section class="bet-side-card form-section summary-card">
                     <div class="section-header compact">
-                      <h3>Parâmetro principal</h3>
+                      <h3>Valor da freebet</h3>
                     </div>
 
                     <label class="form-featured-field" for="freebet-amount-input">
-                      <span>Freebet que vai ganhar</span>
+                      <span>Valor da freebet</span>
                       <input id="freebet-amount-input" name="freebetAmount" type="number" min="0.01" step="0.01" required value="100" placeholder="100,00">
                     </label>
+                    <p class="field-helper">Indicativo apenas. Não altera os stakes.</p>
 
                     <div class="summary-notes">
                       <div class="detail-line">
