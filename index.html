@@ -13,13 +13,11 @@
   <div class="app-shell">
     <aside class="app-rail">
       <div class="rail-brand">
-        <p class="eyebrow">Design Runway Applied</p>
         <h1>BetControl</h1>
         <p class="rail-copy">Uma estação operacional para arbitragem, freebets e fluxo financeiro, com leitura editorial e navegação em capítulos.</p>
       </div>
 
       <div class="rail-group">
-        <span class="rail-label">Leitura</span>
         <button class="tab-button rail-link active" data-tab="dashboard" data-scene-title="Resumo operacional" role="tab" aria-selected="true">Resumo</button>
         <button class="tab-button rail-link" data-tab="history" data-scene-title="Arquivo de apostas" role="tab" aria-selected="false">Histórico</button>
         <button class="tab-button rail-link" data-tab="monthly-analysis" data-scene-title="Análise mensal" role="tab" aria-selected="false">Análise</button>
@@ -28,24 +26,15 @@
       </div>
 
       <div class="rail-group">
-        <span class="rail-label">Criar</span>
         <button class="tab-button rail-link rail-link-accent" data-tab="surebet" data-scene-title="Studio de surebet" role="tab" aria-selected="false">Nova surebet</button>
         <button class="tab-button rail-link rail-link-accent" data-tab="freebet" data-scene-title="Studio de freebet" role="tab" aria-selected="false">Nova freebet</button>
         <button class="tab-button rail-link rail-link-accent" data-tab="expense" data-scene-title="Novo lançamento" role="tab" aria-selected="false">Novo lançamento</button>
-      </div>
-
-      <div class="rail-note card">
-        <span class="card-label">Sistema visual</span>
-        <p>Preto profundo, tipografia comprimida, bordas mínimas e superfícies quase invisíveis. O dado é o protagonista.</p>
       </div>
     </aside>
 
     <main class="app-stage">
       <header class="scene-hero">
-        <div class="scene-copy-block">
-          <p class="eyebrow">Painel cinematográfico</p>
-          <h2 id="current-scene-title">Resumo operacional</h2>
-        </div>
+        <h2 id="current-scene-title">Resumo operacional</h2>
 
         <div class="scene-toolbar">
           <article class="scene-toolbar-card">
@@ -381,8 +370,7 @@
                   <aside class="operation-form-sidebar">
                     <section class="bet-side-card form-section summary-card studio-aside surebet-preview-card">
                       <div class="section-header compact">
-                        <h3>Monitor da surebet</h3>
-                        <span id="surebet-status" class="form-status-badge neutral">Preencha odds válidas</span>
+                        <h3>Profit</h3>
                       </div>
 
                       <div class="studio-monitor-grid">
@@ -392,25 +380,8 @@
                         </label>
 
                         <div class="studio-monitor-line">
-                          <span class="card-label">Resultado A</span>
-                          <strong id="main-result-value">R$ 0,00</strong>
-                        </div>
-
-                        <div class="studio-monitor-line">
-                          <span class="card-label">Resultado B</span>
-                          <strong id="counter-result-value">R$ 0,00</strong>
-                        </div>
-
-                        <div class="studio-monitor-line">
                           <span class="card-label">Profit %</span>
                           <strong id="calculated-profit-percent">0,00%</strong>
-                        </div>
-                      </div>
-
-                      <div class="summary-notes">
-                        <div class="detail-line">
-                          <span>Leitura</span>
-                          <strong>Distribuição automática com preview editorial</strong>
                         </div>
                       </div>
                     </section>
