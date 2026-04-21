@@ -30,6 +30,8 @@ window.BetControlBetForms = ((calculations, utils) => {
         const amount = Number(row.querySelector('[name="amount"]').value);
         const oddInput = row.querySelector('[name="odd"]');
         const odd = oddInput ? Number(oddInput.value) : null;
+        const focusInput = row.querySelector('[name="focus"]');
+        const focus = Boolean(focusInput?.checked);
         const printsPayload = row.querySelector('[name="printsPayload"]')?.value || '[]';
         let prints = [];
 
@@ -40,7 +42,7 @@ window.BetControlBetForms = ((calculations, utils) => {
           prints = [];
         }
 
-        return oddInput ? { house, odd, amount, prints } : { house, amount, prints };
+        return oddInput ? { house, odd, amount, prints, focus } : { house, amount, prints };
       });
 
       const invalidEntry = entries.some((entry) => {
@@ -69,7 +71,8 @@ window.BetControlBetForms = ((calculations, utils) => {
       return [...container.querySelectorAll('.entry-row')].map((row) => ({
         house: row.querySelector('[name="house"]').value.trim(),
         odd: Number(row.querySelector('[name="odd"]').value),
-        amount: Number(row.querySelector('[name="amount"]').value)
+        amount: Number(row.querySelector('[name="amount"]').value),
+        focus: Boolean(row.querySelector('[name="focus"]')?.checked)
       }));
     }
 

@@ -917,7 +917,19 @@ select {
 }
 
 .freebet-entry-row {
-  grid-template-columns: minmax(0, 1.7fr) repeat(3, minmax(110px, 1fr)) auto;
+  grid-template-columns: 72px minmax(0, 1.7fr) repeat(3, minmax(110px, 1fr)) auto;
+}
+
+.freebet-entry-focus-field {
+  justify-content: center;
+  align-items: center;
+}
+
+.freebet-entry-focus-field input {
+  min-height: 14px;
+  width: 14px;
+  height: 14px;
+  padding: 0;
 }
 
 .freebet-entry-row > label,

@@ -365,6 +365,7 @@ function addEntryRow(side) {
   const fragment = (isComputedBetSide ? elements.freebetEntryTemplate : elements.entryTemplate).content.cloneNode(true);
   const row = fragment.querySelector('.entry-row');
   const removeButton = fragment.querySelector('.remove-entry-button');
+  const focusField = fragment.querySelector('.freebet-entry-focus-field');
   const container = side === 'main'
     ? elements.mainEntries
     : side === 'counter'
@@ -372,6 +373,10 @@ function addEntryRow(side) {
       : side === 'freebetMain'
         ? elements.freebetMainEntries
         : elements.freebetHedgeEntries;
+
+  if (focusField) {
+    focusField.hidden = !isFreebetSide;
+  }
 
   const syncRemoveButtons = () => {
     [...container.querySelectorAll('.entry-row')].forEach((entryRow, index) => {
@@ -586,6 +591,10 @@ function setEntryRowValues(row, entry) {
   row.querySelector('[name="house"]').value = entry.house || '';
   row.querySelector('[name="odd"]').value = Number(entry.odd || 0) > 0 ? Number(entry.odd).toFixed(2) : '';
   row.querySelector('[name="amount"]').value = Number(entry.amount || 0) > 0 ? Number(entry.amount).toFixed(2) : '';
+  const focusInput = row.querySelector('[name="focus"]');
+  if (focusInput) {
+    focusInput.checked = Boolean(entry.focus);
+  }
 
   const key = row.dataset.printDraftKey;
   if (key) {
