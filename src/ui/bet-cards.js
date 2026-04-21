@@ -248,9 +248,7 @@ window.BetControlBetCards = ((utils, calculations) => {
       <article class="item-card freebet-card ledger-card" data-surebet-id="${item.id}">
         ${buildCardHeader(item.title, 'Surebet ativa', `<button type="button" class="secondary-button" data-action="edit-surebet" data-id="${item.id}">Editar</button><button type="button" class="success-button" data-action="finish-surebet" data-id="${item.id}">Feito</button><button type="button" class="danger-button" data-action="delete-surebet" data-id="${item.id}">Excluir</button>`, 'Profit projetado', formatSignedCurrency(item.profit || 0))}
         ${buildMetricStrip([
-          { label: 'Stake total', value: formatCurrency(getSurebetTotalStake(item)) },
-          { label: 'Resultado A', value: formatSignedCurrency(item.mainResult || 0) },
-          { label: 'Resultado B', value: formatSignedCurrency(item.counterResult || 0) }
+          { label: 'Stake total', value: formatCurrency(getSurebetTotalStake(item)) }
         ])}
         ${buildSurebetDetails(item, false)}
       </article>
