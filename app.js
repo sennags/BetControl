@@ -372,6 +372,19 @@ function addEntryRow(side) {
         ? elements.freebetMainEntries
         : elements.freebetHedgeEntries;
 
+  const syncRemoveButtons = () => {
+    [...container.querySelectorAll('.entry-row')].forEach((entryRow, index) => {
+      const button = entryRow.querySelector('.remove-entry-button');
+      if (!button) {
+        return;
+      }
+
+      const isFirst = index === 0;
+      button.hidden = isFirst;
+      button.disabled = isFirst;
+    });
+  };
+
   setupEntryPrintDraft(row);
 
   removeButton.addEventListener('click', () => {
@@ -382,6 +395,7 @@ function addEntryRow(side) {
 
     clearEntryPrintDraft(row);
     row.remove();
+    syncRemoveButtons();
     if (isSurebetSide) {
       applySurebetBalancedDefaults();
       updateSurebetResults();
@@ -393,6 +407,7 @@ function addEntryRow(side) {
   });
 
   container.appendChild(fragment);
+  syncRemoveButtons();
 
   if (isSurebetSide) {
     applySurebetBalancedDefaults();

@@ -120,6 +120,10 @@ window.BetControlBootstrap = (() => {
     }
 
     function setupBankroll() {
+      if (!elements.saveBankrollButton || !elements.bankrollInput) {
+        return;
+      }
+
       elements.saveBankrollButton.addEventListener('click', () => {
         const state = getState();
         const nextValue = Number(elements.bankrollInput.value);

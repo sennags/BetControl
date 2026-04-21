@@ -41,15 +41,6 @@
             <span class="card-label">Banca ao vivo</span>
             <strong id="bankroll-value" class="money toolbar-money">R$ 0,00</strong>
           </article>
-
-          <article class="scene-toolbar-card compact-toolbar-card">
-            <span class="card-label">Ajuste manual</span>
-            <label class="inline-field dashboard-bankroll-editor" for="bankroll-input">
-              <span>Editar banca</span>
-              <input id="bankroll-input" type="number" min="0" step="0.01" placeholder="0,00">
-            </label>
-            <button id="save-bankroll-button" class="primary-button">Salvar banca</button>
-          </article>
         </div>
       </header>
 
@@ -342,8 +333,7 @@
                     <section class="bet-side-card freebet-side-card form-section studio-block">
                       <div class="section-header compact freebet-side-header">
                         <div>
-                          <span class="card-label">Plano A</span>
-                          <h3>Lado principal</h3>
+                          <h3>Sure</h3>
                         </div>
                       </div>
                       <div class="freebet-side-layout">
@@ -354,8 +344,7 @@
                     <section class="bet-side-card freebet-side-card form-section form-section-emphasis studio-block">
                       <div class="section-header compact freebet-side-header">
                         <div>
-                          <span class="card-label">Plano B</span>
-                          <h3>Lado contrário</h3>
+                          <h3>Proteção</h3>
                         </div>
                         <div class="side-actions">
                           <button type="button" id="add-surebet-counter-entry-button" class="mini-button">Adicionar casa</button>
@@ -417,8 +406,7 @@
                     <section class="bet-side-card freebet-side-card form-section studio-block">
                       <div class="section-header compact freebet-side-header">
                         <div>
-                          <span class="card-label">Origem</span>
-                          <h3>Lado da freebet</h3>
+                          <h3>Freebet</h3>
                         </div>
                       </div>
                       <div class="freebet-side-layout">
@@ -429,8 +417,7 @@
                     <section class="bet-side-card freebet-side-card form-section form-section-emphasis studio-block">
                       <div class="section-header compact freebet-side-header">
                         <div>
-                          <span class="card-label">Proteção</span>
-                          <h3>Hedge</h3>
+                          <h3>Proteção</h3>
                         </div>
                         <div class="side-actions">
                           <button type="button" id="add-freebet-hedge-entry-button" class="mini-button">Adicionar casa</button>
@@ -453,12 +440,6 @@
                         <input id="freebet-amount-input" name="freebetAmount" type="number" min="0.01" step="0.01" required value="100" placeholder="100,00">
                       </label>
 
-                      <div class="summary-notes">
-                        <div class="detail-line">
-                          <span>Operação</span>
-                          <strong>Freebet + hedge</strong>
-                        </div>
-                      </div>
                     </section>
                   </aside>
                 </div>
@@ -537,7 +518,6 @@
         <input type="hidden" name="printsPayload" value="[]">
         <div class="entry-print-preview empty-state compact-stack">Nenhum print anexado.</div>
       </div>
-      <button type="button" class="remove-entry-button">Remover</button>
     </div>
   </template>
 
