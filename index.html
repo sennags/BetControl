@@ -114,13 +114,6 @@
               </div>
             </section>
 
-            <div class="panel-heading editorial-heading">
-              <div>
-                <p class="eyebrow">Capítulo 01</p>
-                <h2>Centro de controle</h2>
-              </div>
-            </div>
-
             <div class="panel-grid control-grid">
               <section class="card section-card">
                 <div class="section-header">
@@ -143,13 +136,6 @@
 
         <div id="history" class="tab-panel" role="tabpanel" hidden>
           <div class="scene-panel">
-            <div class="panel-heading editorial-heading">
-              <div>
-                <p class="eyebrow">Capítulo 02</p>
-                <h2>Arquivo de apostas</h2>
-              </div>
-            </div>
-
             <section class="card section-card history-stage">
               <div class="section-header">
                 <h2>Histórico consolidado</h2>
@@ -191,16 +177,8 @@
 
         <div id="monthly-analysis" class="tab-panel" role="tabpanel" hidden>
           <div class="scene-panel">
-            <div class="panel-heading editorial-heading">
-              <div>
-                <p class="eyebrow">Capítulo 03</p>
-                <h2>Leitura mensal</h2>
-              </div>
-            </div>
-
-            <section class="card section-card">
-              <div class="section-header">
-                <h2>Análise mensal</h2>
+            <section class="card section-card analysis-panel">
+              <div class="section-header analysis-panel-header">
                 <span id="analysis-month-badge" class="badge">Todos os meses</span>
               </div>
 
@@ -212,43 +190,39 @@
                 <div id="analysis-month-summary" class="filter-summary">Sem dados no período.</div>
               </div>
 
-              <section class="hero-grid compact-hero-grid analysis-grid">
-                <article class="card metric-card">
+              <div class="analysis-grid analysis-panel-metrics">
+                <div class="metric-card analysis-metric-card">
                   <span class="card-label">Profit do mês</span>
                   <strong id="analysis-profit-value" class="money small-money">R$ 0,00</strong>
-                </article>
-                <article class="card metric-card">
+                </div>
+                <div class="metric-card analysis-metric-card">
                   <span class="card-label">Gastos do mês</span>
                   <strong id="analysis-expense-value" class="money small-money">R$ 0,00</strong>
-                </article>
-                <article class="card metric-card">
+                </div>
+                <div class="metric-card analysis-metric-card">
                   <span class="card-label">Lucrinho do mês</span>
                   <strong id="analysis-sidegain-value" class="money small-money">R$ 0,00</strong>
-                </article>
-                <article class="card metric-card highlight-card">
+                </div>
+                <div class="metric-card analysis-metric-card highlight-card">
                   <span class="card-label">Saldo líquido</span>
                   <strong id="analysis-net-value" class="money small-money">R$ 0,00</strong>
-                </article>
-                <article class="card metric-card">
+                </div>
+                <div class="metric-card analysis-metric-card">
                   <span class="card-label">Apostas batidas</span>
                   <strong id="analysis-settled-count" class="money small-money">0</strong>
-                </article>
-              </section>
+                </div>
+              </div>
 
-              <div class="analysis-details-grid">
-                <article class="card subcard">
-                  <div class="section-header compact">
-                    <h3>Apostas liquidadas</h3>
-                  </div>
+              <div class="analysis-details-grid analysis-panel-details">
+                <div class="subcard analysis-detail-panel">
+                  <h3>Apostas liquidadas</h3>
                   <div id="analysis-history-details" class="stack-list empty-state">Nenhuma aposta batida no período.</div>
-                </article>
+                </div>
 
-                <article class="card subcard">
-                  <div class="section-header compact">
-                    <h3>Gastos e lucrinho</h3>
-                  </div>
+                <div class="subcard analysis-detail-panel">
+                  <h3>Gastos e lucrinho</h3>
                   <div id="analysis-expense-details" class="stack-list empty-state">Nenhum lançamento no período.</div>
-                </article>
+                </div>
               </div>
             </section>
           </div>
@@ -256,13 +230,6 @@
 
         <div id="freebets" class="tab-panel" role="tabpanel" hidden>
           <div class="scene-panel">
-            <div class="panel-heading editorial-heading">
-              <div>
-                <p class="eyebrow">Capítulo 04</p>
-                <h2>Carteira de freebets</h2>
-              </div>
-            </div>
-
             <div class="panel-grid single-column dual-ledger-grid">
               <section class="card section-card">
                 <div class="section-header">
@@ -285,13 +252,6 @@
 
         <div id="expenses" class="tab-panel" role="tabpanel" hidden>
           <div class="scene-panel">
-            <div class="panel-heading editorial-heading">
-              <div>
-                <p class="eyebrow">Capítulo 05</p>
-                <h2>Fluxo financeiro</h2>
-              </div>
-            </div>
-
             <section class="card section-card">
               <div class="section-header">
                 <h2>Saídas e lucrinho</h2>
@@ -313,13 +273,6 @@
 
         <div id="surebet" class="tab-panel" role="tabpanel" hidden>
           <div class="scene-panel scene-panel-form">
-            <div class="panel-heading editorial-heading">
-              <div>
-                <p class="eyebrow">Studio 01</p>
-                <h2>Nova surebet</h2>
-              </div>
-            </div>
-
             <section class="card form-card operation-scene-card">
               <form id="surebet-form" class="stack-form operation-form">
                 <section class="form-overview-panel highlight-panel studio-overview-bar">
@@ -396,13 +349,6 @@
 
         <div id="freebet" class="tab-panel" role="tabpanel" hidden>
           <div class="scene-panel scene-panel-form">
-            <div class="panel-heading editorial-heading">
-              <div>
-                <p class="eyebrow">Studio 02</p>
-                <h2>Nova freebet</h2>
-              </div>
-            </div>
-
             <section class="card form-card operation-scene-card">
               <form id="freebet-form" class="stack-form operation-form">
                 <section class="form-overview-panel accent-panel studio-overview-bar">
@@ -468,13 +414,6 @@
 
         <div id="expense" class="tab-panel" role="tabpanel" hidden>
           <div class="scene-panel scene-panel-form">
-            <div class="panel-heading editorial-heading">
-              <div>
-                <p class="eyebrow">Studio 03</p>
-                <h2>Novo lançamento financeiro</h2>
-              </div>
-            </div>
-
             <section class="card form-card operation-scene-card compact-ledger-form">
               <form id="expense-form" class="stack-form operation-form compact-operation-form">
                 <section class="form-overview-panel neutral-panel studio-overview-bar">
@@ -536,6 +475,10 @@
 
   <template id="freebet-entry-template">
     <div class="entry-row freebet-entry-row">
+      <label class="freebet-entry-focus-field">
+        <span>Foco</span>
+        <input type="checkbox" name="focus">
+      </label>
       <label>
         <span>Casa</span>
         <input type="text" name="house" required placeholder="Ex.: Betano">

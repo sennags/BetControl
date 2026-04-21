@@ -16,6 +16,7 @@ window.BetControlBootstrap = (() => {
       updateFreebetResults,
       updateSurebetPreview,
       handleFixedSideChange,
+      syncFocusedFreebetRow,
       updateEntriesHistory,
       saveState,
       render
@@ -166,7 +167,11 @@ window.BetControlBootstrap = (() => {
 
     function setupFreebetCalculator() {
       const handleFreebetInput = (event) => {
-        if (event.target?.name === 'odd') {
+        if (event.target?.name === 'focus') {
+          syncFocusedFreebetRow?.(event.target.closest('.entry-row'));
+        }
+
+        if (event.target?.name === 'odd' || event.target?.name === 'focus') {
           rebalanceFreebetStakesFromOdds();
         }
 
