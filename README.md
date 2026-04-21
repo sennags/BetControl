@@ -8,7 +8,6 @@ O objetivo do app é centralizar o controle financeiro das operações de aposta
 
 ## Funcionalidades principais
 
-- controle da **banca atual**
 - cadastro e acompanhamento de **surebets**
 - cadastro e acompanhamento de **freebets**
 - cálculo automático de **stake** e **profit** por casa
@@ -28,9 +27,8 @@ O objetivo do app é centralizar o controle financeiro das operações de aposta
 ## Como usar
 
 1. Abra o `index.html` no navegador.
-2. Defina ou ajuste sua banca.
-3. Cadastre surebets, freebets e lançamentos.
-4. Finalize as bets para enviar os resultados ao histórico.
+2. Cadastre surebets, freebets e lançamentos.
+3. Finalize as bets para enviar os resultados ao histórico.
 
 ## Observação
 
