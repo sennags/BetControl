@@ -30,6 +30,13 @@
         <button class="tab-button rail-link rail-link-accent" data-tab="freebet" data-scene-title="Studio de freebet" role="tab" aria-selected="false">Nova freebet</button>
         <button class="tab-button rail-link rail-link-accent" data-tab="expense" data-scene-title="Novo lançamento" role="tab" aria-selected="false">Novo lançamento</button>
       </div>
+
+      <div class="rail-group rail-backup-group">
+        <button id="export-backup-button" type="button" class="secondary-button rail-link">Backup .json</button>
+        <button id="import-backup-button" type="button" class="secondary-button rail-link">Importar backup</button>
+        <input id="import-backup-input" type="file" accept="application/json,.json" hidden>
+        <span id="backup-status" class="card-label">Auto backup diario ativo</span>
+      </div>
     </aside>
 
     <main class="app-stage">
