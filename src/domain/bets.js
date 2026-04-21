@@ -15,7 +15,7 @@ window.BetControlBets = ((utils) => {
     return {
       selectedEntries,
       settledPayout,
-      settledLabel: selectedEntries.map((entry) => entry.house || 'Sem casa').join(', ')
+      settledLabel: selectedEntries.map((entry) => entry.house || 'Sem casa').join(' + ')
     };
   }
 

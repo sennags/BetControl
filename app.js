@@ -151,6 +151,7 @@ const elements = {
   freebetMainEntries: document.getElementById('freebet-main-entries'),
   freebetHedgeEntries: document.getElementById('freebet-hedge-entries'),
   surebetTotalInput: document.getElementById('surebet-total-input'),
+  fixedTotalInput: document.getElementById('fixed-total-input'),
   profitInput: document.getElementById('profit-input'),
   mainOddInput: document.getElementById('main-odd-input'),
   counterOddInput: document.getElementById('counter-odd-input'),
@@ -372,6 +373,19 @@ function addEntryRow(side) {
         ? elements.freebetMainEntries
         : elements.freebetHedgeEntries;
 
+  const syncRemoveButtons = () => {
+    [...container.querySelectorAll('.entry-row')].forEach((entryRow, index) => {
+      const button = entryRow.querySelector('.remove-entry-button');
+      if (!button) {
+        return;
+      }
+
+      const isFirst = index === 0;
+      button.hidden = isFirst;
+      button.disabled = isFirst;
+    });
+  };
+
   setupEntryPrintDraft(row);
 
   removeButton.addEventListener('click', () => {
@@ -382,6 +396,7 @@ function addEntryRow(side) {
 
     clearEntryPrintDraft(row);
     row.remove();
+    syncRemoveButtons();
     if (isSurebetSide) {
       applySurebetBalancedDefaults();
       updateSurebetResults();
@@ -393,6 +408,7 @@ function addEntryRow(side) {
   });
 
   container.appendChild(fragment);
+  syncRemoveButtons();
 
   if (isSurebetSide) {
     applySurebetBalancedDefaults();
@@ -415,6 +431,7 @@ function setupSurebetForm() {
       const counterEntries = collectEntries(elements.counterEntries, { requireOdd: true });
       const calculation = calculateFreebetResultsFromEntries(mainEntries, counterEntries);
       const formData = new FormData(elements.surebetForm);
+      const description = String(formData.get('description') || '').trim();
       const totalStakeInput = Number(formData.get('surebetTotal'));
       const savedMainEntries = calculation.freebetEntries;
       const savedCounterEntries = calculation.hedgeEntries;
@@ -422,7 +439,7 @@ function setupSurebetForm() {
 
       surebet = {
         id: crypto.randomUUID(),
-        title: mainHouse,
+        title: description,
         profit: calculation.guaranteedProfit,
         mainResult: calculation.resultIfFreebetWins,
         counterResult: calculation.resultIfHedgeWins,
@@ -446,7 +463,7 @@ function setupSurebetForm() {
     }
 
     if (!surebet.title || !surebet.counterHouse) {
-      alert('Preencha as duas casas da surebet.');
+      alert('Preencha a descricao e as duas casas da surebet.');
       return;
     }
 
@@ -492,13 +509,14 @@ function setupFreebetForm() {
 
     const freebetStake = freebetEntries.reduce((sum, entry) => sum + Number(entry.amount || 0), 0);
     const hedgeStake = hedgeEntries.reduce((sum, entry) => sum + Number(entry.amount || 0), 0);
+    const description = String(formData.get('description') || '').trim();
     const freebetAmount = Number(formData.get('freebetAmount'));
     const resultIfFreebetWins = calculation.resultIfFreebetWins;
     const resultIfHedgeWins = calculation.resultIfHedgeWins;
     const freebetHouse = freebetEntries.map((entry) => entry.house).join(' + ');
     const freebet = {
       id: crypto.randomUUID(),
-      title: freebetHouse,
+      title: description,
       freebetHouse,
       hedgeHouse: hedgeEntries.map((entry) => entry.house).join(' + '),
       freebetEntries,
@@ -512,8 +530,8 @@ function setupFreebetForm() {
       createdAt: new Date().toISOString()
     };
 
-    if (!freebet.freebetHouse || !freebet.hedgeHouse) {
-      alert('Preencha as duas casas da freebet.');
+    if (!freebet.title || !freebet.freebetHouse || !freebet.hedgeHouse) {
+      alert('Preencha a descricao e as duas casas da freebet.');
       return;
     }
 
@@ -562,6 +580,96 @@ function resetFreebetEntries() {
   elements.freebetHedgeEntries.innerHTML = '';
   addEntryRow('freebetMain');
   addEntryRow('freebetHedge');
+}
+
+function setEntryRowValues(row, entry) {
+  row.querySelector('[name="house"]').value = entry.house || '';
+  row.querySelector('[name="odd"]').value = Number(entry.odd || 0) > 0 ? Number(entry.odd).toFixed(2) : '';
+  row.querySelector('[name="amount"]').value = Number(entry.amount || 0) > 0 ? Number(entry.amount).toFixed(2) : '';
+
+  const key = row.dataset.printDraftKey;
+  if (key) {
+    betPrintDrafts[key] = Array.isArray(entry.prints) ? entry.prints.map((item) => ({
+      id: item.id || crypto.randomUUID(),
+      name: item.name || 'print.png',
+      dataUrl: item.dataUrl || ''
+    })) : [];
+    syncEntryPrintState(row);
+  }
+}
+
+function loadSurebetForEditing(id) {
+  const index = state.surebets.findIndex((item) => item.id === id);
+  if (index === -1) {
+    return;
+  }
+
+  const [surebet] = state.surebets.splice(index, 1);
+  state.bankroll = normalizeCurrencyValue(state.bankroll + getSurebetTotalStake(surebet));
+  removeEntryHistoryById(surebet.stakeEntryHistoryId);
+
+  elements.surebetForm.reset();
+  clearContainerPrintDrafts(elements.mainEntries);
+  clearContainerPrintDrafts(elements.counterEntries);
+  elements.mainEntries.innerHTML = '';
+  elements.counterEntries.innerHTML = '';
+
+  (surebet.main?.entries || []).forEach(() => addEntryRow('main'));
+  (surebet.counter?.entries || []).forEach(() => addEntryRow('counter'));
+
+  [...elements.mainEntries.querySelectorAll('.entry-row')].forEach((row, indexRow) => {
+    setEntryRowValues(row, surebet.main.entries[indexRow] || {});
+  });
+  [...elements.counterEntries.querySelectorAll('.entry-row')].forEach((row, indexRow) => {
+    setEntryRowValues(row, surebet.counter.entries[indexRow] || {});
+  });
+
+  elements.surebetForm.querySelector('[name="description"]').value = surebet.title || '';
+  elements.surebetTotalInput.value = String(surebet.surebetTotal || surebet.totalStake || getSurebetTotalStake(surebet));
+  if (elements.fixedTotalInput) {
+    elements.fixedTotalInput.value = String(surebet.surebetTotal || surebet.totalStake || getSurebetTotalStake(surebet));
+  }
+
+  updateSurebetResults();
+  updateSurebetPreview?.({ source: 'controls' });
+  saveState();
+  render();
+  switchToTab('surebet');
+}
+
+function loadFreebetForEditing(id) {
+  const index = state.freebets.findIndex((item) => item.id === id);
+  if (index === -1) {
+    return;
+  }
+
+  const [freebet] = state.freebets.splice(index, 1);
+  state.bankroll = normalizeCurrencyValue(state.bankroll + getFreebetTotalStake(freebet));
+  removeEntryHistoryById(freebet.stakeEntryHistoryId);
+
+  elements.freebetForm.reset();
+  clearContainerPrintDrafts(elements.freebetMainEntries);
+  clearContainerPrintDrafts(elements.freebetHedgeEntries);
+  elements.freebetMainEntries.innerHTML = '';
+  elements.freebetHedgeEntries.innerHTML = '';
+
+  (freebet.freebetEntries || []).forEach(() => addEntryRow('freebetMain'));
+  (freebet.hedgeEntries || []).forEach(() => addEntryRow('freebetHedge'));
+
+  [...elements.freebetMainEntries.querySelectorAll('.entry-row')].forEach((row, indexRow) => {
+    setEntryRowValues(row, freebet.freebetEntries[indexRow] || {});
+  });
+  [...elements.freebetHedgeEntries.querySelectorAll('.entry-row')].forEach((row, indexRow) => {
+    setEntryRowValues(row, freebet.hedgeEntries[indexRow] || {});
+  });
+
+  elements.freebetForm.querySelector('[name="description"]').value = freebet.title || '';
+  elements.freebetAmountInput.value = String(freebet.freebetAmount || '');
+
+  updateFreebetResults();
+  saveState();
+  render();
+  switchToTab('freebet');
 }
 
 function render() {
@@ -958,6 +1066,10 @@ function renderFreebets() {
 }
 
 function bindFreebetActions() {
+  elements.freebetList.querySelectorAll('[data-action="edit-freebet"]').forEach((button) => {
+    button.addEventListener('click', () => loadFreebetForEditing(button.dataset.id));
+  });
+
   elements.freebetList.querySelectorAll('[data-action="delete-freebet"]').forEach((button) => {
     button.addEventListener('click', () => deleteFreebet(button.dataset.id, false));
   });
@@ -1108,6 +1220,10 @@ function renderHistory() {
 }
 
 function bindSurebetActions() {
+  elements.surebetList.querySelectorAll('[data-action="edit-surebet"]').forEach((button) => {
+    button.addEventListener('click', () => loadSurebetForEditing(button.dataset.id));
+  });
+
   elements.surebetList.querySelectorAll('[data-action="finish-surebet"]').forEach((button) => {
     button.addEventListener('click', () => settleSurebet(button.dataset.id));
   });

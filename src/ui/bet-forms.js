@@ -88,11 +88,10 @@ window.BetControlBetForms = ((calculations, utils) => {
     }
 
     function getSurebetTargetTotal() {
-      const currentStake = getSurebetRows().reduce((sum, row) => {
-        const amount = Number(row.querySelector('[name="amount"]').value);
-        return sum + (Number.isNaN(amount) ? 0 : amount);
-      }, 0);
-      const value = currentStake > 0 ? currentStake : Number(elements.surebetTotalInput?.value);
+      const controlValue = Number(elements.fixedTotalInput?.value);
+      const value = Number.isNaN(controlValue) || controlValue <= 0
+        ? Number(elements.surebetTotalInput?.value)
+        : controlValue;
       return Number.isNaN(value) || value <= 0 ? defaultSurebetTotal : value;
     }
 

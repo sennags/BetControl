@@ -120,6 +120,10 @@ window.BetControlBootstrap = (() => {
     }
 
     function setupBankroll() {
+      if (!elements.saveBankrollButton || !elements.bankrollInput) {
+        return;
+      }
+
       elements.saveBankrollButton.addEventListener('click', () => {
         const state = getState();
         const nextValue = Number(elements.bankrollInput.value);
@@ -191,6 +195,9 @@ window.BetControlBootstrap = (() => {
       elements.surebetTotalInput.addEventListener('input', () => {
         rebalanceSurebetStakesFromOdds();
         updateSurebetResults();
+        updateSurebetPreview?.({ source: 'controls' });
+      });
+      elements.fixedTotalInput?.addEventListener('input', () => {
         updateSurebetPreview?.({ source: 'controls' });
       });
       elements.mainOddInput?.addEventListener('input', () => {
