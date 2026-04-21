@@ -499,6 +499,37 @@ label,
   padding: var(--space-5);
 }
 
+.analysis-panel {
+  gap: var(--space-5);
+}
+
+.analysis-panel-header {
+  align-items: end;
+}
+
+.analysis-panel-metrics {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.analysis-metric-card {
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.012);
+}
+
+.analysis-detail-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.012);
+}
+
 .workspace-shell {
   flex-direction: column;
 }
@@ -1159,6 +1190,10 @@ select {
     grid-template-columns: 1fr;
   }
 
+  .analysis-panel-metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
   .app-rail {
     position: static;
     height: auto;
@@ -1224,6 +1259,10 @@ select {
   .app-rail,
   .app-stage {
     padding: var(--space-5);
+  }
+
+  .analysis-panel-metrics {
+    grid-template-columns: 1fr;
   }
 
   .signal-grid,

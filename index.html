@@ -177,8 +177,9 @@
 
         <div id="monthly-analysis" class="tab-panel" role="tabpanel" hidden>
           <div class="scene-panel">
-            <section class="card section-card">
-              <div class="section-header">
+            <section class="card section-card analysis-panel">
+              <div class="section-header analysis-panel-header">
+                <h2>Análise mensal</h2>
                 <span id="analysis-month-badge" class="badge">Todos os meses</span>
               </div>
 
@@ -190,43 +191,39 @@
                 <div id="analysis-month-summary" class="filter-summary">Sem dados no período.</div>
               </div>
 
-              <section class="hero-grid compact-hero-grid analysis-grid">
-                <article class="card metric-card">
+              <div class="analysis-grid analysis-panel-metrics">
+                <div class="metric-card analysis-metric-card">
                   <span class="card-label">Profit do mês</span>
                   <strong id="analysis-profit-value" class="money small-money">R$ 0,00</strong>
-                </article>
-                <article class="card metric-card">
+                </div>
+                <div class="metric-card analysis-metric-card">
                   <span class="card-label">Gastos do mês</span>
                   <strong id="analysis-expense-value" class="money small-money">R$ 0,00</strong>
-                </article>
-                <article class="card metric-card">
+                </div>
+                <div class="metric-card analysis-metric-card">
                   <span class="card-label">Lucrinho do mês</span>
                   <strong id="analysis-sidegain-value" class="money small-money">R$ 0,00</strong>
-                </article>
-                <article class="card metric-card highlight-card">
+                </div>
+                <div class="metric-card analysis-metric-card highlight-card">
                   <span class="card-label">Saldo líquido</span>
                   <strong id="analysis-net-value" class="money small-money">R$ 0,00</strong>
-                </article>
-                <article class="card metric-card">
+                </div>
+                <div class="metric-card analysis-metric-card">
                   <span class="card-label">Apostas batidas</span>
                   <strong id="analysis-settled-count" class="money small-money">0</strong>
-                </article>
-              </section>
+                </div>
+              </div>
 
-              <div class="analysis-details-grid">
-                <article class="card subcard">
-                  <div class="section-header compact">
-                    <h3>Apostas liquidadas</h3>
-                  </div>
+              <div class="analysis-details-grid analysis-panel-details">
+                <div class="subcard analysis-detail-panel">
+                  <h3>Apostas liquidadas</h3>
                   <div id="analysis-history-details" class="stack-list empty-state">Nenhuma aposta batida no período.</div>
-                </article>
+                </div>
 
-                <article class="card subcard">
-                  <div class="section-header compact">
-                    <h3>Gastos e lucrinho</h3>
-                  </div>
+                <div class="subcard analysis-detail-panel">
+                  <h3>Gastos e lucrinho</h3>
                   <div id="analysis-expense-details" class="stack-list empty-state">Nenhum lançamento no período.</div>
-                </article>
+                </div>
               </div>
             </section>
           </div>
