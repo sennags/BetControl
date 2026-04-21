@@ -171,11 +171,7 @@ window.BetControlBootstrap = (() => {
           syncFocusedFreebetRow?.(event.target.closest('.entry-row'));
         }
 
-        if (event.target?.name === 'odd') {
-          rebalanceFreebetStakesFromOdds();
-        }
-
-        if (event.target?.name === 'amount' || event.target?.name === 'focus') {
+        if (event.target?.name === 'odd' || event.target?.name === 'focus') {
           rebalanceFreebetStakesFromOdds();
         }
 
