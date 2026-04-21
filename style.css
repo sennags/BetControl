@@ -926,10 +926,38 @@ select {
 }
 
 .freebet-entry-focus-field input {
+  position: relative;
   min-height: 14px;
   width: 14px;
   height: 14px;
+  margin: 0;
   padding: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: 4px;
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.freebet-entry-focus-field input:checked {
+  border-color: var(--text-soft);
+  background: var(--text-soft);
+}
+
+.freebet-entry-focus-field input:checked::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 3px;
+  height: 7px;
+  border-right: 1.5px solid #0c0c0c;
+  border-bottom: 1.5px solid #0c0c0c;
+  transform: rotate(45deg);
+}
+
+.freebet-entry-focus-field input:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.35);
+  outline-offset: 2px;
 }
 
 .freebet-entry-row > label,
