@@ -4,7 +4,10 @@ const {
   ONE_TIME_TODAY_ENTRIES_CLEAR_TARGET,
   DEFAULT_FREEBET_TOTAL,
   DEFAULT_SUREBET_TOTAL,
+  buildExportPayload,
+  importState,
   loadState,
+  loadAutoBackups,
   saveState: persistState
 } = window.BetControlStorage;
 
@@ -146,6 +149,10 @@ const elements = {
   freebetOverviewCount: document.getElementById('freebet-overview-count'),
   freebetOverviewTotal: document.getElementById('freebet-overview-total'),
   freebetOverviewLocations: document.getElementById('freebet-overview-locations'),
+  exportBackupButton: document.getElementById('export-backup-button'),
+  importBackupButton: document.getElementById('import-backup-button'),
+  importBackupInput: document.getElementById('import-backup-input'),
+  backupStatus: document.getElementById('backup-status'),
   mainEntries: document.getElementById('main-entries'),
   counterEntries: document.getElementById('counter-entries'),
   freebetMainEntries: document.getElementById('freebet-main-entries'),
@@ -264,6 +271,7 @@ bootstrap();
 function bootstrap() {
   setupTabs();
   setupBankroll();
+  setupBackupActions();
   setupSurebetForm();
   setupFreebetForm();
   setupExpenseForm();
@@ -296,8 +304,66 @@ function bootstrap() {
   render();
 }
 
+function updateBackupStatus() {
+  if (!elements.backupStatus) {
+    return;
+  }
+
+  const latestBackup = loadAutoBackups()[0];
+  elements.backupStatus.textContent = latestBackup
+    ? `Auto: ${formatDate(latestBackup.createdAt)}`
+    : 'Auto backup diario ativo';
+}
+
+function downloadJsonFile(fileName, payload) {
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function setupBackupActions() {
+  updateBackupStatus();
+
+  elements.exportBackupButton?.addEventListener('click', () => {
+    const timestamp = new Date().toISOString().replace(/[:]/g, '-');
+    downloadJsonFile(`betcontrol-backup-${timestamp}.json`, buildExportPayload(state));
+    updateBackupStatus();
+  });
+
+  elements.importBackupButton?.addEventListener('click', () => {
+    elements.importBackupInput?.click();
+  });
+
+  elements.importBackupInput?.addEventListener('change', async () => {
+    const file = elements.importBackupInput.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    try {
+      const rawText = await file.text();
+      const payload = JSON.parse(rawText);
+      state = importState(payload);
+      render();
+      updateBackupStatus();
+      alert('Backup importado com sucesso.');
+    } catch {
+      alert('Nao foi possivel importar este backup.');
+    } finally {
+      elements.importBackupInput.value = '';
+    }
+  });
+}
+
 function saveState() {
   persistState(state);
+  updateBackupStatus();
 }
 
 function updateEntriesHistory(delta, details = {}) {

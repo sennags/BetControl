@@ -228,6 +228,17 @@ label,
   gap: var(--space-2);
 }
 
+.rail-backup-group {
+  margin-top: auto;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--line);
+}
+
+.rail-backup-group .card-label {
+  display: block;
+  margin-top: var(--space-2);
+}
+
 .rail-brand h1 {
   max-width: 100%;
   font-size: clamp(2.1rem, 2.8vw, 3.3rem);

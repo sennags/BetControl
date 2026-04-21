@@ -1,12 +1,14 @@
 window.BetControlStorage = (() => {
   const STORAGE_KEY = 'betcontrol:data';
   const LEGACY_STORAGE_KEY = 'betcerteza:data';
+  const AUTO_BACKUP_KEY = 'betcontrol:auto-backups';
   const ONE_TIME_TODAY_ENTRIES_CLEAR_KEY = 'betcontrol:entries-history-cleared-once';
   const LEGACY_ONE_TIME_TODAY_ENTRIES_CLEAR_KEY = 'betcerteza:entries-history-cleared-once';
   const ONE_TIME_TODAY_ENTRIES_CLEAR_TARGET = '2026-04-16';
   const DEFAULT_FREEBET_TOTAL = 100;
   const DEFAULT_SUREBET_TOTAL = 100;
   const HISTORY_TTL_MONTHS = 12;
+  const MAX_AUTO_BACKUPS = 30;
 
   const defaultState = {
     bankroll: 0,
@@ -116,32 +118,99 @@ window.BetControlStorage = (() => {
     return { state, changed };
   }
 
+  function normalizeState(parsed) {
+    return {
+      bankroll: Number(parsed.bankroll) || 0,
+      entriesHistory: Array.isArray(parsed.entriesHistory)
+        ? parsed.entriesHistory
+        : Array.isArray(parsed.bankrollHistory)
+          ? parsed.bankrollHistory
+          : [],
+      surebets: Array.isArray(parsed.surebets) ? parsed.surebets : [],
+      freebets: Array.isArray(parsed.freebets) ? parsed.freebets : [],
+      freebetHistory: Array.isArray(parsed.freebetHistory) ? parsed.freebetHistory : [],
+      surebetHistory: Array.isArray(parsed.surebetHistory) ? parsed.surebetHistory : [],
+      expenses: Array.isArray(parsed.expenses) ? parsed.expenses : []
+    };
+  }
+
+  function getCurrentDateKey() {
+    return new Date().toISOString().slice(0, 10);
+  }
+
+  function loadAutoBackups() {
+    try {
+      const raw = localStorage.getItem(AUTO_BACKUP_KEY);
+      const parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function saveAutoBackups(backups) {
+    localStorage.setItem(AUTO_BACKUP_KEY, JSON.stringify(backups));
+  }
+
+  function ensureDailyBackup(state) {
+    const dateKey = getCurrentDateKey();
+    const backups = loadAutoBackups();
+    if (backups.some((item) => item.dateKey === dateKey)) {
+      return backups;
+    }
+
+    const nextBackups = [
+      {
+        dateKey,
+        createdAt: new Date().toISOString(),
+        state: structuredClone(state)
+      },
+      ...backups
+    ].slice(0, MAX_AUTO_BACKUPS);
+
+    saveAutoBackups(nextBackups);
+    return nextBackups;
+  }
+
+  function buildExportPayload(state) {
+    return {
+      app: 'BetControl',
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      state: structuredClone(state)
+    };
+  }
+
+  function importState(payload) {
+    const source = payload?.state ?? payload;
+    const normalizedState = normalizeState(source || {});
+    const { state, changed } = purgeExpiredState(normalizedState);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    if (changed || !localStorage.getItem(STORAGE_KEY)) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+    ensureDailyBackup(state);
+    return state;
+  }
+
   function loadState() {
     try {
       const saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY);
       if (!saved) {
-        return structuredClone(defaultState);
+        const freshState = structuredClone(defaultState);
+        ensureDailyBackup(freshState);
+        return freshState;
       }
 
       const parsed = JSON.parse(saved);
-      const normalizedState = {
-        bankroll: Number(parsed.bankroll) || 0,
-        entriesHistory: Array.isArray(parsed.entriesHistory)
-          ? parsed.entriesHistory
-          : Array.isArray(parsed.bankrollHistory)
-            ? parsed.bankrollHistory
-            : [],
-        surebets: Array.isArray(parsed.surebets) ? parsed.surebets : [],
-        freebets: Array.isArray(parsed.freebets) ? parsed.freebets : [],
-        freebetHistory: Array.isArray(parsed.freebetHistory) ? parsed.freebetHistory : [],
-        surebetHistory: Array.isArray(parsed.surebetHistory) ? parsed.surebetHistory : [],
-        expenses: Array.isArray(parsed.expenses) ? parsed.expenses : []
-      };
+      const normalizedState = normalizeState(parsed);
 
       const { state, changed } = purgeExpiredState(normalizedState);
       if (changed || !localStorage.getItem(STORAGE_KEY)) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
       }
+
+      ensureDailyBackup(state);
 
       return state;
     } catch {
@@ -151,18 +220,25 @@ window.BetControlStorage = (() => {
 
   function saveState(state) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    ensureDailyBackup(state);
   }
 
   return {
     STORAGE_KEY,
     LEGACY_STORAGE_KEY,
+    AUTO_BACKUP_KEY,
     ONE_TIME_TODAY_ENTRIES_CLEAR_KEY,
     LEGACY_ONE_TIME_TODAY_ENTRIES_CLEAR_KEY,
     ONE_TIME_TODAY_ENTRIES_CLEAR_TARGET,
     DEFAULT_FREEBET_TOTAL,
     DEFAULT_SUREBET_TOTAL,
     HISTORY_TTL_MONTHS,
+    MAX_AUTO_BACKUPS,
     defaultState,
+    buildExportPayload,
+    importState,
+    loadAutoBackups,
+    ensureDailyBackup,
     loadState,
     saveState
   };
