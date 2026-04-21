@@ -71,6 +71,43 @@ window.BetControlCalculations = ((utils) => {
     };
   }
 
+  function rebalanceEntriesWithFixedFocus(entries) {
+    if (!Array.isArray(entries) || entries.length === 0) {
+      return [];
+    }
+
+    const focusIndex = entries.findIndex((entry) => entry.focus);
+    if (focusIndex === -1) {
+      return null;
+    }
+
+    const focusedEntry = entries[focusIndex];
+    const focusedOdd = Number(focusedEntry.odd || 0);
+    const focusedAmount = Number(focusedEntry.amount || 0);
+
+    if (!Number.isFinite(focusedOdd) || focusedOdd <= 1 || !Number.isFinite(focusedAmount) || focusedAmount <= 0) {
+      return null;
+    }
+
+    const targetPayout = focusedAmount * focusedOdd;
+
+    return entries.map((entry, index) => {
+      const odd = Number(entry.odd || 0);
+      if (!Number.isFinite(odd) || odd <= 1) {
+        return { ...entry };
+      }
+
+      if (index === focusIndex) {
+        return { ...entry, amount: normalizeCurrencyValue(focusedAmount) };
+      }
+
+      return {
+        ...entry,
+        amount: normalizeCurrencyValue(targetPayout / odd)
+      };
+    });
+  }
+
   function calculateSurebetFromTotal(mainOdd, counterOdd, totalStake) {
     if ([mainOdd, counterOdd, totalStake].some((value) => Number.isNaN(value) || value <= 0)) {
       throw new Error('Preencha odds e valor fixo válidos.');
@@ -243,6 +280,7 @@ window.BetControlCalculations = ((utils) => {
     calculateSurebetFromTotal,
     calculateSurebetFromFixedStake,
     calculateSurebetFromActualStakes,
+    rebalanceEntriesWithFixedFocus,
     getBetOutcomeAmount,
     getFreebetSelectableEntries,
     getSurebetSelectableEntries,

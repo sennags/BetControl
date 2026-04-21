@@ -178,7 +178,8 @@ const {
   updateFreebetResults,
   updateSurebetResults,
   updateSurebetPreview,
-  handleFixedSideChange
+  handleFixedSideChange,
+  syncFocusedFreebetRow
 } = createBetFormHelpers({
   elements,
   defaults: {
@@ -237,6 +238,7 @@ const {
     updateFreebetResults,
     updateSurebetPreview,
     handleFixedSideChange,
+    syncFocusedFreebetRow,
     updateEntriesHistory,
     saveState,
     render
