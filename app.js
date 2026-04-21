@@ -431,6 +431,7 @@ function setupSurebetForm() {
       const counterEntries = collectEntries(elements.counterEntries, { requireOdd: true });
       const calculation = calculateFreebetResultsFromEntries(mainEntries, counterEntries);
       const formData = new FormData(elements.surebetForm);
+      const description = String(formData.get('description') || '').trim();
       const totalStakeInput = Number(formData.get('surebetTotal'));
       const savedMainEntries = calculation.freebetEntries;
       const savedCounterEntries = calculation.hedgeEntries;
@@ -438,7 +439,7 @@ function setupSurebetForm() {
 
       surebet = {
         id: crypto.randomUUID(),
-        title: mainHouse,
+        title: description,
         profit: calculation.guaranteedProfit,
         mainResult: calculation.resultIfFreebetWins,
         counterResult: calculation.resultIfHedgeWins,
@@ -462,7 +463,7 @@ function setupSurebetForm() {
     }
 
     if (!surebet.title || !surebet.counterHouse) {
-      alert('Preencha as duas casas da surebet.');
+      alert('Preencha a descricao e as duas casas da surebet.');
       return;
     }
 
@@ -508,13 +509,14 @@ function setupFreebetForm() {
 
     const freebetStake = freebetEntries.reduce((sum, entry) => sum + Number(entry.amount || 0), 0);
     const hedgeStake = hedgeEntries.reduce((sum, entry) => sum + Number(entry.amount || 0), 0);
+    const description = String(formData.get('description') || '').trim();
     const freebetAmount = Number(formData.get('freebetAmount'));
     const resultIfFreebetWins = calculation.resultIfFreebetWins;
     const resultIfHedgeWins = calculation.resultIfHedgeWins;
     const freebetHouse = freebetEntries.map((entry) => entry.house).join(' + ');
     const freebet = {
       id: crypto.randomUUID(),
-      title: freebetHouse,
+      title: description,
       freebetHouse,
       hedgeHouse: hedgeEntries.map((entry) => entry.house).join(' + '),
       freebetEntries,
@@ -528,8 +530,8 @@ function setupFreebetForm() {
       createdAt: new Date().toISOString()
     };
 
-    if (!freebet.freebetHouse || !freebet.hedgeHouse) {
-      alert('Preencha as duas casas da freebet.');
+    if (!freebet.title || !freebet.freebetHouse || !freebet.hedgeHouse) {
+      alert('Preencha a descricao e as duas casas da freebet.');
       return;
     }
 
