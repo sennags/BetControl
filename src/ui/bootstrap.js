@@ -197,6 +197,9 @@ window.BetControlBootstrap = (() => {
         updateSurebetResults();
         updateSurebetPreview?.({ source: 'controls' });
       });
+      elements.fixedTotalInput?.addEventListener('input', () => {
+        updateSurebetPreview?.({ source: 'controls' });
+      });
       elements.mainOddInput?.addEventListener('input', () => {
         updateSurebetPreview?.({ source: 'controls' });
       });

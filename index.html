@@ -323,7 +323,10 @@
             <section class="card form-card operation-scene-card">
               <form id="surebet-form" class="stack-form operation-form">
                 <section class="form-overview-panel highlight-panel studio-overview-bar">
-                  <span class="card-label">Nova surebet</span>
+                  <label class="inline-field studio-top-control" for="fixed-total-input">
+                    <span>Total Stake</span>
+                    <input id="fixed-total-input" type="number" min="1" step="0.01" value="100" placeholder="100,00">
+                  </label>
                 </section>
 
                 <input id="surebet-total-input" name="surebetTotal" type="hidden" value="100">

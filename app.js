@@ -151,6 +151,7 @@ const elements = {
   freebetMainEntries: document.getElementById('freebet-main-entries'),
   freebetHedgeEntries: document.getElementById('freebet-hedge-entries'),
   surebetTotalInput: document.getElementById('surebet-total-input'),
+  fixedTotalInput: document.getElementById('fixed-total-input'),
   profitInput: document.getElementById('profit-input'),
   mainOddInput: document.getElementById('main-odd-input'),
   counterOddInput: document.getElementById('counter-odd-input'),
