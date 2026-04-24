@@ -265,14 +265,6 @@ window.BetControlCalculations = ((utils) => {
     return getSurebetSelectableEntries(surebet).reduce((sum, entry) => sum + Number(entry.amount || 0), 0);
   }
 
-  function getFreebetSettlementDelta(freebet) {
-    return getFreebetTotalStake(freebet) + Number(freebet.settledResult != null ? freebet.settledResult : freebet.qualificationResult || 0);
-  }
-
-  function getSurebetSettlementDelta(surebet) {
-    return getSurebetTotalStake(surebet) + Number(surebet.settledResult || 0);
-  }
-
   return {
     splitAmount,
     splitAmountByWeights,
@@ -286,8 +278,6 @@ window.BetControlCalculations = ((utils) => {
     getSurebetSelectableEntries,
     getFreebetEntryProfit,
     getFreebetTotalStake,
-    getSurebetTotalStake,
-    getFreebetSettlementDelta,
-    getSurebetSettlementDelta
+    getSurebetTotalStake
   };
 })(window.BetControlUtils);

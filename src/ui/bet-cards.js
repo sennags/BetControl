@@ -152,9 +152,12 @@ window.BetControlBetCards = ((utils, calculations) => {
   }
 
   function buildFreebetCard(item, fromHistory = false) {
+    const isTrackedFreebet = !Array.isArray(item.freebetEntries) || item.freebetEntries.length === 0;
     const actionButton = fromHistory
       ? `<button type="button" class="danger-button" data-action="delete-freebet-history" data-id="${item.id}">Excluir</button>`
-      : `<button type="button" class="secondary-button" data-action="edit-freebet" data-id="${item.id}">Editar</button><button type="button" class="success-button" data-action="finish-freebet" data-id="${item.id}">Feito</button><button type="button" class="danger-button" data-action="delete-freebet" data-id="${item.id}">Excluir</button>`;
+      : isTrackedFreebet
+        ? `<button type="button" class="secondary-button" data-action="edit-freebet" data-id="${item.id}">Editar</button><button type="button" class="danger-button" data-action="delete-freebet" data-id="${item.id}">Remover</button>`
+        : `<button type="button" class="secondary-button" data-action="edit-freebet" data-id="${item.id}">Editar</button><button type="button" class="success-button" data-action="finish-freebet" data-id="${item.id}">Feito</button><button type="button" class="danger-button" data-action="delete-freebet" data-id="${item.id}">Remover</button>`;
     const lifecycleChip = fromHistory
       ? `<span class="chip">Finalizada em: ${formatDate(item.settledAt || item.createdAt)}</span>`
       : `<span class="chip">Criada em: ${formatDate(item.createdAt)}</span>`;
@@ -164,22 +167,25 @@ window.BetControlBetCards = ((utils, calculations) => {
 
     return `
       <article class="item-card freebet-card ledger-card" data-freebet-id="${item.id}">
-        ${buildCardHeader(item.title, fromHistory ? 'Freebet liquidada' : 'Freebet ativa', actionButton, fromHistory ? 'Profit liquidado' : 'Freebet a ganhar', fromHistory ? formatSignedCurrency(item.settledResult ?? 0) : formatCurrency(item.freebetAmount || 0))}
-        ${buildMetricStrip([
+        ${buildCardHeader(item.title, fromHistory ? 'Freebet liquidada' : 'Na carteira', actionButton, fromHistory ? 'Profit liquidado' : 'Freebet a ganhar', fromHistory ? formatSignedCurrency(item.settledResult ?? 0) : formatCurrency(item.freebetAmount || 0))}
+        ${isTrackedFreebet ? buildMetricStrip([
+          { label: 'Local', value: item.freebetHouse || 'Sem local' },
+          { label: 'Valor', value: formatCurrency(item.freebetAmount || 0) }
+        ]) : buildMetricStrip([
           { label: 'Stake freebet', value: formatCurrency(item.freebetStake || 0) },
           { label: 'Stake hedge', value: formatCurrency(item.hedgeStake || 0) },
           { label: 'Profit travado', value: formatSignedCurrency(item.guaranteedProfit || 0) }
         ])}
-        ${fromHistory ? buildFreebetHistoryRows(item) : buildFreebetWinnerRows(item)}
-        ${buildEntryPrintGroups([
+        ${isTrackedFreebet ? '' : (fromHistory ? buildFreebetHistoryRows(item) : buildFreebetWinnerRows(item))}
+        ${isTrackedFreebet ? '' : (buildEntryPrintGroups([
           { label: 'Prints da freebet', entries: item.freebetEntries, fallbackLabel: 'Casa da freebet', downloadPrefix: 'freebet' },
           { label: 'Prints do hedge', entries: item.hedgeEntries, fallbackLabel: 'Casa do hedge', downloadPrefix: 'hedge' }
         ]) || buildLegacyPrintGroups([
           { label: 'Prints da freebet', prints: item.prints?.main, buttonLabel: 'Print da freebet', downloadPrefix: 'freebet' },
           { label: 'Prints do hedge', prints: item.prints?.hedge, buttonLabel: 'Print do hedge', downloadPrefix: 'hedge' }
-        ])}
+        ]))}
         <div class="item-meta">
-          ${fromHistory ? '' : `<span class="chip">Freebet a ganhar: ${formatCurrency(item.freebetAmount || 0)}</span>`}
+          ${fromHistory ? '' : `<span class="chip">Freebet disponível: ${formatCurrency(item.freebetAmount || 0)}</span>`}
           ${outcomeChip}
           ${lifecycleChip}
         </div>

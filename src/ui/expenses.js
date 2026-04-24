@@ -42,7 +42,6 @@ window.BetControlExpenses = (() => {
       }
 
       const [expense] = state.expenses.splice(index, 1);
-      state.bankroll -= getExpenseBankrollDelta(expense);
       removeEntryHistoryById(expense.entryHistoryId);
       saveState();
       render();

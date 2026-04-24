@@ -69,6 +69,10 @@ window.BetControlBetForms = ((calculations, utils) => {
     }
 
     function collectPreviewEntries(container) {
+      if (!container) {
+        return [];
+      }
+
       return [...container.querySelectorAll('.entry-row')].map((row) => ({
         house: row.querySelector('[name="house"]').value.trim(),
         odd: Number(row.querySelector('[name="odd"]').value),
@@ -85,6 +89,10 @@ window.BetControlBetForms = ((calculations, utils) => {
     }
 
     function getFreebetRows() {
+      if (!elements.freebetMainEntries || !elements.freebetHedgeEntries) {
+        return [];
+      }
+
       return [
         ...elements.freebetMainEntries.querySelectorAll('.entry-row'),
         ...elements.freebetHedgeEntries.querySelectorAll('.entry-row')
@@ -92,6 +100,10 @@ window.BetControlBetForms = ((calculations, utils) => {
     }
 
     function getFreebetEntryRowsByContainer(container) {
+      if (!container) {
+        return [];
+      }
+
       return [...container.querySelectorAll('.entry-row')];
     }
 
@@ -111,38 +123,103 @@ window.BetControlBetForms = ((calculations, utils) => {
       elements.surebetTotalInput.value = String(getSurebetTargetTotal());
     }
 
-    function getFreebetTargetTotal() {
-      const value = getFreebetRows().reduce((sum, row) => {
-        const amount = Number(row.querySelector('[name="amount"]').value);
+    function syncSurebetTargetInputState() {
+      if (!elements.fixedTotalInput) {
+        return;
+      }
+
+      const rows = getSurebetRows();
+      const hasFocusedRow = rows.some((row) => row.querySelector('[name="focus"]')?.checked);
+      elements.fixedTotalInput.disabled = hasFocusedRow;
+
+      if (!hasFocusedRow) {
+        syncSurebetTargetInput();
+        return;
+      }
+
+      const derivedTotal = rows.reduce((sum, row) => {
+        const amount = Number(row.querySelector('[name="amount"]')?.value);
         return sum + (Number.isNaN(amount) ? 0 : amount);
       }, 0);
+
+      elements.fixedTotalInput.value = (derivedTotal > 0 ? derivedTotal : defaultSurebetTotal).toFixed(2);
+      elements.surebetTotalInput.value = elements.fixedTotalInput.value;
+    }
+
+    function getFreebetTargetTotal() {
+      const controlValue = Number(elements.freebetTotalInput?.value);
+      const value = Number.isNaN(controlValue) || controlValue <= 0
+        ? getFreebetRows().reduce((sum, row) => {
+          const amount = Number(row.querySelector('[name="amount"]').value);
+          return sum + (Number.isNaN(amount) ? 0 : amount);
+        }, 0)
+        : controlValue;
       return Number.isNaN(value) || value <= 0 ? defaultFreebetTotal : value;
+    }
+
+    function syncFreebetTargetInputState() {
+      if (!elements.freebetTotalInput) {
+        return;
+      }
+
+      const rows = getFreebetRows();
+      const hasFocusedRow = rows.some((row) => row.querySelector('[name="focus"]')?.checked);
+      elements.freebetTotalInput.disabled = hasFocusedRow;
+
+      if (!hasFocusedRow) {
+        return;
+      }
+
+      const derivedTotal = rows.reduce((sum, row) => {
+        const amount = Number(row.querySelector('[name="amount"]')?.value);
+        return sum + (Number.isNaN(amount) ? 0 : amount);
+      }, 0);
+
+      elements.freebetTotalInput.value = (derivedTotal > 0 ? derivedTotal : defaultFreebetTotal).toFixed(2);
     }
 
     function rebalanceSurebetStakesFromOdds() {
       const rows = getSurebetRows();
       if (rows.length === 0) {
+        syncSurebetTargetInputState();
         return;
       }
-
-      syncSurebetTargetInput();
 
       const entries = rows.map((row) => {
         const odd = Number(row.querySelector('[name="odd"]').value);
         return {
           row,
-          odd: Number.isNaN(odd) || odd <= 1 ? null : odd
+          odd: Number.isNaN(odd) || odd <= 1 ? null : odd,
+          amount: Number(row.querySelector('[name="amount"]').value),
+          focus: Boolean(row.querySelector('[name="focus"]')?.checked)
         };
       });
 
       if (entries.some((entry) => entry.odd == null)) {
+        syncSurebetTargetInputState();
         return;
       }
+
+      const focusedDistribution = rebalanceEntriesWithFixedFocus(
+        entries.map((entry) => ({ odd: entry.odd, amount: entry.amount, focus: entry.focus }))
+      );
+
+      if (focusedDistribution) {
+        entries.forEach((entry, index) => {
+          entry.row.querySelector('[name="amount"]').value = Number(focusedDistribution[index].amount || 0).toFixed(2);
+        });
+        syncSurebetTargetInputState();
+        return;
+      }
+
+      syncSurebetTargetInput();
 
       const distributedStakes = splitAmountByWeights(entries.map((entry) => 1 / entry.odd), getSurebetTargetTotal());
       entries.forEach((entry, index) => {
         entry.row.querySelector('[name="amount"]').value = distributedStakes[index].toFixed(2);
       });
+
+      syncSurebetTargetInputState();
     }
 
     function rebalanceFreebetStakesFromOdds() {
@@ -150,6 +227,7 @@ window.BetControlBetForms = ((calculations, utils) => {
       const hedgeRows = getFreebetEntryRowsByContainer(elements.freebetHedgeEntries);
       const rows = [...mainRows, ...hedgeRows];
       if (rows.length === 0) {
+        syncFreebetTargetInputState();
         return;
       }
 
@@ -177,6 +255,7 @@ window.BetControlBetForms = ((calculations, utils) => {
 
       const entries = [...mainEntries, ...hedgeEntries];
       if (entries.some((entry) => entry.odd == null)) {
+        syncFreebetTargetInputState();
         return;
       }
 
@@ -190,6 +269,7 @@ window.BetControlBetForms = ((calculations, utils) => {
           const amountInput = entry.row.querySelector('[name="amount"]');
           amountInput.value = Number(focusedDistribution[index].amount || 0).toFixed(2);
         });
+        syncFreebetTargetInputState();
         return;
       }
 
@@ -200,6 +280,8 @@ window.BetControlBetForms = ((calculations, utils) => {
         const amountInput = entry.row.querySelector('[name="amount"]');
         amountInput.value = distributedStakes[index].toFixed(2);
       });
+
+      syncFreebetTargetInputState();
     }
 
     function applySurebetBalancedDefaults() {
@@ -233,6 +315,7 @@ window.BetControlBetForms = ((calculations, utils) => {
     function syncFocusedFreebetRow(changedRow) {
       const focusInput = changedRow?.querySelector('[name="focus"]');
       if (!focusInput?.checked) {
+        syncFreebetTargetInputState();
         return;
       }
 
@@ -246,6 +329,29 @@ window.BetControlBetForms = ((calculations, utils) => {
           input.checked = false;
         }
       });
+
+      syncFreebetTargetInputState();
+    }
+
+    function syncFocusedSurebetRow(changedRow) {
+      const focusInput = changedRow?.querySelector('[name="focus"]');
+      if (!focusInput?.checked) {
+        syncSurebetTargetInputState();
+        return;
+      }
+
+      getSurebetRows().forEach((row) => {
+        if (row === changedRow) {
+          return;
+        }
+
+        const input = row.querySelector('[name="focus"]');
+        if (input) {
+          input.checked = false;
+        }
+      });
+
+      syncSurebetTargetInputState();
     }
 
     function clearRowResults(rows) {
@@ -258,6 +364,10 @@ window.BetControlBetForms = ((calculations, utils) => {
     }
 
     function updateFreebetResults() {
+      if (!elements.freebetMainEntries || !elements.freebetHedgeEntries) {
+        return;
+      }
+
       const rows = getFreebetRows();
 
       try {
@@ -376,7 +486,10 @@ window.BetControlBetForms = ((calculations, utils) => {
       handleFixedSideChange,
       getSideTotals,
       sumEntryAmounts,
-      syncFocusedFreebetRow
+      syncFocusedFreebetRow,
+      syncFreebetTargetInputState,
+      syncFocusedSurebetRow,
+      syncSurebetTargetInputState
     };
   }
 
