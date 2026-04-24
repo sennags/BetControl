@@ -17,6 +17,9 @@ window.BetControlBootstrap = (() => {
       updateSurebetPreview,
       handleFixedSideChange,
       syncFocusedFreebetRow,
+      syncFreebetTargetInputState,
+      syncFocusedSurebetRow,
+      syncSurebetTargetInputState,
       updateEntriesHistory,
       saveState,
       render
@@ -166,13 +169,24 @@ window.BetControlBootstrap = (() => {
     }
 
     function setupFreebetCalculator() {
+      if (!elements.freebetMainEntries || !elements.freebetHedgeEntries) {
+        return;
+      }
+
       const handleFreebetInput = (event) => {
+        const changedRow = event.target?.closest('.entry-row');
+
         if (event.target?.name === 'focus') {
-          syncFocusedFreebetRow?.(event.target.closest('.entry-row'));
+          syncFocusedFreebetRow?.(changedRow);
         }
 
-        if (event.target?.name === 'odd' || event.target?.name === 'focus') {
+        const changedFocusedAmount = event.target?.name === 'amount'
+          && changedRow?.querySelector('[name="focus"]')?.checked;
+
+        if (event.target?.name === 'odd' || event.target?.name === 'focus' || changedFocusedAmount) {
           rebalanceFreebetStakesFromOdds();
+        } else {
+          syncFreebetTargetInputState?.();
         }
 
         updateFreebetResults();
@@ -180,15 +194,31 @@ window.BetControlBootstrap = (() => {
 
       elements.freebetMainEntries.addEventListener('input', handleFreebetInput);
       elements.freebetHedgeEntries.addEventListener('input', handleFreebetInput);
+      elements.freebetTotalInput?.addEventListener('input', () => {
+        rebalanceFreebetStakesFromOdds();
+        updateFreebetResults();
+      });
 
       applyFreebetBalancedDefaults();
+      syncFreebetTargetInputState?.();
       updateFreebetResults();
     }
 
     function setupSurebetCalculator() {
       const handleSurebetInput = (changedSide) => (event) => {
-        if (event.target?.name === 'odd') {
+        const changedRow = event.target?.closest('.entry-row');
+
+        if (event.target?.name === 'focus') {
+          syncFocusedSurebetRow?.(changedRow);
+        }
+
+        const changedFocusedAmount = event.target?.name === 'amount'
+          && changedRow?.querySelector('[name="focus"]')?.checked;
+
+        if (event.target?.name === 'odd' || event.target?.name === 'focus' || changedFocusedAmount) {
           rebalanceSurebetStakesFromOdds();
+        } else {
+          syncSurebetTargetInputState?.();
         }
 
         updateSurebetResults();
@@ -219,6 +249,7 @@ window.BetControlBootstrap = (() => {
       });
 
       applySurebetBalancedDefaults();
+      syncSurebetTargetInputState?.();
       updateSurebetResults();
       updateSurebetPreview?.({ source: 'controls' });
     }

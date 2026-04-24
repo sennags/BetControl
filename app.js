@@ -46,10 +46,16 @@ const {
   getFreebetSelectableEntries,
   getSurebetSelectableEntries,
   getFreebetTotalStake,
-  getSurebetTotalStake,
-  getFreebetSettlementDelta,
-  getSurebetSettlementDelta
+  getSurebetTotalStake
 } = window.BetControlCalculations;
+
+const {
+  getFreebetBankrollStake,
+  getSurebetBankrollStake,
+  getFreebetSettlementDelta,
+  getSurebetSettlementDelta,
+  getOpenExposure
+} = window.BetControlFinance;
 
 const {
   buildFreebetCard,
@@ -89,7 +95,13 @@ let selectedExpenseMonth = currentMonthKey;
 let selectedAnalysisMonth = currentMonthKey;
 const MAX_PRINTS_PER_ENTRY = 5;
 const MAX_PRINT_SIZE_BYTES = 750 * 1024;
+const BACKUP_FILE_DB_NAME = 'betcontrol-file-backup';
+const BACKUP_FILE_STORE_NAME = 'handles';
+const BACKUP_FILE_HANDLE_KEY = 'auto-backup';
+const AUTO_BACKUP_FILE_NAME = 'betcontrol-auto-backup.json';
 let betPrintDrafts = {};
+let autoBackupFileHandle = null;
+let autoBackupFileStatus = 'inactive';
 
 const elements = {
   bankrollInput: document.getElementById('bankroll-input'),
@@ -149,6 +161,7 @@ const elements = {
   freebetOverviewCount: document.getElementById('freebet-overview-count'),
   freebetOverviewTotal: document.getElementById('freebet-overview-total'),
   freebetOverviewLocations: document.getElementById('freebet-overview-locations'),
+  enableFileBackupButton: document.getElementById('enable-file-backup-button'),
   exportBackupButton: document.getElementById('export-backup-button'),
   importBackupButton: document.getElementById('import-backup-button'),
   importBackupInput: document.getElementById('import-backup-input'),
@@ -167,6 +180,7 @@ const elements = {
   calculatedProfitPercent: document.getElementById('calculated-profit-percent'),
   addSurebetCounterEntryButton: document.getElementById('add-surebet-counter-entry-button'),
   addFreebetHedgeEntryButton: document.getElementById('add-freebet-hedge-entry-button'),
+  freebetTotalInput: document.getElementById('freebet-total-input'),
   freebetAmountInput: document.getElementById('freebet-amount-input'),
   entryTemplate: document.getElementById('entry-template'),
   freebetEntryTemplate: document.getElementById('freebet-entry-template'),
@@ -186,7 +200,10 @@ const {
   updateSurebetResults,
   updateSurebetPreview,
   handleFixedSideChange,
-  syncFocusedFreebetRow
+  syncFocusedFreebetRow,
+  syncFreebetTargetInputState,
+  syncFocusedSurebetRow,
+  syncSurebetTargetInputState
 } = createBetFormHelpers({
   elements,
   defaults: {
@@ -246,6 +263,9 @@ const {
     updateSurebetPreview,
     handleFixedSideChange,
     syncFocusedFreebetRow,
+    syncFreebetTargetInputState,
+    syncFocusedSurebetRow,
+    syncSurebetTargetInputState,
     updateEntriesHistory,
     saveState,
     render
@@ -272,6 +292,7 @@ function bootstrap() {
   setupTabs();
   setupBankroll();
   setupBackupActions();
+  restoreAutoBackupFileHandle();
   setupSurebetForm();
   setupFreebetForm();
   setupExpenseForm();
@@ -289,11 +310,11 @@ function bootstrap() {
     addEntryRow('counter');
   }
 
-  if (elements.freebetMainEntries.children.length === 0) {
+  if (elements.freebetMainEntries && elements.freebetMainEntries.children.length === 0) {
     addEntryRow('freebetMain');
   }
 
-  if (elements.freebetHedgeEntries.children.length === 0) {
+  if (elements.freebetHedgeEntries && elements.freebetHedgeEntries.children.length === 0) {
     addEntryRow('freebetHedge');
   }
 
@@ -310,9 +331,197 @@ function updateBackupStatus() {
   }
 
   const latestBackup = loadAutoBackups()[0];
-  elements.backupStatus.textContent = latestBackup
-    ? `Auto: ${formatDate(latestBackup.createdAt)}`
-    : 'Auto backup diario ativo';
+  const localStatus = latestBackup
+    ? `Local: ${formatDate(latestBackup.createdAt)}`
+    : 'Local diario ativo';
+
+  if (autoBackupFileStatus === 'active') {
+    elements.backupStatus.textContent = `${localStatus} | Arquivo .json ativo`;
+    return;
+  }
+
+  if (autoBackupFileStatus === 'unsupported') {
+    elements.backupStatus.textContent = `${localStatus} | Arquivo .json indisponivel`;
+    return;
+  }
+
+  if (autoBackupFileStatus === 'error') {
+    elements.backupStatus.textContent = `${localStatus} | Arquivo .json com erro`;
+    return;
+  }
+
+  elements.backupStatus.textContent = `${localStatus} | Arquivo .json inativo`;
+}
+
+function supportsAutoBackupFile() {
+  return typeof window.showSaveFilePicker === 'function' && typeof window.indexedDB !== 'undefined';
+}
+
+function openBackupHandleDb() {
+  return new Promise((resolve, reject) => {
+    const request = window.indexedDB.open(BACKUP_FILE_DB_NAME, 1);
+
+    request.onupgradeneeded = () => {
+      const database = request.result;
+      if (!database.objectStoreNames.contains(BACKUP_FILE_STORE_NAME)) {
+        database.createObjectStore(BACKUP_FILE_STORE_NAME);
+      }
+    };
+
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error || new Error('Nao foi possivel abrir o banco do backup.'));
+  });
+}
+
+async function loadStoredBackupFileHandle() {
+  if (!supportsAutoBackupFile()) {
+    return null;
+  }
+
+  const database = await openBackupHandleDb();
+
+  return new Promise((resolve, reject) => {
+    const transaction = database.transaction(BACKUP_FILE_STORE_NAME, 'readonly');
+    const store = transaction.objectStore(BACKUP_FILE_STORE_NAME);
+    const request = store.get(BACKUP_FILE_HANDLE_KEY);
+
+    request.onsuccess = () => resolve(request.result || null);
+    request.onerror = () => reject(request.error || new Error('Nao foi possivel ler o arquivo de backup.'));
+    transaction.oncomplete = () => database.close();
+    transaction.onerror = () => database.close();
+  });
+}
+
+async function saveStoredBackupFileHandle(handle) {
+  if (!supportsAutoBackupFile()) {
+    return;
+  }
+
+  const database = await openBackupHandleDb();
+
+  await new Promise((resolve, reject) => {
+    const transaction = database.transaction(BACKUP_FILE_STORE_NAME, 'readwrite');
+    const store = transaction.objectStore(BACKUP_FILE_STORE_NAME);
+    const request = store.put(handle, BACKUP_FILE_HANDLE_KEY);
+
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error || new Error('Nao foi possivel salvar o arquivo de backup.'));
+    transaction.oncomplete = () => database.close();
+    transaction.onerror = () => database.close();
+  });
+}
+
+async function getBackupFilePermission(handle, mode = 'readwrite') {
+  if (!handle) {
+    return false;
+  }
+
+  if (await handle.queryPermission({ mode }) === 'granted') {
+    return true;
+  }
+
+  return (await handle.requestPermission({ mode })) === 'granted';
+}
+
+async function hasBackupFilePermission(handle, mode = 'readwrite') {
+  if (!handle) {
+    return false;
+  }
+
+  return (await handle.queryPermission({ mode })) === 'granted';
+}
+
+async function writeAutoBackupFile() {
+  if (!autoBackupFileHandle) {
+    return;
+  }
+
+  if (!(await getBackupFilePermission(autoBackupFileHandle))) {
+    autoBackupFileStatus = 'error';
+    updateBackupStatus();
+    return;
+  }
+
+  const writable = await autoBackupFileHandle.createWritable();
+  await writable.write(JSON.stringify(buildExportPayload(state), null, 2));
+  await writable.close();
+  autoBackupFileStatus = 'active';
+  updateBackupStatus();
+}
+
+async function enableAutoBackupFile() {
+  if (!supportsAutoBackupFile()) {
+    autoBackupFileStatus = 'unsupported';
+    updateBackupStatus();
+    alert('Seu navegador nao permite salvar automaticamente em arquivo.');
+    return;
+  }
+
+  try {
+    const handle = await window.showSaveFilePicker({
+      suggestedName: AUTO_BACKUP_FILE_NAME,
+      types: [{
+        description: 'Arquivo JSON',
+        accept: {
+          'application/json': ['.json']
+        }
+      }],
+      excludeAcceptAllOption: false
+    });
+
+    if (!(await getBackupFilePermission(handle))) {
+      throw new Error('Permissao negada para salvar o backup.');
+    }
+
+    autoBackupFileHandle = handle;
+    autoBackupFileStatus = 'active';
+    await saveStoredBackupFileHandle(handle);
+    await writeAutoBackupFile();
+    alert('Backup automatico em arquivo ativado com sucesso.');
+  } catch (error) {
+    if (error?.name === 'AbortError') {
+      return;
+    }
+
+    autoBackupFileStatus = 'error';
+    updateBackupStatus();
+    alert('Nao foi possivel ativar o backup automatico em arquivo.');
+  }
+}
+
+async function restoreAutoBackupFileHandle() {
+  if (!supportsAutoBackupFile()) {
+    autoBackupFileStatus = 'unsupported';
+    updateBackupStatus();
+    return;
+  }
+
+  try {
+    const handle = await loadStoredBackupFileHandle();
+    if (!handle) {
+      autoBackupFileStatus = 'inactive';
+      updateBackupStatus();
+      return;
+    }
+
+    autoBackupFileHandle = handle;
+    autoBackupFileStatus = (await hasBackupFilePermission(handle, 'readwrite')) ? 'active' : 'inactive';
+    updateBackupStatus();
+  } catch {
+    autoBackupFileStatus = 'error';
+    updateBackupStatus();
+  }
+}
+
+function scheduleAutoBackupFileWrite() {
+  if (!autoBackupFileHandle) {
+    return;
+  }
+
+  writeAutoBackupFile().catch(() => {
+    autoBackupFileStatus = 'error';
+    updateBackupStatus();
+  });
 }
 
 function downloadJsonFile(fileName, payload) {
@@ -329,6 +538,10 @@ function downloadJsonFile(fileName, payload) {
 
 function setupBackupActions() {
   updateBackupStatus();
+
+  elements.enableFileBackupButton?.addEventListener('click', () => {
+    enableAutoBackupFile();
+  });
 
   elements.exportBackupButton?.addEventListener('click', () => {
     const timestamp = new Date().toISOString().replace(/[:]/g, '-');
@@ -352,6 +565,7 @@ function setupBackupActions() {
       state = importState(payload);
       render();
       updateBackupStatus();
+      scheduleAutoBackupFileWrite();
       alert('Backup importado com sucesso.');
     } catch {
       alert('Nao foi possivel importar este backup.');
@@ -364,6 +578,7 @@ function setupBackupActions() {
 function saveState() {
   persistState(state);
   updateBackupStatus();
+  scheduleAutoBackupFileWrite();
 }
 
 function updateEntriesHistory(delta, details = {}) {
@@ -442,8 +657,16 @@ function addEntryRow(side) {
         ? elements.freebetMainEntries
         : elements.freebetHedgeEntries;
 
+  if (!container) {
+    return;
+  }
+
   if (focusField) {
-    focusField.hidden = !isFreebetSide;
+    focusField.hidden = !(isFreebetSide || isSurebetSide);
+  }
+
+  if (isSurebetSide) {
+    row.classList.add('surebet-entry-row');
   }
 
   const syncRemoveButtons = () => {
@@ -472,6 +695,7 @@ function addEntryRow(side) {
     syncRemoveButtons();
     if (isSurebetSide) {
       applySurebetBalancedDefaults();
+      syncSurebetTargetInputState?.();
       updateSurebetResults();
       updateSurebetPreview?.({ source: 'entries', changedSide: side });
     } else if (isFreebetSide) {
@@ -485,6 +709,7 @@ function addEntryRow(side) {
 
   if (isSurebetSide) {
     applySurebetBalancedDefaults();
+    syncSurebetTargetInputState?.();
     updateSurebetResults();
     updateSurebetPreview?.({ source: 'entries', changedSide: side });
   } else if (isFreebetSide) {
@@ -541,7 +766,7 @@ function setupSurebetForm() {
     }
 
     state.surebets.unshift(surebet);
-    const stakeMovement = updateEntriesHistory(-getSurebetTotalStake(surebet), {
+    const stakeMovement = updateEntriesHistory(-getSurebetBankrollStake(surebet), {
       reason: 'Surebet registrada',
       description: surebet.title
     });
@@ -563,75 +788,34 @@ function setupFreebetForm() {
   elements.freebetForm.addEventListener('submit', (event) => {
     event.preventDefault();
 
-    let freebetEntries;
-    let hedgeEntries;
-    let calculation;
-
-    try {
-      freebetEntries = collectEntries(elements.freebetMainEntries, { requireOdd: true });
-      hedgeEntries = collectEntries(elements.freebetHedgeEntries, { requireOdd: true });
-      calculation = calculateFreebetResultsFromEntries(freebetEntries, hedgeEntries);
-    } catch (error) {
-      alert(error.message || 'Preencha as casas da freebet corretamente.');
-      return;
-    }
-
     const formData = new FormData(elements.freebetForm);
-    freebetEntries = calculation.freebetEntries;
-    hedgeEntries = calculation.hedgeEntries;
-
-    const freebetStake = freebetEntries.reduce((sum, entry) => sum + Number(entry.amount || 0), 0);
-    const hedgeStake = hedgeEntries.reduce((sum, entry) => sum + Number(entry.amount || 0), 0);
     const description = String(formData.get('description') || '').trim();
+    const freebetHouse = String(formData.get('freebetHouse') || '').trim();
     const freebetAmount = Number(formData.get('freebetAmount'));
-    const resultIfFreebetWins = calculation.resultIfFreebetWins;
-    const resultIfHedgeWins = calculation.resultIfHedgeWins;
-    const freebetHouse = freebetEntries.map((entry) => entry.house).join(' + ');
+
     const freebet = {
       id: crypto.randomUUID(),
       title: description,
       freebetHouse,
-      hedgeHouse: hedgeEntries.map((entry) => entry.house).join(' + '),
-      freebetEntries,
-      hedgeEntries,
-      freebetStake,
-      hedgeStake,
       freebetAmount,
-      resultIfFreebetWins,
-      resultIfHedgeWins,
-      guaranteedProfit: calculation.guaranteedProfit,
+      trackingOnly: true,
       createdAt: new Date().toISOString()
     };
 
-    if (!freebet.title || !freebet.freebetHouse || !freebet.hedgeHouse) {
-      alert('Preencha a descricao e as duas casas da freebet.');
+    if (!freebet.title || !freebet.freebetHouse) {
+      alert('Preencha a descricao e o local da freebet.');
       return;
     }
 
-    if ([freebetStake, hedgeStake, freebetAmount, resultIfFreebetWins, resultIfHedgeWins].some((value) => Number.isNaN(value))) {
-      alert('Preencha todos os valores da freebet corretamente.');
-      return;
-    }
-
-    if (freebetAmount <= 0 || freebetStake < 0 || hedgeStake < 0) {
-      alert('Os valores apostados devem ser válidos e a freebet deve ser maior que zero.');
+    if (Number.isNaN(freebetAmount) || freebetAmount <= 0) {
+      alert('Informe um valor válido para a freebet.');
       return;
     }
 
     state.freebets.unshift(freebet);
-    const stakeMovement = updateEntriesHistory(-getFreebetTotalStake(freebet), {
-      reason: 'Freebet registrada',
-      description: freebet.title
-    });
-    if (stakeMovement) {
-      freebet.stakeEntryHistoryId = stakeMovement.id;
-      freebet.stakeBankrollBefore = stakeMovement.before;
-      freebet.stakeBankrollAfter = stakeMovement.after;
-    }
     saveState();
     elements.freebetForm.reset();
-    resetFreebetEntries();
-    updateFreebetResults();
+    elements.freebetAmountInput.value = String(DEFAULT_FREEBET_TOTAL);
     render();
     switchToTab('freebets');
   });
@@ -647,6 +831,10 @@ function resetEntries() {
 }
 
 function resetFreebetEntries() {
+  if (!elements.freebetMainEntries || !elements.freebetHedgeEntries) {
+    return;
+  }
+
   clearContainerPrintDrafts(elements.freebetMainEntries);
   clearContainerPrintDrafts(elements.freebetHedgeEntries);
   elements.freebetMainEntries.innerHTML = '';
@@ -682,7 +870,7 @@ function loadSurebetForEditing(id) {
   }
 
   const [surebet] = state.surebets.splice(index, 1);
-  state.bankroll = normalizeCurrencyValue(state.bankroll + getSurebetTotalStake(surebet));
+  state.bankroll = normalizeCurrencyValue(state.bankroll + getSurebetBankrollStake(surebet));
   removeEntryHistoryById(surebet.stakeEntryHistoryId);
 
   elements.surebetForm.reset();
@@ -721,29 +909,17 @@ function loadFreebetForEditing(id) {
   }
 
   const [freebet] = state.freebets.splice(index, 1);
-  state.bankroll = normalizeCurrencyValue(state.bankroll + getFreebetTotalStake(freebet));
+  state.bankroll = normalizeCurrencyValue(state.bankroll + getFreebetBankrollStake(freebet));
   removeEntryHistoryById(freebet.stakeEntryHistoryId);
 
   elements.freebetForm.reset();
-  clearContainerPrintDrafts(elements.freebetMainEntries);
-  clearContainerPrintDrafts(elements.freebetHedgeEntries);
-  elements.freebetMainEntries.innerHTML = '';
-  elements.freebetHedgeEntries.innerHTML = '';
-
-  (freebet.freebetEntries || []).forEach(() => addEntryRow('freebetMain'));
-  (freebet.hedgeEntries || []).forEach(() => addEntryRow('freebetHedge'));
-
-  [...elements.freebetMainEntries.querySelectorAll('.entry-row')].forEach((row, indexRow) => {
-    setEntryRowValues(row, freebet.freebetEntries[indexRow] || {});
-  });
-  [...elements.freebetHedgeEntries.querySelectorAll('.entry-row')].forEach((row, indexRow) => {
-    setEntryRowValues(row, freebet.hedgeEntries[indexRow] || {});
-  });
-
   elements.freebetForm.querySelector('[name="description"]').value = freebet.title || '';
+  const freebetHouseInput = elements.freebetForm.querySelector('[name="freebetHouse"]');
+  if (freebetHouseInput) {
+    freebetHouseInput.value = freebet.freebetHouse || '';
+  }
   elements.freebetAmountInput.value = String(freebet.freebetAmount || '');
 
-  updateFreebetResults();
   saveState();
   render();
   switchToTab('freebet');
@@ -962,8 +1138,7 @@ function clearEntryPrintDraft(row) {
 
 function renderSummary() {
   const summary = buildDashboardSummary(state, new Date(), getBetOutcomeAmount, isSameMonth);
-  const openExposure = state.surebets.reduce((sum, item) => sum + getSurebetTotalStake(item), 0)
-    + state.freebets.reduce((sum, item) => sum + getFreebetTotalStake(item), 0);
+  const openExposure = getOpenExposure(state);
   const net = summary.gains - summary.losses;
   const activeSurebets = state.surebets.length;
   const activeFreebets = state.freebets.length;
@@ -995,7 +1170,7 @@ function renderSummary() {
 }
 
 function renderFreebetOverview() {
-  const allFreebets = [...state.freebets, ...state.freebetHistory];
+  const allFreebets = state.freebets.map((item) => ({ ...item, __fromHistory: false }));
   elements.freebetOverviewCount.textContent = String(allFreebets.length);
   const totalAmount = allFreebets.reduce((sum, item) => sum + Number(item.freebetAmount || 0), 0);
   elements.freebetOverviewTotal.textContent = formatCurrency(totalAmount);
@@ -1006,25 +1181,37 @@ function renderFreebetOverview() {
     return;
   }
 
-  const houses = allFreebets.reduce((map, item) => {
-    const key = item.freebetHouse || 'Sem casa';
-    if (!map.has(key)) {
-      map.set(key, { count: 0, total: 0 });
-    }
-
-    const current = map.get(key);
-    current.count += 1;
-    current.total += Number(item.freebetAmount || 0);
-    return map;
-  }, new Map());
-
   elements.freebetOverviewLocations.className = 'stack-list compact-stack';
-  elements.freebetOverviewLocations.innerHTML = [...houses.entries()].map(([house, info]) => `
-    <div class="detail-line compact-detail-line">
-      <span>${escapeHtml(house)} • ${info.count} freebet(s)</span>
-      <strong>${formatCurrency(info.total)}</strong>
-    </div>
+  elements.freebetOverviewLocations.innerHTML = allFreebets.map((item) => `
+    <article class="freebet-overview-entry ${item.__fromHistory ? 'is-history' : 'is-active'}">
+      <div class="freebet-overview-copy">
+        <div class="freebet-overview-eyebrow-row">
+          <span class="freebet-overview-status">${item.__fromHistory ? 'Historico' : 'Ativa'}</span>
+          <span class="freebet-overview-date">${formatDate(item.settledAt || item.createdAt)}</span>
+        </div>
+        <strong class="freebet-overview-house">${escapeHtml(item.freebetHouse || item.title || 'Sem casa')}</strong>
+        <span class="freebet-overview-title">${escapeHtml(item.title || 'Freebet sem descricao')}</span>
+      </div>
+      <div class="item-actions compact-detail-actions freebet-overview-actions">
+        <div class="freebet-overview-amount-block">
+          <span class="card-label">Freebet</span>
+          <strong>${formatCurrency(item.freebetAmount || 0)}</strong>
+        </div>
+        <button type="button" class="danger-button" data-action="delete-freebet-overview" data-id="${item.id}" data-from-history="${item.__fromHistory ? 'true' : 'false'}">Remover</button>
+      </div>
+    </article>
   `).join('');
+
+  bindFreebetOverviewActions();
+}
+
+function bindFreebetOverviewActions() {
+  elements.freebetOverviewLocations.querySelectorAll('[data-action="delete-freebet-overview"]').forEach((button) => {
+    button.addEventListener('click', (event) => {
+      event.stopPropagation();
+      deleteFreebet(button.dataset.id, button.dataset.fromHistory === 'true');
+    });
+  });
 }
 
 function renderEntriesHistory() {
@@ -1107,7 +1294,7 @@ function renderFreebets() {
 
   if (state.freebets.length === 0) {
     elements.freebetList.className = 'stack-list empty-state';
-    elements.freebetList.textContent = 'Nenhuma freebet ativa ainda.';
+    elements.freebetList.textContent = 'Nenhuma freebet na carteira.';
   } else {
     elements.freebetList.className = 'stack-list';
     elements.freebetList.innerHTML = state.freebets.map((item) => buildFreebetCard(item, false)).join('');
@@ -1223,8 +1410,7 @@ function deleteFreebet(id, fromHistory = false) {
     fromHistory,
     activeKey: 'freebets',
     historyKey: 'freebetHistory',
-    historyBankrollChange: (freebet) => -getBetOutcomeAmount(freebet),
-    activeBankrollChange: (freebet) => (!freebet.qualificationOutcomeLabel ? getFreebetTotalStake(freebet) : 0),
+    activeBankrollChange: (freebet) => (!freebet.qualificationOutcomeLabel ? getFreebetBankrollStake(freebet) : 0),
     onDeleteHistory: removeLinkedFreebetEntryHistory,
     onDeleteActive: (freebet) => {
       if (!freebet.qualificationOutcomeLabel) {
@@ -1425,8 +1611,7 @@ function deleteSurebet(id, fromHistory) {
     fromHistory,
     activeKey: 'surebets',
     historyKey: 'surebetHistory',
-    historyBankrollChange: (surebet) => -getBetOutcomeAmount(surebet),
-    activeBankrollChange: (surebet) => getSurebetTotalStake(surebet),
+    activeBankrollChange: (surebet) => getSurebetBankrollStake(surebet),
     onDeleteHistory: removeLinkedEntryHistory,
     onDeleteActive: (surebet) => removeEntryHistoryById(surebet.stakeEntryHistoryId)
   });

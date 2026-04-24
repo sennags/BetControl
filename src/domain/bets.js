@@ -1,6 +1,4 @@
-window.BetControlBets = ((utils) => {
-  const { normalizeCurrencyValue } = utils;
-
+window.BetControlBets = (() => {
   function getCheckedWinnerKeys(card, selector) {
     if (!card) {
       return [];
@@ -58,9 +56,6 @@ window.BetControlBets = ((utils) => {
       }
 
       state[config.historyKey] = state[config.historyKey].filter((entry) => entry.id !== config.id);
-      if (config.historyBankrollChange) {
-        state.bankroll = normalizeCurrencyValue(state.bankroll + Number(config.historyBankrollChange(item) || 0));
-      }
       config.onDeleteHistory?.(item);
       return { ok: true, item };
     }
@@ -82,4 +77,4 @@ window.BetControlBets = ((utils) => {
     settleBet,
     deleteBet
   };
-})(window.BetControlUtils);
+})();
