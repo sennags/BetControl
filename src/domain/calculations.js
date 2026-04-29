@@ -46,7 +46,13 @@ window.BetControlCalculations = ((utils) => {
       throw new Error('Adicione ao menos uma casa na freebet.');
     }
 
-    const invalidEntry = allEntries.some((entry) => Number.isNaN(Number(entry.amount)) || Number(entry.amount) <= 0 || Number.isNaN(Number(entry.odd)) || Number(entry.odd) <= 1);
+    const invalidEntry = allEntries.some((entry) => {
+      const effectiveOdd = getEntryEffectiveOdd(entry);
+      return Number.isNaN(Number(entry.amount))
+        || Number(entry.amount) <= 0
+        || Number.isNaN(effectiveOdd)
+        || effectiveOdd <= 1;
+    });
     if (invalidEntry) {
       throw new Error('Cada casa precisa de odd maior que 1 e stake válido.');
     }
@@ -54,7 +60,7 @@ window.BetControlCalculations = ((utils) => {
     const totalStake = allEntries.reduce((sum, entry) => sum + Number(entry.amount || 0), 0);
     const enrichEntries = (entries) => entries.map((entry) => ({
       ...entry,
-      profit: normalizeCurrencyValue((Number(entry.amount || 0) * Number(entry.odd || 0)) - totalStake)
+      profit: normalizeCurrencyValue((Number(entry.amount || 0) * getEntryEffectiveOdd(entry)) - totalStake)
     }));
     const computedFreebetEntries = enrichEntries(freebetEntries);
     const computedHedgeEntries = enrichEntries(hedgeEntries);
@@ -82,7 +88,7 @@ window.BetControlCalculations = ((utils) => {
     }
 
     const focusedEntry = entries[focusIndex];
-    const focusedOdd = Number(focusedEntry.odd || 0);
+    const focusedOdd = getEntryEffectiveOdd(focusedEntry);
     const focusedAmount = Number(focusedEntry.amount || 0);
 
     if (!Number.isFinite(focusedOdd) || focusedOdd <= 1 || !Number.isFinite(focusedAmount) || focusedAmount <= 0) {
@@ -92,10 +98,10 @@ window.BetControlCalculations = ((utils) => {
     const targetPayout = focusedAmount * focusedOdd;
 
     return entries.map((entry, index) => {
-      const odd = Number(entry.odd || 0);
-      if (!Number.isFinite(odd) || odd <= 1) {
-        return { ...entry };
-      }
+        const odd = getEntryEffectiveOdd(entry);
+        if (!Number.isFinite(odd) || odd <= 1) {
+          return { ...entry };
+        }
 
       if (index === focusIndex) {
         return { ...entry, amount: normalizeCurrencyValue(focusedAmount) };
@@ -250,7 +256,41 @@ window.BetControlCalculations = ((utils) => {
       return Number(entry.profit || 0);
     }
 
-    return normalizeCurrencyValue((Number(entry.amount || 0) * Number(entry.odd || 0)) - totalStake);
+    return normalizeCurrencyValue((Number(entry.amount || 0) * getEntryEffectiveOdd(entry)) - totalStake);
+  }
+
+  function getLayEffectiveOdd(odd, commissionPercent = 0) {
+    const normalizedOdd = Number(odd || 0);
+    const normalizedCommission = Number(commissionPercent || 0);
+    if (!Number.isFinite(normalizedOdd) || normalizedOdd <= 1) {
+      return 0;
+    }
+
+    const commissionRate = normalizedCommission / 100;
+    return (normalizedOdd - commissionRate) / (normalizedOdd - 1);
+  }
+
+  function getLayBackerStake(liability, odd) {
+    const normalizedLiability = Number(liability || 0);
+    const normalizedOdd = Number(odd || 0);
+    if (!Number.isFinite(normalizedLiability) || normalizedLiability <= 0 || !Number.isFinite(normalizedOdd) || normalizedOdd <= 1) {
+      return 0;
+    }
+
+    return normalizedLiability / (normalizedOdd - 1);
+  }
+
+  function getEntryEffectiveOdd(entry) {
+    const explicitEffectiveOdd = Number(entry?.effectiveOdd || 0);
+    if (Number.isFinite(explicitEffectiveOdd) && explicitEffectiveOdd > 1) {
+      return explicitEffectiveOdd;
+    }
+
+    if (entry?.isLay) {
+      return getLayEffectiveOdd(entry.odd, entry.commission);
+    }
+
+    return Number(entry?.odd || 0);
   }
 
   function getFreebetTotalStake(freebet) {
@@ -273,6 +313,9 @@ window.BetControlCalculations = ((utils) => {
     calculateSurebetFromFixedStake,
     calculateSurebetFromActualStakes,
     rebalanceEntriesWithFixedFocus,
+    getLayEffectiveOdd,
+    getLayBackerStake,
+    getEntryEffectiveOdd,
     getBetOutcomeAmount,
     getFreebetSelectableEntries,
     getSurebetSelectableEntries,

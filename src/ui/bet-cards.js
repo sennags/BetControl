@@ -199,9 +199,9 @@ window.BetControlBetCards = ((utils, calculations) => {
     return getSurebetSelectableEntries(item).map((entry) => `
       <label class="freebet-winner-row ledger-outcome-row">
         <input type="checkbox" data-surebet-winner data-entry-key="${entry.key}">
-        <span class="freebet-winner-house">${escapeHtml(entry.house || 'Sem casa')}</span>
+        <span class="freebet-winner-house">${escapeHtml(entry.house || 'Sem casa')}${entry.isLay ? ' • Lay' : ''}</span>
         <span class="winner-metric"><span class="winner-metric-label">Odd</span><strong>${Number(entry.odd || 0).toFixed(2)}</strong></span>
-        <span class="winner-metric"><span class="winner-metric-label">Stake</span><strong>${formatCurrency(entry.amount)}</strong></span>
+        <span class="winner-metric"><span class="winner-metric-label">${entry.isLay ? 'Liability' : 'Stake'}</span><strong>${formatCurrency(entry.amount)}</strong></span>
         <span class="winner-metric"><span class="winner-metric-label">Profit</span><strong>${formatSignedCurrency(getFreebetEntryProfit(entry, totalStake))}</strong></span>
       </label>
     `).join('');
@@ -215,9 +215,9 @@ window.BetControlBetCards = ((utils, calculations) => {
 
       return `
         <div class="freebet-winner-row history-row ledger-outcome-row ${isWinner ? 'winner-row' : ''}">
-          <span class="freebet-winner-house">${escapeHtml(entry.house || 'Sem casa')}</span>
+          <span class="freebet-winner-house">${escapeHtml(entry.house || 'Sem casa')}${entry.isLay ? ' • Lay' : ''}</span>
           <span class="winner-metric"><span class="winner-metric-label">Odd</span><strong>${Number(entry.odd || 0).toFixed(2)}</strong></span>
-          <span class="winner-metric"><span class="winner-metric-label">Stake</span><strong>${formatCurrency(entry.amount)}</strong></span>
+          <span class="winner-metric"><span class="winner-metric-label">${entry.isLay ? 'Liability' : 'Stake'}</span><strong>${formatCurrency(entry.amount)}</strong></span>
           <span class="winner-metric"><span class="winner-metric-label">Profit</span><strong>${formatSignedCurrency(getFreebetEntryProfit(entry, totalStake))}</strong></span>
         </div>
       `;

@@ -3,7 +3,9 @@ window.BetControlBetForms = ((calculations, utils) => {
     splitAmount,
     splitAmountByWeights,
     calculateFreebetResultsFromEntries,
-    rebalanceEntriesWithFixedFocus
+    rebalanceEntriesWithFixedFocus,
+    getLayEffectiveOdd,
+    getLayBackerStake
   } = calculations;
   const {
     formatCurrency,
@@ -43,7 +45,25 @@ window.BetControlBetForms = ((calculations, utils) => {
           prints = [];
         }
 
-        return oddInput ? { house, odd, amount, prints, focus } : { house, amount, prints };
+        const commissionInput = row.querySelector('[name="commission"]');
+        const commission = Number(commissionInput?.value || 0);
+        const isLay = row.dataset.betMode === 'lay';
+        const backerStake = isLay ? getLayBackerStake(amount, odd) : 0;
+        const effectiveOdd = isLay ? getLayEffectiveOdd(odd, commission) : odd;
+
+        return oddInput
+          ? {
+            house,
+            odd,
+            amount,
+            prints,
+            focus,
+            commission,
+            isLay,
+            effectiveOdd,
+            backerStake
+          }
+          : { house, amount, prints };
       });
 
       const invalidEntry = entries.some((entry) => {
@@ -53,7 +73,8 @@ window.BetControlBetForms = ((calculations, utils) => {
         }
 
         if (requireOdd) {
-          return Number.isNaN(entry.odd) || entry.odd <= 1;
+          const invalidCommission = entry.commission != null && (Number.isNaN(entry.commission) || entry.commission < 0 || entry.commission > 40);
+          return Number.isNaN(entry.odd) || entry.odd <= 1 || invalidCommission;
         }
 
         return false;
@@ -77,7 +98,12 @@ window.BetControlBetForms = ((calculations, utils) => {
         house: row.querySelector('[name="house"]').value.trim(),
         odd: Number(row.querySelector('[name="odd"]').value),
         amount: Number(row.querySelector('[name="amount"]').value),
-        focus: Boolean(row.querySelector('[name="focus"]')?.checked)
+        focus: Boolean(row.querySelector('[name="focus"]')?.checked),
+        commission: Number(row.querySelector('[name="commission"]')?.value || 0),
+        isLay: row.dataset.betMode === 'lay',
+        effectiveOdd: row.dataset.betMode === 'lay'
+          ? getLayEffectiveOdd(Number(row.querySelector('[name="odd"]').value), Number(row.querySelector('[name="commission"]')?.value || 0))
+          : Number(row.querySelector('[name="odd"]').value)
       }));
     }
 
@@ -189,7 +215,9 @@ window.BetControlBetForms = ((calculations, utils) => {
         const odd = Number(row.querySelector('[name="odd"]').value);
         return {
           row,
-          odd: Number.isNaN(odd) || odd <= 1 ? null : odd,
+          odd: Number.isNaN(odd) || odd <= 1 ? null : (row.dataset.betMode === 'lay'
+            ? getLayEffectiveOdd(odd, Number(row.querySelector('[name="commission"]')?.value || 0))
+            : odd),
           amount: Number(row.querySelector('[name="amount"]').value),
           focus: Boolean(row.querySelector('[name="focus"]')?.checked)
         };
