@@ -215,7 +215,7 @@ window.BetControlBootstrap = (() => {
         const changedFocusedAmount = event.target?.name === 'amount'
           && changedRow?.querySelector('[name="focus"]')?.checked;
 
-        if (event.target?.name === 'odd' || event.target?.name === 'focus' || changedFocusedAmount) {
+        if (event.target?.name === 'odd' || event.target?.name === 'focus' || event.target?.name === 'commission' || changedFocusedAmount) {
           rebalanceSurebetStakesFromOdds();
         } else {
           syncSurebetTargetInputState?.();

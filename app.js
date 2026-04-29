@@ -183,6 +183,7 @@ const elements = {
   freebetTotalInput: document.getElementById('freebet-total-input'),
   freebetAmountInput: document.getElementById('freebet-amount-input'),
   entryTemplate: document.getElementById('entry-template'),
+  surebetEntryTemplate: document.getElementById('surebet-entry-template'),
   freebetEntryTemplate: document.getElementById('freebet-entry-template'),
   tabButtons: document.querySelectorAll('.tab-button'),
   tabPanels: document.querySelectorAll('.tab-panel'),
@@ -645,7 +646,12 @@ function addEntryRow(side) {
   const isComputedBetSide = ['main', 'counter', 'freebetMain', 'freebetHedge'].includes(side);
   const isFreebetSide = side === 'freebetMain' || side === 'freebetHedge';
   const isSurebetSide = side === 'main' || side === 'counter';
-  const fragment = (isComputedBetSide ? elements.freebetEntryTemplate : elements.entryTemplate).content.cloneNode(true);
+  const template = isSurebetSide
+    ? elements.surebetEntryTemplate
+    : isComputedBetSide
+      ? elements.freebetEntryTemplate
+      : elements.entryTemplate;
+  const fragment = template.content.cloneNode(true);
   const row = fragment.querySelector('.entry-row');
   const removeButton = fragment.querySelector('.remove-entry-button');
   const focusField = fragment.querySelector('.freebet-entry-focus-field');
@@ -667,6 +673,7 @@ function addEntryRow(side) {
 
   if (isSurebetSide) {
     row.classList.add('surebet-entry-row');
+    setupSurebetModeControls(row, side);
   }
 
   const syncRemoveButtons = () => {
@@ -716,6 +723,67 @@ function addEntryRow(side) {
     applyFreebetBalancedDefaults();
     updateFreebetResults();
   }
+}
+
+function syncSurebetRowMode(row) {
+  if (!row) {
+    return;
+  }
+
+  const isLay = row.dataset.betMode === 'lay';
+  const modeButton = row.querySelector('[data-action="toggle-bet-mode"]');
+  const commissionInput = row.querySelector('[name="commission"]');
+  const stakeLabel = row.querySelector('.surebet-stake-field span');
+  const backerField = row.querySelector('.surebet-backer-field');
+  const backerStakeInput = row.querySelector('[name="backerStake"]');
+  const odd = Number(row.querySelector('[name="odd"]')?.value || 0);
+  const amount = Number(row.querySelector('[name="amount"]')?.value || 0);
+
+  row.classList.toggle('is-lay-entry', isLay);
+  if (modeButton) {
+    modeButton.textContent = isLay ? 'Lay' : 'Back';
+  }
+  if (commissionInput) {
+    commissionInput.disabled = !isLay;
+    if (!isLay) {
+      commissionInput.value = '0';
+    }
+  }
+  if (stakeLabel) {
+    stakeLabel.textContent = isLay ? 'Liability' : 'Stake';
+  }
+  if (backerField) {
+    backerField.hidden = !isLay;
+  }
+  if (backerStakeInput) {
+    backerStakeInput.value = isLay && odd > 1 && amount > 0
+      ? Number(amount / (odd - 1)).toFixed(2)
+      : '';
+  }
+}
+
+function setupSurebetModeControls(row, side) {
+  syncSurebetRowMode(row);
+
+  const modeButton = row.querySelector('[data-action="toggle-bet-mode"]');
+  const oddInput = row.querySelector('[name="odd"]');
+  const amountInput = row.querySelector('[name="amount"]');
+
+  modeButton?.addEventListener('click', () => {
+    row.dataset.betMode = row.dataset.betMode === 'lay' ? 'back' : 'lay';
+    syncSurebetRowMode(row);
+    rebalanceSurebetStakesFromOdds();
+    updateSurebetResults();
+    updateSurebetPreview?.({ source: 'entries', changedSide: side });
+  });
+
+  oddInput?.addEventListener('input', () => {
+    syncSurebetRowMode(row);
+  });
+
+  amountInput?.addEventListener('input', () => {
+    syncSurebetRowMode(row);
+  });
 }
 
 function setupSurebetForm() {
@@ -847,6 +915,12 @@ function setEntryRowValues(row, entry) {
   row.querySelector('[name="house"]').value = entry.house || '';
   row.querySelector('[name="odd"]').value = Number(entry.odd || 0) > 0 ? Number(entry.odd).toFixed(2) : '';
   row.querySelector('[name="amount"]').value = Number(entry.amount || 0) > 0 ? Number(entry.amount).toFixed(2) : '';
+  const commissionInput = row.querySelector('[name="commission"]');
+  if (commissionInput) {
+    commissionInput.value = Number(entry.commission || 0).toFixed(2);
+    row.dataset.betMode = entry.isLay ? 'lay' : 'back';
+    syncSurebetRowMode(row);
+  }
   const focusInput = row.querySelector('[name="focus"]');
   if (focusInput) {
     focusInput.checked = Boolean(entry.focus);

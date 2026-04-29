@@ -449,6 +449,49 @@
     </div>
   </template>
 
+  <template id="surebet-entry-template">
+    <div class="entry-row surebet-entry-row" data-bet-mode="back">
+      <label class="freebet-entry-focus-field">
+        <span>Foco</span>
+        <input type="checkbox" name="focus">
+      </label>
+      <label class="surebet-mode-field">
+        <span>Casa / modo</span>
+        <div class="surebet-mode-stack">
+          <input type="text" name="house" required placeholder="Ex.: Betano">
+          <button type="button" class="mini-button surebet-mode-button" data-action="toggle-bet-mode">Back</button>
+        </div>
+      </label>
+      <label>
+        <span>Odd</span>
+        <input type="number" name="odd" min="1.01" step="0.01" required value="2" placeholder="2,00">
+      </label>
+      <label class="surebet-commission-field">
+        <span>Comissão</span>
+        <input type="number" name="commission" min="0" max="40" step="0.01" value="0" placeholder="0,00" disabled>
+      </label>
+      <label class="surebet-stake-field">
+        <span>Stake</span>
+        <input type="number" name="amount" min="0" step="0.01" required placeholder="0,00">
+      </label>
+      <label class="surebet-backer-field" hidden>
+        <span>Backer's stake</span>
+        <input type="text" name="backerStake" readonly value="" placeholder="—">
+      </label>
+      <label class="freebet-entry-result-field surebet-result-field">
+        <span>Profit</span>
+        <input type="text" name="result" readonly value="" placeholder="—">
+      </label>
+      <div class="entry-row-actions">
+        <button type="button" class="mini-button entry-print-button" title="Você também pode colar uma imagem com Ctrl+V">Inserir/colar print</button>
+        <input type="file" class="entry-print-input" accept="image/*" multiple hidden>
+        <input type="hidden" name="printsPayload" value="[]">
+        <div class="entry-print-preview empty-state compact-stack">Nenhum print anexado.</div>
+      </div>
+      <button type="button" class="remove-entry-button">Remover</button>
+    </div>
+  </template>
+
   <template id="freebet-entry-template">
     <div class="entry-row freebet-entry-row">
       <label class="freebet-entry-focus-field">
